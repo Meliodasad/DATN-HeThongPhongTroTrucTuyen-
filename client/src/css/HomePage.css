@@ -1,0 +1,14 @@
+.homePage {
+  display: flex;
+  padding: 80px 16px 16px; 
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.sidebar {
+  flex: 1;
+}
+
+.list {
+  flex: 2;
+}

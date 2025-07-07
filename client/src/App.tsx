@@ -1,13 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import './App.css'
+import Footer from './components/Footer';
+import Header from './components/Header';
+import HomePage from './pages/HomePage';
 
 function App() {
   return (
-    <div className="text-center mt-10">
-      <h1 className="text-4xl font-bold text-orange-500">Hello Khải!</h1>
-      <p className="text-gray-500">Tailwind chạy ngon lành rồi 😎</p>
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      minHeight: '100vh'  
+    }}>
+      <Header />
+
+      <main style={{ flex: 1 }}>
+       <HomePage />
+      </main>
+      
+
+      <Footer />
     </div>
   );
 }
