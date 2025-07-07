@@ -1,7 +1,7 @@
-import SidebarLeft from '../components/SidebarLeft';
-import SidebarRight from '../components/SidebarRight';
-import PostList from '../components/PostList';
 import React from 'react';
+import SidebarLeft from '../../components/SidebarLeft';
+import PostList from '../../components/PostList';
+import SidebarRight from '../../components/SidebarRight';
 
 const HomePage = () => {
   return (
