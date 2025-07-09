@@ -1,0 +1,133 @@
+{
+  "quan_tri_vien": [
+    {
+      "id": "1",
+      "ten_dang_nhap": "admin1",
+      "mat_khau": "admin123",
+      "ho_ten": "Quản trị viên 1"
+    }
+  ],
+  "nguoi_dung": [
+    {
+      "name": "Nguyễn Văn A",
+      "email": "vanưewea@gmail.com",
+      "role": "Chủ trọ",
+      "id": "1"
+    },
+    {
+      "id": "2",
+      "name": "Trần Thị 222B",
+      "email": "thib@gmail.com",
+      "role": "Chủ trọ",
+      "createdAt": "2024-02-15"
+    },
+    {
+      "id": "3",
+      "name": "Lê Văn C",
+      "email": "vanc@gmail.com",
+      "role": "Người dùng",
+      "createdAt": "2024-03-20"
+    },
+    {
+      "id": "aa3e",
+      "name": "tung",
+      "email": "xuantungbui1811@gmail.com",
+      "role": "Admin",
+      "createdAt": "2025-07-09"
+    },
+    {
+      "id": "6cdf",
+      "name": "222",
+      "email": "xuantung@gmail.com",
+      "role": "Chủ trọ",
+      "password": "2141",
+      "createdAt": "2025-07-09"
+    }
+  ],
+  "phong_tro": [
+    {
+      "id": "1",
+      "tieu_de": "Phòng trọ Gò Vấ222p, có gác lửng",
+      "dia_chi": "456 Quang Trung, Gò Vấp, TP.HCM",
+      "gia_thue": 1800000333,
+      "dien_tich": 18,
+      "mo_ta": "Phòng rộng rãi, khu an ninh",
+      "hinh_anh": [
+        "https://bandon.vn/resize/1000x700/a-c/zc-1/f/uploads/posts/thiet-ke-nha-tro-dep-2020-bandon-0.jpg"
+      ],
+      "trang_thai": "con_trong",
+      "chu_tro_id": 2
+    },
+    {
+      "id": "3",
+      "tieu_de": "Phòng trọ Thủ Đức, thoáng mát lllllll",
+      "dia_chi": "789 Võ Văn Ngân, Thủ Đức, TP.HCM",
+      "gia_thue": 2000000,
+      "dien_tich": 22,
+      "mo_ta": "Có gác lửng, gần đại học",
+      "hinh_anh": [
+        "https://danviet.ex-cdn.com/files/f1/296231569849192448/2024/8/27/phong-tro-3-anh-mxh-1724730219130679034782.jpg"
+      ],
+      "trang_thai": "da_thue",
+      "chu_tro_id": 2
+    },
+    {
+      "id": "4",
+      "tieu_de": "Phòng đẹp Bình Thạnh",
+      "dia_chi": "321 Bạch Đằng, Bình Thạnh, TP.HCM",
+      "gia_thue": 2600000,
+      "dien_tich": 19,
+      "mo_ta": "Gần bến xe miền Đông",
+      "hinh_anh": [
+        "https://kientructrangkim.com/wp-content/uploads/2022/11/thiet-ke-noi-that-phong-tro-19.jpg"
+      ],
+      "trang_thai": "da_thue",
+      "chu_tro_id": 2
+    },
+    {
+      "id": "1752068966854",
+      "tieu_de": "Phòng trọ Gò Vấ222p, có gác lửng22222222",
+      "dia_chi": "Hà Nội",
+      "gia_thue": 222222222222,
+      "dien_tich": 3333,
+      "mo_ta": "sâfafa",
+      "hinh_anh": [
+        "https://s-housing.vn/wp-content/uploads/2022/09/thiet-ke-phong-tro-dep-54.jpg"
+      ],
+      "trang_thai": "con_trong",
+      "chu_tro_id": 2
+    }
+  ],
+  "don_thue": [
+    {
+      "id": "1",
+      "phong_id": 1,
+      "nguoi_thue_id": 1,
+      "trang_thai": "cho_duyet",
+      "ngay_bat_dau": "2025-07-15",
+      "ngay_ket_thuc": "2025-12-15",
+      "ghi_chu": "Cần phòng cho sinh viên ở lâu dài"
+    }
+  ],
+  "danh_gia": [
+    {
+      "id": "1",
+      "phong_id": 2,
+      "nguoi_dung_id": 1,
+      "so_sao": 4,
+      "binh_luan": "Phòng sạch sẽ, chủ dễ thương",
+      "ngay_danh_gia": "2025-07-01"
+    }
+  ],
+  "khach_tham_quan": [
+    {
+      "id": "1",
+      "dia_chi_ip": "192.168.1.100",
+      "thoi_gian_truy_cap": "2025-07-09T09:00:00",
+      "phong_quan_tam": [
+        1,
+        2
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+
 type User = {
   id: number;
   name: string;
@@ -9,11 +10,10 @@ type User = {
 };
 
 const UserList = () => {
-
   const [users, setUsers] = useState<User[]>([]);
-  const [form, setForm] = useState({ name: '', email: '', role: '' });
+  const [form, setForm] = useState({ name: '', email: '', role: '', password: '' });
   const [open, setOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -28,7 +28,7 @@ const UserList = () => {
     fetchUsers();
   }, []);
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: number) => {
     const confirmDelete = confirm('Bạn có chắc muốn xoá người dùng này?');
     if (!confirmDelete) return;
     try {
@@ -40,28 +40,30 @@ const UserList = () => {
     }
   };
 
-  const handleEdit = (user) => {
+  const handleEdit = (user: User) => {
     setEditingUser(user);
-    setForm({ name: user.name, email: user.email, role: user.role });
+    setForm({ name: user.name, email: user.email, role: user.role, password: '' });
     setOpen(true);
   };
 
   const handleAdd = () => {
     setEditingUser(null);
-    setForm({ name: '', email: '', role: '' });
+    setForm({ name: '', email: '', role: '', password: '' });
     setOpen(true);
   };
 
   const handleSubmit = async () => {
-    const { name, email, role } = form;
-    if (!name || !email || !role) {
+    const { name, email, role, password } = form;
+    if (!name || !email || !role || (!editingUser && !password)) {
       alert('Vui lòng điền đầy đủ thông tin');
       return;
     }
 
     try {
       if (editingUser) {
-        await axios.put(`http://localhost:3000/nguoi_dung/${editingUser.id}`, form);
+        await axios.put(`http://localhost:3000/nguoi_dung/${editingUser.id}`, {
+          name, email, role,
+        });
         alert('Cập nhật thành công');
       } else {
         await axios.post('http://localhost:3000/nguoi_dung', {
@@ -83,6 +85,7 @@ const UserList = () => {
         <h2 className="text-3xl font-bold text-blue-700">👥 Quản lý người dùng</h2>
         <button onClick={handleAdd} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">+ Thêm người dùng</button>
       </div>
+
       <div className="overflow-x-auto">
         <table className="min-w-full table-auto border border-gray-200">
           <thead className="bg-gray-100 text-sm font-semibold text-gray-600">
@@ -116,25 +119,55 @@ const UserList = () => {
       {open && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded w-[400px] shadow-lg">
-            <h3 className="text-xl font-semibold mb-4">{editingUser ? 'Cập nhật người dùng' : 'Thêm người dùng'}</h3>
+            <h3 className="text-xl font-semibold mb-4">
+              {editingUser ? 'Cập nhật người dùng' : 'Thêm người dùng'}
+            </h3>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium">Tên người dùng</label>
-                <input type="text" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="mt-1 w-full px-3 py-2 border rounded" />
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  className="mt-1 w-full px-3 py-2 border rounded"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium">Email</label>
-                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="mt-1 w-full px-3 py-2 border rounded" />
+                <input
+                  type="email"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                  className="mt-1 w-full px-3 py-2 border rounded"
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium">Vai trò</label>
-                <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="mt-1 w-full px-3 py-2 border rounded">
+                <select
+                  value={form.role}
+                  onChange={(e) => setForm({ ...form, role: e.target.value })}
+                  className="mt-1 w-full px-3 py-2 border rounded"
+                >
                   <option value="">-- Chọn vai trò --</option>
                   <option value="Người dùng">Người dùng</option>
                   <option value="Chủ trọ">Chủ trọ</option>
                   <option value="Admin">Admin</option>
                 </select>
               </div>
+
+              {/* Thêm mật khẩu chỉ khi tạo mới */}
+              {!editingUser && (
+                <div>
+                  <label className="block text-sm font-medium">Mật khẩu</label>
+                  <input
+                    type="password"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="mt-1 w-full px-3 py-2 border rounded"
+                  />
+                </div>
+              )}
+
               <div className="flex justify-end space-x-2 pt-4">
                 <button onClick={() => setOpen(false)} className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Huỷ</button>
                 <button onClick={handleSubmit} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Lưu</button>

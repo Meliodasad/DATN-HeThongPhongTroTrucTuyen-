@@ -28,7 +28,7 @@ const AdminSidebar = () => {
       icon: <UserOutlined />,
     },
     {
-      key: 'owners',
+      key: 'phong-tro',
       label: 'Chủ trọ',
       icon: <ApartmentOutlined />,
     },
