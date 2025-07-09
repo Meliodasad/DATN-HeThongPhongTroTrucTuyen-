@@ -1,15 +1,27 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { useRoutes } from 'react-router-dom';
+import AdminLayout from './pages/layout/admin';
+import Dashboard from './pages/admin/Dashboard'; // Đảm bảo đường dẫn đúng
+import UserList from './pages/admin/UserList';
+import Owners from './pages/admin/Owners'
+const App = () => {
+  const routes = useRoutes([
+    {
+      path: '/dashboard',
+      element: <AdminLayout />,
+      children: [
+              { path: 'users', element: <UserList /> },
+               { path: 'owners', element: <Owners /> },
+        {
+          index: true, // khi vào /dashboard thì load Dashboard
+          element: <Dashboard />,
+        },
+        // bạn có thể thêm các route con khác ở đây
+      ],
+    },
+  ]);
 
-function App() {
-  return (
-    <div className="text-center mt-10">
-      <h1 className="text-4xl font-bold text-orange-500">Hello Khải!</h1>
-      <p className="text-gray-500">Tailwind chạy ngon lành rồi 😎</p>
-    </div>
-  );
-}
+  return routes;
+};
 
-export default App
+export default App;
