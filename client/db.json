@@ -15,11 +15,12 @@
       "id": "1"
     },
     {
-      "id": "2",
-      "name": "Trần Thị 222B",
-      "email": "thib@gmail.com",
-      "role": "Chủ trọ",
-      "createdAt": "2024-02-15"
+      "name": "321gnbfdDSAVFBDAG",
+      "email": "GHGF333333333",
+      "role": "Người dùng",
+      "password": "243QWE",
+      "createdAt": "2025-07-09",
+      "id": "2"
     },
     {
       "id": "3",
@@ -42,6 +43,54 @@
       "role": "Chủ trọ",
       "password": "2141",
       "createdAt": "2025-07-09"
+    },
+    {
+      "id": "1752072068467",
+      "name": "tung",
+      "email": "a@gmail.com",
+      "role": "Người dùng",
+      "password": "282828",
+      "createdAt": "2025-07-09"
+    },
+    {
+      "id": 1752072068468,
+      "name": "32323",
+      "email": "23232",
+      "role": "Chủ trọ",
+      "password": "32322",
+      "createdAt": "2025-07-09"
+    },
+    {
+      "id": 2,
+      "name": "23232",
+      "email": "323232",
+      "role": "Người dùng",
+      "password": "3232",
+      "createdAt": "2025-07-09"
+    },
+    {
+      "id": 2,
+      "name": "32222",
+      "email": "22222222222222222222222222",
+      "role": "Người dùng",
+      "password": "22222222222222222",
+      "createdAt": "2025-07-09"
+    },
+    {
+      "id": 2,
+      "name": "321gnbfdDSAVFBDAG",
+      "email": "GHGF",
+      "role": "Người dùng",
+      "password": "243QWE",
+      "createdAt": "2025-07-09"
+    },
+    {
+      "id": null,
+      "name": "2313143333333333",
+      "email": "214214",
+      "role": "Người dùng",
+      "password": "333333333333333333333",
+      "createdAt": "2025-07-09"
     }
   ],
   "phong_tro": [
@@ -54,19 +103,6 @@
       "mo_ta": "Phòng rộng rãi, khu an ninh",
       "hinh_anh": [
         "https://bandon.vn/resize/1000x700/a-c/zc-1/f/uploads/posts/thiet-ke-nha-tro-dep-2020-bandon-0.jpg"
-      ],
-      "trang_thai": "con_trong",
-      "chu_tro_id": 2
-    },
-    {
-      "id": "3",
-      "tieu_de": "Phòng trọ Thủ Đức, thoáng mát lllllll",
-      "dia_chi": "789 Võ Văn Ngân, Thủ Đức, TP.HCM",
-      "gia_thue": 2000000,
-      "dien_tich": 22,
-      "mo_ta": "Có gác lửng, gần đại học",
-      "hinh_anh": [
-        "https://danviet.ex-cdn.com/files/f1/296231569849192448/2024/8/27/phong-tro-3-anh-mxh-1724730219130679034782.jpg"
       ],
       "trang_thai": "da_thue",
       "chu_tro_id": 2
