@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, MapPin, Users, Maximize, DollarSign, Phone, Mail, Calendar, Zap, Droplets, Wifi, Car, Heart } from 'lucide-react';
-import type { Room } from '../../../types/room';
+import type { Room } from '../../types/room';
 
 interface RoomDetailModalProps {
   isOpen: boolean;

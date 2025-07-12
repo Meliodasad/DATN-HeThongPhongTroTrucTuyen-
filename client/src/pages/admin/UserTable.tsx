@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Edit, Trash2, MoreVertical, Power, PowerOff } from 'lucide-react';
-import type { User } from '../../../types/user';
+import type { User } from '../../types/user';
 
 interface UserTableProps {
   users: User[];

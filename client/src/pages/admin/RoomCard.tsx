@@ -1,6 +1,6 @@
   import React from 'react';
   import { MapPin, Users, Maximize, DollarSign, Edit, MoreVertical, Eye } from 'lucide-react';
-import type { Room } from '../../../types/room';
+import type { Room } from '../../types/room';
   
   interface RoomCardProps {
     room: Room;

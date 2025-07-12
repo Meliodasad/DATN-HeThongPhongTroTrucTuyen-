@@ -5,13 +5,13 @@ import { useToast } from './hooks/useToast';
 import { userService } from './services/userService';
 import { roomService } from './services/roomService';
 import type { RoomStats } from './types/room';
-import UserTable from './pages/admin/components/UserTable';
-import SearchAndFilter from './pages/admin/components/SearchAndFilter';
-import Dashboard from './pages/admin/Dashboard';import Toast from './pages/admin/components/Toast';
+import UserTable from './pages/admin/UserTable';
+import SearchAndFilter from './pages/admin/SearchAndFilter';
+import Dashboard from './pages/admin/Dashboard';import Toast from './pages/admin/Toast'
 import RoomManagement from './pages/admin/RoomManagement';
-import UserModal from './pages/admin/components/UserModal';
+import UserModal from './pages/admin/UserModal';
 import type { User as UserType, UserFormData,UserStats } from  './types/user';
-import StatsSidebar from './pages/admin/components/StatsSidebar';
+import StatsSidebar from './pages/admin/StatsSidebar';
 import { Star } from 'lucide-react';
 import { MessageSquare } from 'lucide-react';
 import { Phone } from 'lucide-react';

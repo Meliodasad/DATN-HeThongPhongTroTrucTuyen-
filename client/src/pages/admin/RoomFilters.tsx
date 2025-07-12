@@ -1,7 +1,7 @@
 import React from 'react';
 import { Search, Plus, MapPin, Home, DollarSign, Maximize } from 'lucide-react';
-import { vietnamDistricts } from '../../../utils/roomMockData';
-import type { Room, RoomFilters } from '../../../types/room';
+import { vietnamDistricts } from '../../utils/roomMockData';
+import type { Room, RoomFilters } from '../../types/room';
 
 interface RoomFiltersProps {
   filters: RoomFilters;

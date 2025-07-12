@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Mail, Shield, Lock, AlertCircle } from 'lucide-react';
-import type { User as UserType, UserFormData } from '../../../types/user';
+import type { User as UserType, UserFormData } from '../../types/user';
 
 interface UserModalProps {
   isOpen: boolean;

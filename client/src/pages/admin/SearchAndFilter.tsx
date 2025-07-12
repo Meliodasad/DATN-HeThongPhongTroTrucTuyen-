@@ -1,6 +1,6 @@
 import React from 'react';
 import { Search, Plus } from 'lucide-react';
-import type { User } from '../../../types/user'; 
+import type { User } from '../../types/user'; 
 interface SearchAndFilterProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;

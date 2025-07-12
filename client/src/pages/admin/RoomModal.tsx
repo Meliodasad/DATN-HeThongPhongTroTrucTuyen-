@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Home, MapPin, DollarSign, Users, Maximize, Plus, Minus, Upload, AlertCircle, Settings } from 'lucide-react';
-import type { Room, RoomFormData, RoomFormErrors } from '../../../types/room';
-import { commonAmenities, vietnamDistricts } from '../../../utils/roomMockData';
+import type { Room, RoomFormData, RoomFormErrors } from '../../types/room';
+import { commonAmenities, vietnamDistricts } from '../../utils/roomMockData';
 
 
 interface RoomModalProps {

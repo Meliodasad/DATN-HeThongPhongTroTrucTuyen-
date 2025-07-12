@@ -1,6 +1,6 @@
 import React from 'react';
 import { Users, UserCheck, UserX,  Home } from 'lucide-react';
-import type { UserStats } from '../../../types/user';
+import type { UserStats } from '../../types/user';
 
 interface UserStatsProps {
   stats: UserStats;

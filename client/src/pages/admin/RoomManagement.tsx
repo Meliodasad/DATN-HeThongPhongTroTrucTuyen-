@@ -8,12 +8,12 @@ import type {
   RoomFormData,
   RoomStats,
 } from "../../types/room";
-import Toast from "./components/Toast";
-import RoomDetailModal from "./components/RoomDetailModal";
-import RoomModal from "./components/RoomModal";
-import RoomCard from "./components/RoomCard";
-import RoomStatsComponent from "./components/RoomStats";
-import RoomFiltersComponent from "./components/RoomFilters";
+import Toast from "./Toast";
+import RoomDetailModal from "./RoomDetailModal";
+import RoomModal from "./RoomModal";
+import RoomCard from "./RoomCard";
+import RoomStatsComponent from "./RoomStats";
+import RoomFiltersComponent from "./RoomFilters";
 
 const RoomManagement: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);

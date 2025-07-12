@@ -1,5 +1,5 @@
 import React from 'react'
-import ClientHeader from '../components/client/header'
+import ClientHeader from '../../components/admin/header'
 import ClientFooter from '../components/client/footer'
 import { Outlet } from 'react-router-dom'
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Home, CheckCircle, XCircle, Wrench, DollarSign, TrendingUp,  } from 'lucide-react';
-import type { RoomStats } from '../../../types/room';
+import type { RoomStats } from '../../types/room';
 
 interface RoomStatsProps {
   stats: RoomStats;
