@@ -78,42 +78,84 @@
   margin-top: 32px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
+.contact-box {
+  margin-top: 32px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
 
 .contact-header {
   display: flex;
   align-items: center;
-  gap: 16px;
   margin-bottom: 16px;
 }
 
 .contact-header .avatar {
-  width: 64px;
-  height: 64px;
-  background-color: #eee;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
+  object-fit: cover;
+  margin-right: 16px;
+  border: 1px solid #ccc;
 }
 
-.sub-info {
-  font-size: 14px;
-  color: gray;
+.contact-header h3 {
   margin: 0;
+  font-size: 18px;
+  font-weight: bold;
 }
 
-.contact-info p {
-  margin: 8px 0;
+.contact-header .sub-info {
+  font-size: 14px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.contact-buttons {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.contact-buttons a {
+  flex: 1;
+  padding: 12px;
+  font-size: 16px;
+  text-align: center;
+  border-radius: 6px;
+  text-decoration: none;
+  color: white;
+  font-weight: bold;
+}
+
+.phone-button {
+  background-color: #00b14f;
+}
+
+.zalo-button {
+  background-color: #0068ff;
 }
 
 .contact-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 16px;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.contact-actions button {
-  padding: 8px 16px;
-  border: 1px solid #ccc;
-  background-color: #f9f9f9;
+.action-button {
+  flex: 1;
+  padding: 10px;
+  background-color: #f5f5f5;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
 }
 
+.action-button:hover {
+  background-color: #eaeaea;
+}

@@ -48,30 +48,35 @@ const PostDetail = () => {
       <div className="contact-box">
         <div className="contact-header">
           <img
-            src="https://tse2.mm.bing.net/th/id/OIP.vg41yG82qw84ziz5nS-CWQHaHa?pid=Api&P=0&h=220"  
+            src={post.author?.avatar}
             alt="avatar"
             className="avatar"
           />
           <div>
-            <h3>Lê Như Ngọc</h3>
-            <p className="sub-info">Đang hoạt động • Tham gia từ: 28/06/2025</p>
+            <h3>{post.author?.name}</h3>
+            <p className="sub-info">
+              {post.author?.status} • Tham gia từ: {post.author?.joinedDate}
+            </p>
           </div>
         </div>
 
-        <div className="contact-info">
-          <p><strong>📞 Số điện thoại:</strong> <a href="">0901879823</a></p>
-          <p><strong>💬 Zalo:</strong> <a href="#">Nhắn Zalo</a></p>
+        <div className="contact-buttons">
+          <a href={`tel:${post.author?.phone}`} className="phone-button">
+            📞 {post.author?.phone}
+          </a>
+          <a href={post.author?.zalo} className="zalo-button" target="_blank" rel="noopener noreferrer">
+            💬 Nhắn Zalo
+          </a>
         </div>
 
         <div className="contact-actions">
-          <button>Lưu tin</button>
-          <button>Chia sẻ</button>
-          <button>Báo cáo</button>
+          <button className="action-button"> Lưu tin</button>
+          <button className="action-button"> Chia sẻ</button>
+          <button className="action-button"> Báo cáo</button>
         </div>
       </div>
 
     </div>
-
 
   );
 };
