@@ -1,77 +1,44 @@
-import React from 'react'
+import React from 'react';
+import '../css/Header.css'
 
 const Header = () => {
   return (
-    <header style={{
-      backgroundColor: 'white',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-      width: '100%',
-      top: 0,
-      padding: '8px 16px',
-      zIndex: 1000,      
-      left: 0,
-    }}>
-      
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between', 
-        padding: '8px 32px', 
-        width: '100%',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+    <header className="header">
+      <div className="header-top">
+        <div className="header-left">
           <img
             src="https://phongtro123.com/images/logo-phongtro.svg"
             alt="Logo"
-            style={{ height: 30 }}
+            className="logo"
           />
           <input
             type="text"
             placeholder="Tìm phòng theo khu vực..."
-            style={{
-              width: 400,
-              borderRadius: 20,
-              padding: '8px 16px',
-              border: '1px solid #ccc',
-              fontSize: 14,
-            }}
+            className="search-input"
           />
         </div>
 
-        <div style={{ display: 'flex', gap: 10, fontSize: 14 , width:'100%', alignItems:"center", padding: '8px 200px'}}>
-          <button style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer' }}>Tin đã lưu</button>
-          <button style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer' }}>Đăng ký</button>
-          <button style={{ background: 'none', border: 'none', color: '#555', cursor: 'pointer' }}>Đăng nhập</button>
-          <button style={{ backgroundColor: '#f97316', color: 'white',border: 'none',borderRadius: 6,padding: '6px 16px',cursor: 'pointer'}}>
-            Đăng tin
-          </button>
+        <div className="header-actions">
+          <button className="btn">Tin đã lưu</button>
+          <button className="btn">Đăng ký</button>
+          <button className="btn">Đăng nhập</button>
+          <button className="btn highlight">Đăng tin</button>
         </div>
       </div>
 
-      <nav style={{
-        backgroundColor: 'white',
-        borderTop: '1px solid #ddd',
-        borderBottom: '1px solid #ddd',
-        fontSize: 14,
-        padding: '8px 32px', 
-      }}>
-        <div style={{
-          display: 'flex',
-          gap: 24,
-          overflowX: 'auto',
-          whiteSpace: 'nowrap'
-        }}>
-          <a href="#" style={{ color: '#555' }}>Phòng trọ</a>
-          <a href="#" style={{ color: '#555' }}>Nhà nguyên căn</a>
-          <a href="#" style={{ color: '#555' }}>Căn hộ</a>
-          <a href="#" style={{ color: '#555' }}>Ở ghép</a>
-          <a href="#" style={{ color: '#555' }}>Mặt bằng</a>
-          <a href="#" style={{ color: '#555' }}>Blog</a>
-          <a href="#" style={{ color: '#555' }}>Bảng giá dịch vụ</a>
+      <nav className="header-nav">
+        <div className="nav-links">
+          <a href="#">Phòng trọ</a>
+          <a href="#">Nhà nguyên căn</a>
+          <a href="#">Căn hộ</a>
+          <a href="#">Ở ghép</a>
+          <a href="#">Mặt bằng</a>
+          <a href="#">Blog</a>
+          <a href="#">Bảng giá dịch vụ</a>
         </div>
       </nav>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

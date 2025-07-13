@@ -1,18 +1,18 @@
-import React from 'react';
+import React from 'react'; 
 import SidebarLeft from '../../components/SidebarLeft';
 import PostList from '../../components/PostList';
 import SidebarRight from '../../components/SidebarRight';
+import '../../css/HomePage.css'
 
 const HomePage = () => {
   return (
-    <div style={{ display: 'flex', gap: 24 }}>
-      
-      <div style={{ flex: 2, display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="home-container">
+      <div className="main-content">
         <SidebarLeft />
         <PostList />
       </div>
 
-      <div style={{ flex: 1 }}>
+      <div className="side-content">
         <SidebarRight />
       </div>
     </div>

@@ -1,29 +1,52 @@
-type PostProps = {
+import '../css/PostCard.css';
+type PostCardProps = {
   title: string;
   price: string;
   area: string;
   address: string;
-  image: string;
+  images: string[];
+  description: string;
 };
 
-const PostCard = ({ title, price, area, address, image }: PostProps) => {
+const PostCard = ({
+  title = '',
+  price = '',
+  area = '',
+  address = '',
+  images = [],
+  description = '',
+}: PostCardProps) => {
   return (
-    <div style={{
-      display: 'flex',
-      border: '1px solid #ddd',
-      borderRadius: 8,
-      overflow: 'hidden',
-      marginBottom: 16
-    }}>
-      <img
-        src={image}
-        alt={title}
-        style={{ width: 100, height: 100, objectFit: 'cover' }}
-      />
-      <div style={{ padding: 12 }}>
-        <h3 style={{ fontSize: 16, fontWeight: 'bold', color: '#f97316', margin: 0 }}>{title}</h3>
-        <p style={{ margin: '8px 0', fontSize: 14, color: '#555' }}>{address}</p>
-        <p style={{ fontSize: 14, color: '#333' }}>{price} • {area}</p>
+    <div className="post-card">
+      <div className="post-card-images">
+        <div className="left-main-image">
+          {images[0] && (
+            <img src={images[0]} alt="Ảnh chính" className="main-image" />
+          )}
+        </div>
+        <div className="right-sub-images">
+          {images[1] && (
+            <img src={images[1]} alt="Ảnh phụ 1" className="sub-image" />
+          )}
+          {images[2] && (
+            <img src={images[2]} alt="Ảnh phụ 2" className="sub-image" />
+          )}
+        </div>
+      </div>
+
+      <div className="post-card-content">
+        <div className="post-card-tag">CHO THUÊ NHANH</div>
+
+        <h2 className="post-card-title">
+          <span className="post-card-stars">★★★★★</span> {title}
+        </h2>
+
+        <div className="post-card-info">
+          {price}
+          <span> • {area} • {address}</span>
+        </div>
+
+        <p className="post-card-description">{description}</p>
       </div>
     </div>
   );
