@@ -1,0 +1,195 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Nguyễn Văn A",
+      "email": "nguyenvana@example.com",
+      "role": "Admin",
+      "status": "active",
+      "createdAt": "2024-01-15",
+      "lastLogin": "2024-01-20"
+    },
+    {
+      "id": 2,
+      "name": "Trần Thị B",
+      "email": "tranthib@example.com",
+      "role": "Chủ trọ",
+      "status": "active",
+      "createdAt": "2024-01-16",
+      "lastLogin": "2024-01-19"
+    },
+    {
+      "id": 3,
+      "name": "Lê Văn C",
+      "email": "levanc@example.com",
+      "role": "Người dùng",
+      "status": "inactive",
+      "createdAt": "2024-01-17",
+      "lastLogin": "2024-01-18"
+    },
+    {
+      "id": 4,
+      "name": "Phạm Thị D",
+      "email": "phamthid@example.com",
+      "role": "Người dùng",
+      "status": "active",
+      "createdAt": "2024-01-18",
+      "lastLogin": "2024-01-20"
+    },
+    {
+      "id": 5,
+      "name": "Hoàng Văn E",
+      "email": "hoangvane@example.com",
+      "role": "Chủ trọ",
+      "status": "active",
+      "createdAt": "2024-01-19",
+      "lastLogin": "2024-01-20"
+    }
+  ],
+  "rooms": [
+    {
+      "id": 1,
+      "title": "Phòng trọ cao cấp quận 1",
+      "description": "Phòng trọ cao cấp với đầy đủ tiện nghi, vị trí trung tâm",
+      "address": "123 Nguyễn Huệ, Quận 1, TP.HCM",
+      "price": 5000000,
+      "type": "single",
+      "status": "available",
+      "owner": "Nguyễn Văn A",
+      "ownerId": 2,
+      "area": 25,
+      "amenities": ["Điều hòa", "Tủ lạnh", "Máy giặt", "WiFi", "Bảo vệ 24/7"],
+      "images": ["https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"],
+      "createdAt": "2024-01-15",
+      "updatedAt": "2024-01-20"
+    },
+    {
+      "id": 2,
+      "title": "Phòng trọ sinh viên quận 3",
+      "description": "Phòng trọ dành cho sinh viên, giá cả phải chăng",
+      "address": "456 Võ Văn Tần, Quận 3, TP.HCM",
+      "price": 3000000,
+      "type": "shared",
+      "status": "rented",
+      "owner": "Trần Thị B",
+      "ownerId": 3,
+      "area": 20,
+      "amenities": ["WiFi", "Máy giặt chung", "Bếp chung"],
+      "images": ["https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg"],
+      "createdAt": "2024-01-16",
+      "updatedAt": "2024-01-19"
+    },
+    {
+      "id": 3,
+      "title": "Căn hộ mini quận 7",
+      "description": "Căn hộ mini hiện đại, view đẹp",
+      "address": "789 Nguyễn Thị Thập, Quận 7, TP.HCM",
+      "price": 8000000,
+      "type": "apartment",
+      "status": "maintenance",
+      "owner": "Lê Văn C",
+      "ownerId": 4,
+      "area": 35,
+      "amenities": ["Điều hòa", "Tủ lạnh", "Máy giặt", "WiFi", "Ban công", "Thang máy"],
+      "images": ["https://images.pexels.com/photos/1571471/pexels-photo-1571471.jpeg"],
+      "createdAt": "2024-01-17",
+      "updatedAt": "2024-01-18"
+    },
+    {
+      "id": 4,
+      "title": "Studio quận 2",
+      "description": "Studio hiện đại, đầy đủ nội thất",
+      "address": "321 Đỗ Xuân Hợp, Quận 2, TP.HCM",
+      "price": 6500000,
+      "type": "studio",
+      "status": "available",
+      "owner": "Phạm Thị D",
+      "ownerId": 5,
+      "area": 30,
+      "amenities": ["Điều hòa", "Tủ lạnh", "Máy giặt", "WiFi", "Bảo vệ 24/7", "Hồ bơi"],
+      "images": ["https://images.pexels.com/photos/1571473/pexels-photo-1571473.jpeg"],
+      "createdAt": "2024-01-18",
+      "updatedAt": "2024-01-20"
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "content": "Phòng rất sạch sẽ và thoáng mát. Chủ trọ thân thiện, giá cả hợp lý.",
+      "author": "Nguyễn Văn A",
+      "authorEmail": "nguyenvana@example.com",
+      "roomId": 1,
+      "roomTitle": "Phòng trọ cao cấp quận 1",
+      "createdAt": "2024-01-20",
+      "status": "approved",
+      "rating": 5,
+      "replies": [
+        {
+          "id": 1,
+          "content": "Cảm ơn bạn đã đánh giá tích cực! Chúng tôi sẽ tiếp tục duy trì chất lượng.",
+          "author": "Admin",
+          "authorEmail": "admin@system.com",
+          "createdAt": "2024-01-21",
+          "isAdmin": true
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "content": "Vị trí thuận tiện, gần trường học và chợ. Tuy nhiên âm thanh hơi ồn vào buổi tối.",
+      "author": "Trần Thị B",
+      "authorEmail": "tranthib@example.com",
+      "roomId": 2,
+      "roomTitle": "Phòng trọ sinh viên quận 3",
+      "createdAt": "2024-01-19",
+      "status": "pending",
+      "rating": 4,
+      "replies": []
+    },
+    {
+      "id": 3,
+      "content": "Phòng không như hình ảnh quảng cáo. Thiết bị cũ kỹ và wifi chậm.",
+      "author": "Lê Văn C",
+      "authorEmail": "levanc@example.com",
+      "roomId": 3,
+      "roomTitle": "Phòng trọ giá rẻ quận 7",
+      "createdAt": "2024-01-18",
+      "status": "rejected",
+      "rating": 2,
+      "replies": []
+    },
+    {
+      "id": 4,
+      "content": "Phòng đẹp, view tốt, an ninh chặt chẽ. Rất hài lòng với lựa chọn này.",
+      "author": "Phạm Thị D",
+      "authorEmail": "phamthid@example.com",
+      "roomId": 4,
+      "roomTitle": "Căn hộ mini quận 2",
+      "createdAt": "2024-01-17",
+      "status": "approved",
+      "rating": 5,
+      "replies": [
+        {
+          "id": 2,
+          "content": "Rất vui khi bạn hài lòng với căn hộ. Chúc bạn ở vui vẻ!",
+          "author": "Chủ trọ Nguyễn Văn B",
+          "authorEmail": "chutro@example.com",
+          "createdAt": "2024-01-18",
+          "isAdmin": false
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "content": "Giá hơi cao so với chất lượng. Phòng nhỏ và không có ban công.",
+      "author": "Hoàng Văn E",
+      "authorEmail": "hoangvane@example.com",
+      "roomId": 1,
+      "roomTitle": "Studio quận 1",
+      "createdAt": "2024-01-16",
+      "status": "pending",
+      "rating": 3,
+      "replies": []
+    }
+  ]
+}

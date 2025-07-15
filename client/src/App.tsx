@@ -1,15 +1,30 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout';
+import Dashboard from './pages/Dashboard';
+import UsersPage from './pages/UsersPage';
+import RoomsPage from './pages/RoomsPage';
+import CommentsPage from './pages/CommentsPage';
+import StatisticsPage from './pages/StatisticsPage';
+import { ToastProvider } from './contexts/ToastContext';
 
 function App() {
   return (
-    <div className="text-center mt-10">
-      <h1 className="text-4xl font-bold text-orange-500">Hello Khải!</h1>
-      <p className="text-gray-500">Tailwind chạy ngon lành rồi 😎</p>
-    </div>
+    <ToastProvider>
+      <Router>
+        <Layout>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/users" element={<UsersPage />} />
+            <Route path="/rooms" element={<RoomsPage />} />
+            <Route path="/comments" element={<CommentsPage />} />
+            <Route path="/statistics" element={<StatisticsPage />} />
+          </Routes>
+        </Layout>
+      </Router>
+    </ToastProvider>
   );
 }
 
-export default App
+export default App;
