@@ -69,8 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       label: 'Liên hệ & Hỗ trợ', 
       icon: Phone, 
       path: '/contacts',
-      active: false, 
-      disabled: true 
+      active: location.pathname === '/contacts'
     },
   ];
 

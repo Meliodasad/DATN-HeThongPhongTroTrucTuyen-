@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { MessageSquare, User, Calendar, MoreVertical, Eye, Trash2, Flag, Check, X, Clock } from 'lucide-react';
+import { MessageSquare, User, Calendar, Eye, Trash2, Flag, Check, X, Clock } from 'lucide-react';
 import { useToastContext } from '../../../contexts/ToastContext';
 import { commentService } from '../../../services/commentService';
 import type { Comment, CommentStats } from '../../../types/comment';

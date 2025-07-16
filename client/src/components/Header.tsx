@@ -38,6 +38,11 @@ const Header: React.FC<HeaderProps> = ({ sidebarOpen, setSidebarOpen }) => {
           title: 'Thống kê chi tiết',
           description: 'Xem báo cáo và phân tích dữ liệu chi tiết'
         };
+      case '/contacts':
+        return {
+          title: 'Liên hệ & Hỗ trợ',
+          description: 'Quản lý tin nhắn liên hệ và hỗ trợ khách hàng'
+        };
       default:
         return {
           title: 'Trang không tìm thấy',

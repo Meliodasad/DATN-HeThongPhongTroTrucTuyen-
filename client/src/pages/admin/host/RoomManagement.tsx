@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Home, MapPin, DollarSign, Users, Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
+import { Home, MapPin, DollarSign, Users, Plus, Search, Edit, Trash2, Eye, Check, X, Clock, AlertTriangle } from 'lucide-react';
 import { useToastContext } from '../../../contexts/ToastContext';
 import type { Room, RoomStats } from '../../../types/room';
 import RoomModal from './RoomModal';
@@ -13,6 +13,8 @@ const RoomManagement: React.FC = () => {
     available: 0,
     rented: 0,
     maintenance: 0,
+    pending: 0,
+    rejected: 0,
     byType: { single: 0, shared: 0, apartment: 0, studio: 0 },
     averagePrice: 0,
     totalRevenue: 0
@@ -22,16 +24,15 @@ const RoomManagement: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
+  const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<Room['type'] | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<Room['status'] | 'all'>('all');
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [showRejectionModal, setShowRejectionModal] = useState(false);
+  const [roomToReject, setRoomToReject] = useState<Room | null>(null);
 
   const { success, error } = useToastContext();
-
-  useEffect(() => {
-    loadData();
-  }, []);
 
   const loadData = async () => {
     try {
@@ -49,6 +50,10 @@ const RoomManagement: React.FC = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadData();
+  }, []);
 
   const filteredRooms = useMemo(() => {
     return rooms.filter(room => {
@@ -72,12 +77,12 @@ const RoomManagement: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleViewDetail = (roomId: number) => {
+  const handleViewDetail = (roomId: string) => {
     setSelectedRoomId(roomId);
     setIsDetailModalOpen(true);
   };
 
-  const handleSubmitRoom = async (roomData: any) => {
+  const handleSubmitRoom = async (roomData: Partial<Room>) => {
     try {
       setModalLoading(true);
       
@@ -89,17 +94,18 @@ const RoomManagement: React.FC = () => {
         success('Thành công', 'Thêm phòng trọ thành công');
       }
       
-      await loadData();
       setIsModalOpen(false);
+      setEditingRoom(null);
+      await loadData();
     } catch (err) {
-      console.log(err);
-      error('Lỗi', 'Không thể thực hiện thao tác');
+      console.error(err);
+      error('Lỗi', editingRoom ? 'Không thể cập nhật phòng trọ' : 'Không thể thêm phòng trọ');
     } finally {
       setModalLoading(false);
     }
   };
 
-  const handleDeleteRoom = async (id: number) => {
+  const handleDeleteRoom = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa phòng trọ này?')) return;
 
     try {
@@ -112,7 +118,7 @@ const RoomManagement: React.FC = () => {
     }
   };
 
-  const handleUpdateStatus = async (id: number, status: Room['status']) => {
+  const handleUpdateStatus = async (id: string, status: Room['status']) => {
     try {
       await roomService.updateRoomStatus(id, status);
       success('Thành công', 'Cập nhật trạng thái thành công');
@@ -120,6 +126,41 @@ const RoomManagement: React.FC = () => {
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể cập nhật trạng thái');
+    }
+  };
+
+  const handleApproveRoom = async (id: string) => {
+    try {
+      await roomService.approveRoom(id, 'Admin');
+      success('Thành công', 'Duyệt phòng trọ thành công');
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      error('Lỗi', 'Không thể duyệt phòng trọ');
+    }
+  };
+
+  const handleRejectRoom = (room: Room) => {
+    setRoomToReject(room);
+    setShowRejectionModal(true);
+  };
+
+  const confirmRejectRoom = async () => {
+    if (!roomToReject || !rejectionReason.trim()) {
+      error('Lỗi', 'Vui lòng nhập lý do từ chối');
+      return;
+    }
+
+    try {
+      await roomService.rejectRoom(roomToReject.id, rejectionReason, 'Admin');
+      success('Thành công', 'Từ chối phòng trọ thành công');
+      await loadData();
+      setShowRejectionModal(false);
+      setRejectionReason('');
+      setRoomToReject(null);
+    } catch (err) {
+      console.error(err);
+      error('Lỗi', 'Không thể từ chối phòng trọ');
     }
   };
 
@@ -131,25 +172,31 @@ const RoomManagement: React.FC = () => {
         return 'bg-blue-100 text-blue-800';
       case 'maintenance':
         return 'bg-red-100 text-red-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'rejected':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
- // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const getStatusText = (status: Room['status']) => {
-  switch (status) {
-    case 'available':
-      return 'Còn trống';
-    case 'rented':
-      return 'Đã thuê';
-    case 'maintenance':
-      return 'Bảo trì';
-    default:
-      return 'Không xác định';
-  }
-};
-
+  const getStatusText = (status: Room['status']) => {
+    switch (status) {
+      case 'available':
+        return 'Còn trống';
+      case 'rented':
+        return 'Đã thuê';
+      case 'maintenance':
+        return 'Bảo trì';
+      case 'pending':
+        return 'Chờ duyệt';
+      case 'rejected':
+        return 'Đã từ chối';
+      default:
+        return 'Không xác định';
+    }
+  };
 
   const getTypeText = (type: Room['type']) => {
     switch (type) {
@@ -185,28 +232,30 @@ const getStatusText = (status: Room['status']) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Quản lý phòng trọ</h1>
-          <p className="text-gray-600">Quản lý thông tin phòng trọ và trạng thái cho thuê</p>
+          <p className="text-gray-600">Quản lý thông tin phòng trọ và trạng thái</p>
         </div>
-        <button 
+        <button
           onClick={handleAddRoom}
           className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          Thêm phòng mới
+          Thêm phòng trọ
         </button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
-            <Home className="w-8 h-8 text-blue-600" />
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+              <Home className="w-4 h-4 text-blue-600" />
+            </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng phòng</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
+              <p className="text-2xl font-bold text-blue-600">{stats.total}</p>
             </div>
           </div>
         </div>
@@ -214,7 +263,7 @@ const getStatusText = (status: Room['status']) => {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600 font-bold">✓</span>
+              <Home className="w-4 h-4 text-green-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Còn trống</p>
@@ -225,12 +274,12 @@ const getStatusText = (status: Room['status']) => {
 
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-              <Users className="w-4 h-4 text-blue-600" />
+            <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+              <Users className="w-4 h-4 text-purple-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đã thuê</p>
-              <p className="text-2xl font-bold text-blue-600">{stats.rented}</p>
+              <p className="text-2xl font-bold text-purple-600">{stats.rented}</p>
             </div>
           </div>
         </div>
@@ -238,7 +287,7 @@ const getStatusText = (status: Room['status']) => {
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-              <span className="text-red-600 font-bold">⚠</span>
+              <Home className="w-4 h-4 text-red-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Bảo trì</p>
@@ -246,32 +295,60 @@ const getStatusText = (status: Room['status']) => {
             </div>
           </div>
         </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+              <Clock className="w-4 h-4 text-yellow-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Chờ duyệt</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+              <X className="w-4 h-4 text-gray-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Đã từ chối</p>
+              <p className="text-2xl font-bold text-gray-600">{stats.rejected}</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Search and Filter */}
       <div className="bg-white p-4 rounded-lg shadow-sm border">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            <input
-              type="text"
-              placeholder="Tìm kiếm phòng trọ..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex-1">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm theo tên hoặc địa chỉ..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
           </div>
+          
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as Room['type'] | 'all')}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="all">Tất cả loại</option>
+            <option value="all">Tất cả loại phòng</option>
             <option value="single">Phòng đơn</option>
             <option value="shared">Phòng chia sẻ</option>
             <option value="apartment">Căn hộ</option>
             <option value="studio">Studio</option>
           </select>
+
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as Room['status'] | 'all')}
@@ -281,12 +358,14 @@ const getStatusText = (status: Room['status']) => {
             <option value="available">Còn trống</option>
             <option value="rented">Đã thuê</option>
             <option value="maintenance">Bảo trì</option>
+            <option value="pending">Chờ duyệt</option>
+            <option value="rejected">Đã từ chối</option>
           </select>
         </div>
       </div>
 
       {/* Rooms Table */}
-      <div className="bg-white rounded-lg shadow-sm border">
+      <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">Danh sách phòng trọ ({filteredRooms.length})</h3>
         </div>
@@ -324,7 +403,7 @@ const getStatusText = (status: Room['status']) => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
-                        {room.images[0] ? (
+                        {room.images && room.images[0] ? (
                           <img src={room.images[0]} alt={room.title} className="w-full h-full object-cover" />
                         ) : (
                           <Home className="w-6 h-6 text-gray-500" />
@@ -352,21 +431,51 @@ const getStatusText = (status: Room['status']) => {
                     <span className="text-sm text-gray-900">{getTypeText(room.type)}</span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <select
-                      value={room.status}
-                      onChange={(e) => handleUpdateStatus(room.id, e.target.value as Room['status'])}
-                      className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ${getStatusColor(room.status)}`}
-                    >
-                      <option value="available">Còn trống</option>
-                      <option value="rented">Đã thuê</option>
-                      <option value="maintenance">Bảo trì</option>
-                    </select>
+                    {room.status === 'pending' ? (
+                      <span className={`text-xs font-semibold rounded-full px-2 py-1 ${getStatusColor(room.status)}`}>
+                        {getStatusText(room.status)}
+                      </span>
+                    ) : (
+                      <select
+                        value={room.status}
+                        onChange={(e) => handleUpdateStatus(room.id, e.target.value as Room['status'])}
+                        className={`text-xs font-semibold rounded-full px-2 py-1 border-0 ${getStatusColor(room.status)}`}
+                        disabled={room.status === 'rejected'}
+                      >
+                        <option value="available">Còn trống</option>
+                        <option value="rented">Đã thuê</option>
+                        <option value="maintenance">Bảo trì</option>
+                      </select>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{room.owner}</div>
+                    {room.rejectionReason && (
+                      <div className="text-xs text-red-600 mt-1">
+                        Lý do từ chối: {room.rejectionReason}
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
+                      {room.status === 'pending' && (
+                        <>
+                          <button 
+                            onClick={() => handleApproveRoom(room.id)}
+                            className="text-green-600 hover:text-green-900" 
+                            title="Duyệt phòng"
+                          >
+                            <Check className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleRejectRoom(room)}
+                            className="text-red-600 hover:text-red-900" 
+                            title="Từ chối"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                       <button 
                         onClick={() => handleViewDetail(room.id)}
                         className="text-blue-600 hover:text-blue-900" 
@@ -374,20 +483,24 @@ const getStatusText = (status: Room['status']) => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => handleEditRoom(room)}
-                        className="text-green-600 hover:text-green-900"
-                        title="Chỉnh sửa"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteRoom(room.id)}
-                        className="text-red-600 hover:text-red-900"
-                        title="Xóa"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {room.status !== 'pending' && (
+                        <>
+                          <button 
+                            onClick={() => handleEditRoom(room)}
+                            className="text-blue-600 hover:text-blue-900"
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteRoom(room.id)}
+                            className="text-red-600 hover:text-red-900"
+                            title="Xóa"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -403,6 +516,56 @@ const getStatusText = (status: Room['status']) => {
           </div>
         )}
       </div>
+
+      {/* Rejection Modal */}
+      {showRejectionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Từ chối phòng trọ</h3>
+                <p className="text-sm text-gray-600">Vui lòng nhập lý do từ chối</p>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lý do từ chối *
+              </label>
+              <textarea
+                value={rejectionReason}
+                onChange={(e) => setRejectionReason(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                rows={3}
+                placeholder="Nhập lý do từ chối phòng trọ này..."
+              />
+            </div>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowRejectionModal(false);
+                  setRejectionReason('');
+                  setRoomToReject(null);
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmRejectRoom}
+                disabled={!rejectionReason.trim()}
+                className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Từ chối
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Room Modal */}
       <RoomModal

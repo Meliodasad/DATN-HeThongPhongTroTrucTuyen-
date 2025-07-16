@@ -13,15 +13,16 @@ class UserService {
   }
 
   // Create new user
-  async createUser(userData: UserFormData): Promise<User> {
-    const newUser = {
-      ...userData,
-      id: Date.now(), // Temporary ID generation
-      createdAt: new Date().toISOString().split('T')[0],
-      lastLogin: new Date().toISOString().split('T')[0]
-    };
-    return apiService.post<User>('/users', newUser);
-  }
+ // Create new user
+async createUser(userData: UserFormData): Promise<User> {
+  const newUser = {
+    ...userData,
+    id: Date.now().toString(), // ✅ Ép kiểu về string
+    createdAt: new Date().toISOString().split('T')[0],
+    lastLogin: new Date().toISOString().split('T')[0]
+  };
+  return apiService.post<User>('/users', newUser);
+}
 
   // Update user
   async updateUser(id: number, userData: UserFormData): Promise<User> {

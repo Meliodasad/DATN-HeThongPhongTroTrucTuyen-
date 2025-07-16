@@ -7,6 +7,7 @@ import RoomsPage from './pages/RoomsPage';
 import CommentsPage from './pages/CommentsPage';
 import StatisticsPage from './pages/StatisticsPage';
 import ReviewsPage from './pages/ReviewsPage';
+import ContactsPage from './pages/ContactsPage';
 import { ToastProvider } from './contexts/ToastContext';
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
             <Route path="/comments" element={<CommentsPage />} />
             <Route path="/statistics" element={<StatisticsPage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/contacts" element={<ContactsPage />} />
           </Routes>
         </Layout>
       </Router>

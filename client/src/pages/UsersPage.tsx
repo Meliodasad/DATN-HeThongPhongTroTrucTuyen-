@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import UserManagement from './admin/user/UserManagement';
+import UserModal from './admin/user/UserModal';
+import UserTable from './admin/user/UserTable';
+import SearchAndFilter from './admin/user/SearchAndFilter';
+import { userService } from '../services/userService';
+import type { UserFormData, UserStats } from '../types/user';
 
 const UsersPage: React.FC = () => {
   return <UserManagement />;

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Calendar, Star, MessageSquare, Send, Trash2 } from 'lucide-react';
+import { X, User, Calendar, MessageSquare, Send, Trash2 } from 'lucide-react';
 import { useToastContext } from '../../../contexts/ToastContext';
 import { commentService } from '../../../services/commentService';
-import type { Comment, CommentReply, CommentReplyFormData } from '../../../types/comment';
+import type { Comment, CommentReplyFormData } from '../../../types/comment';
 
 interface CommentDetailModalProps {
   isOpen: boolean;

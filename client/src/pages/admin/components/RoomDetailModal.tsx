@@ -16,18 +16,19 @@ import {
   Edit,
   Trash2
 } from 'lucide-react';
+import type { Room } from '../../../types/room';
 import { useToastContext } from '../../../contexts/ToastContext';
 import { roomService } from '../../../services/roomService';
 import { commentService } from '../../../services/commentService';
-import type { Room } from '../../../types/room';
-import type { Comment } from '../../../types/comment';
+import type { IComment } from '../../../types/comment';
+
 
 interface RoomDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
-  roomId: number | null;
+  roomId: string | null;
   onEdit: (room: Room) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }
 
 const RoomDetailModal: React.FC<RoomDetailModalProps> = ({ 
@@ -38,11 +39,11 @@ const RoomDetailModal: React.FC<RoomDetailModalProps> = ({
   onDelete
 }) => {
   const [room, setRoom] = useState<Room | null>(null);
-  const [comments, setComments] = useState<Comment[]>([]);
+const [comments, setComments] = useState<IComment[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-  const { success, error } = useToastContext();
+  const { error } = useToastContext();
 
   useEffect(() => {
     if (isOpen && roomId) {
@@ -92,6 +93,10 @@ const RoomDetailModal: React.FC<RoomDetailModalProps> = ({
         return 'bg-blue-100 text-blue-800';
       case 'maintenance':
         return 'bg-red-100 text-red-800';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'rejected':
+        return 'bg-gray-100 text-gray-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -105,6 +110,10 @@ const RoomDetailModal: React.FC<RoomDetailModalProps> = ({
         return 'Đã thuê';
       case 'maintenance':
         return 'Bảo trì';
+      case 'pending':
+        return 'Chờ duyệt';
+      case 'rejected':
+        return 'Đã từ chối';
       default:
         return 'Không xác định';
     }
@@ -130,6 +139,16 @@ const RoomDetailModal: React.FC<RoomDetailModalProps> = ({
       style: 'currency',
       currency: 'VND'
     }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
   const getAmenityIcon = (amenity: string) => {
@@ -168,20 +187,24 @@ const RoomDetailModal: React.FC<RoomDetailModalProps> = ({
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h3 className="text-xl font-semibold text-gray-900">Chi tiết phòng trọ</h3>
           <div className="flex items-center gap-2">
-            <button
-              onClick={handleEdit}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
-            >
-              <Edit className="w-4 h-4" />
-              Chỉnh sửa
-            </button>
-            <button
-              onClick={handleDelete}
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
-            >
-              <Trash2 className="w-4 h-4" />
-              Xóa
-            </button>
+            {room && room.status !== 'pending' && (
+              <>
+                <button
+                  onClick={handleEdit}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                >
+                  <Edit className="w-4 h-4" />
+                  Chỉnh sửa
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Xóa
+                </button>
+              </>
+            )}
             <button
               onClick={onClose}
               className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -266,6 +289,25 @@ const RoomDetailModal: React.FC<RoomDetailModalProps> = ({
                       </div>
                     </div>
 
+                    {/* Rejection Reason */}
+                    {room.status === 'rejected' && room.rejectionReason && (
+                      <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                        <h4 className="font-semibold text-red-800 mb-2">Lý do từ chối</h4>
+                        <p className="text-red-700">{room.rejectionReason}</p>
+                      </div>
+                    )}
+
+                    {/* Approval Info */}
+                    {room.approved && room.approvedBy && room.approvedAt && (
+                      <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <h4 className="font-semibold text-green-800 mb-2">Thông tin duyệt</h4>
+                        <div className="text-sm text-green-700">
+                          <p>Được duyệt bởi: <span className="font-medium">{room.approvedBy}</span></p>
+                          <p>Thời gian: <span className="font-medium">{formatDate(room.approvedAt)}</span></p>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Description */}
                     {room.description && (
                       <div className="mb-6">
@@ -327,20 +369,22 @@ const RoomDetailModal: React.FC<RoomDetailModalProps> = ({
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Ngày tạo:</span>
-                        <span className="font-medium">{room.createdAt}</span>
+                        <span className="font-medium">{formatDate(room.createdAt)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Cập nhật:</span>
-                        <span className="font-medium">{room.updatedAt}</span>
+                        <span className="font-medium">{formatDate(room.updatedAt)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">ID phòng:</span>
                         <span className="font-medium">#{room.id}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Lượt xem:</span>
-                        <span className="font-medium">1,234</span>
-                      </div>
+                      {room.rating && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Đánh giá:</span>
+                          <div>{renderStars(room.rating)}</div>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -359,7 +403,7 @@ const RoomDetailModal: React.FC<RoomDetailModalProps> = ({
                               {comment.rating && renderStars(comment.rating)}
                             </div>
                             <p className="text-sm text-gray-600 line-clamp-2">{comment.content}</p>
-                            <span className="text-xs text-gray-500">{comment.createdAt}</span>
+                            <span className="text-xs text-gray-500">{formatDate(comment.createdAt)}</span>
                           </div>
                         ))}
                         {comments.length > 3 && (
