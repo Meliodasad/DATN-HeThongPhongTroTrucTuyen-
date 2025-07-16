@@ -10,7 +10,14 @@ import {
   Star,
   MessageSquare,
   Phone,
-  TrendingUp
+  TrendingUp,
+  Building,
+  CheckCircle,
+  Calendar,
+  FileText,
+  CreditCard,
+  AlertTriangle,
+  Settings
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -44,18 +51,53 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       active: location.pathname === '/rooms'
     },
     { 
-      id: 'statistics', 
-      label: 'Thống kê chi tiết', 
-      icon: TrendingUp, 
-      path: '/statistics',
-      active: location.pathname === '/statistics'
+      id: 'tenants', 
+      label: 'Quản lý người thuê', 
+      icon: Users, 
+      path: '/tenants',
+      active: location.pathname === '/tenants'
     },
     { 
+      id: 'bookings', 
+      label: 'Quản lý đặt phòng', 
+      icon: Calendar, 
+      path: '/bookings',
+      active: location.pathname === '/bookings'
+    },
+    { 
+      id: 'contracts', 
+      label: 'Hợp đồng thuê', 
+      icon: FileText, 
+      path: '/contracts',
+      active: location.pathname === '/contracts'
+    },
+    { 
+      id: 'payments', 
+      label: 'Quản lý thu chi', 
+      icon: CreditCard, 
+      path: '/payments',
+      active: location.pathname === '/payments'
+    },
+        { 
       id: 'comments', 
       label: 'Quản lý bình luận', 
       icon: MessageSquare, 
       path: '/comments',
       active: location.pathname === '/comments'
+    },
+    { 
+      id: 'issues', 
+      label: 'Lỗi & Sự cố', 
+      icon: AlertTriangle, 
+      path: '/issues',
+      active: location.pathname === '/issues'
+    },
+    { 
+      id: 'statistics', 
+      label: 'Thống kê chi tiết', 
+      icon: TrendingUp, 
+      path: '/statistics',
+      active: location.pathname === '/statistics'
     },
     { 
       id: 'reviews', 
@@ -71,6 +113,13 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       path: '/contacts',
       active: location.pathname === '/contacts'
     },
+    { 
+      id: 'settings', 
+      label: 'Cài đặt hệ thống', 
+      icon: Settings, 
+      path: '/settings',
+      active: location.pathname === '/settings'
+    },
   ];
 
   const handleNavigation = (path: string, disabled?: boolean) => {
@@ -80,7 +129,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
   };
 
   return (
-    <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-slate-800 text-white transition-all duration-300 flex flex-col`}>
+    <div className={`${sidebarOpen ? 'w-64' : 'w-16'} bg-slate-800 text-white transition-all duration-300 flex flex-col h-screen`}>
       {/* Logo */}
       <div className="p-4 border-b border-slate-700">
         <div className="flex items-center gap-3">
@@ -97,7 +146,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
+      <nav className="flex-1 p-4 overflow-y-auto">
         <div className="space-y-2">
           {sidebarItems.map((item) => (
             <button
