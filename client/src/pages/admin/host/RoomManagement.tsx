@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Home, MapPin, DollarSign, Users, Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye, Calendar } from 'lucide-react';
 import { useToastContext } from '../../../contexts/ToastContext';
+import { roomService } from '../../../services/roomService';
 import type { Room, RoomStats } from '../../../types/room';
 import RoomModal from './RoomModal';
 
@@ -32,38 +33,12 @@ const RoomManagement: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/db.json');
-      const data = await response.json();
-      setRooms(data.rooms);
-      
-      // Calculate stats
-      const total = data.rooms.length;
-      const available = data.rooms.filter((r: Room) => r.status === 'available').length;
-      const rented = data.rooms.filter((r: Room) => r.status === 'rented').length;
-      const maintenance = data.rooms.filter((r: Room) => r.status === 'maintenance').length;
-      
-      const byType = data.rooms.reduce((acc: any, room: Room) => {
-        acc[room.type] = (acc[room.type] || 0) + 1;
-        return acc;
-      }, {});
-      
-      const averagePrice = data.rooms.reduce((sum: number, room: Room) => sum + room.price, 0) / data.rooms.length;
-      const totalRevenue = data.rooms.filter((r: Room) => r.status === 'rented').reduce((sum: number, room: Room) => sum + room.price, 0);
-
-      setStats({
-        total,
-        available,
-        rented,
-        maintenance,
-        byType: {
-          single: byType.single || 0,
-          shared: byType.shared || 0,
-          apartment: byType.apartment || 0,
-          studio: byType.studio || 0
-        },
-        averagePrice: Math.round(averagePrice),
-        totalRevenue
-      });
+      const [roomsData, statsData] = await Promise.all([
+        roomService.getRooms(),
+        roomService.getRoomStats()
+      ]);
+      setRooms(roomsData);
+      setStats(statsData);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải dữ liệu phòng trọ');
@@ -99,8 +74,10 @@ const RoomManagement: React.FC = () => {
       setModalLoading(true);
       
       if (editingRoom) {
+        await roomService.updateRoom(editingRoom.id, roomData);
         success('Thành công', 'Cập nhật phòng trọ thành công');
       } else {
+        await roomService.createRoom(roomData);
         success('Thành công', 'Thêm phòng trọ thành công');
       }
       
@@ -118,6 +95,7 @@ const RoomManagement: React.FC = () => {
     if (!confirm('Bạn có chắc chắn muốn xóa phòng trọ này?')) return;
 
     try {
+      await roomService.deleteRoom(id);
       success('Thành công', 'Xóa phòng trọ thành công');
       await loadData();
     } catch (err) {
@@ -128,6 +106,7 @@ const RoomManagement: React.FC = () => {
 
   const handleUpdateStatus = async (id: number, status: Room['status']) => {
     try {
+      await roomService.updateRoomStatus(id, status);
       success('Thành công', 'Cập nhật trạng thái thành công');
       await loadData();
     } catch (err) {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useToastContext } from '../../../contexts/ToastContext';
+import { userService } from '../../../services/userService';
 import UserTable from './UserTable';
 import SearchAndFilter from './SearchAndFilter';
 import UserModal from './UserModal';
@@ -30,30 +31,12 @@ const UserManagement: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/db.json');
-      const data = await response.json();
-      setUsers(data.users);
-      
-      // Calculate stats
-      const total = data.users.length;
-      const active = data.users.filter((u: UserType) => u.status === 'active').length;
-      const inactive = total - active;
-      
-      const byRole = data.users.reduce((acc: any, user: UserType) => {
-        acc[user.role] = (acc[user.role] || 0) + 1;
-        return acc;
-      }, {});
-
-      setStats({
-        total,
-        active,
-        inactive,
-        byRole: {
-          'Admin': byRole['Admin'] || 0,
-          'Chủ trọ': byRole['Chủ trọ'] || 0,
-          'Người dùng': byRole['Người dùng'] || 0
-        }
-      });
+      const [usersData, statsData] = await Promise.all([
+        userService.getUsers(),
+        userService.getUserStats()
+      ]);
+      setUsers(usersData);
+      setStats(statsData);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải dữ liệu người dùng');
@@ -88,10 +71,10 @@ const UserManagement: React.FC = () => {
       setModalLoading(true);
       
       if (editingUser) {
-        // Update user logic here
+        await userService.updateUser(editingUser.id, userData);
         success('Thành công', 'Cập nhật người dùng thành công');
       } else {
-        // Create user logic here
+        await userService.createUser(userData);
         success('Thành công', 'Thêm người dùng thành công');
       }
       
@@ -109,7 +92,7 @@ const UserManagement: React.FC = () => {
     if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) return;
 
     try {
-      // Delete user logic here
+      await userService.deleteUser(id);
       success('Thành công', 'Xóa người dùng thành công');
       await loadData();
     } catch (err) {
@@ -120,7 +103,7 @@ const UserManagement: React.FC = () => {
 
   const handleToggleStatus = async (id: number) => {
     try {
-      // Toggle status logic here
+      await userService.toggleUserStatus(id);
       success('Thành công', 'Cập nhật trạng thái thành công');
       await loadData();
     } catch (err) {

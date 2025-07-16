@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Calendar, Star, MessageSquare, Send, Trash2 } from 'lucide-react';
 import { useToastContext } from '../../../contexts/ToastContext';
+import { commentService } from '../../../services/commentService';
 import type { Comment, CommentReply, CommentReplyFormData } from '../../../types/comment';
 
 interface CommentDetailModalProps {
@@ -38,10 +39,8 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
     
     try {
       setLoading(true);
-      const response = await fetch('/db.json');
-      const data = await response.json();
-      const commentData = data.comments.find((c: Comment) => c.id === commentId);
-      setComment(commentData || null);
+      const commentData = await commentService.getCommentById(commentId);
+      setComment(commentData);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải chi tiết bình luận');
@@ -56,6 +55,7 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
 
     try {
       setReplyLoading(true);
+      await commentService.addReply(commentId, replyForm);
       success('Thành công', 'Đã thêm phản hồi');
       setReplyForm({
         content: '',
@@ -77,6 +77,7 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
     if (!commentId || !confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) return;
 
     try {
+      await commentService.deleteReply(commentId, replyId);
       success('Thành công', 'Đã xóa phản hồi');
       await loadComment();
     } catch (err) {

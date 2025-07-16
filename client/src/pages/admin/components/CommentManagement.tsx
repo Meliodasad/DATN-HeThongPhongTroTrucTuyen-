@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { MessageSquare, User, Calendar, MoreVertical, Eye, Trash2, Flag, Check, X, Clock } from 'lucide-react';
 import { useToastContext } from '../../../contexts/ToastContext';
+import { commentService } from '../../../services/commentService';
 import type { Comment, CommentStats } from '../../../types/comment';
 import CommentDetailModal from './CommentDetailModal';
 
@@ -28,25 +29,12 @@ const CommentManagement: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/db.json');
-      const data = await response.json();
-      setComments(data.comments);
-      
-      // Calculate stats
-      const total = data.comments.length;
-      const approved = data.comments.filter((c: Comment) => c.status === 'approved').length;
-      const pending = data.comments.filter((c: Comment) => c.status === 'pending').length;
-      const rejected = data.comments.filter((c: Comment) => c.status === 'rejected').length;
-      
-      const averageRating = data.comments.reduce((sum: number, c: Comment) => sum + (c.rating || 0), 0) / data.comments.filter((c: Comment) => c.rating).length;
-
-      setStats({
-        total,
-        approved,
-        pending,
-        rejected,
-        averageRating: Math.round(averageRating * 10) / 10
-      });
+      const [commentsData, statsData] = await Promise.all([
+        commentService.getComments(),
+        commentService.getCommentStats()
+      ]);
+      setComments(commentsData);
+      setStats(statsData);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải dữ liệu bình luận');
@@ -68,6 +56,7 @@ const CommentManagement: React.FC = () => {
 
   const handleUpdateStatus = async (id: number, status: Comment['status']) => {
     try {
+      await commentService.updateCommentStatus(id, status);
       success('Thành công', `${status === 'approved' ? 'Duyệt' : status === 'rejected' ? 'Từ chối' : 'Cập nhật'} bình luận thành công`);
       await loadData();
     } catch (err) {
@@ -80,6 +69,7 @@ const CommentManagement: React.FC = () => {
     if (!confirm('Bạn có chắc chắn muốn xóa bình luận này?')) return;
 
     try {
+      await commentService.deleteComment(id);
       success('Thành công', 'Xóa bình luận thành công');
       await loadData();
     } catch (err) {
