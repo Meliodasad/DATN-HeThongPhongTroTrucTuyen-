@@ -1,11 +1,13 @@
 {
   "users": [
     {
-      "name": "Nguyễn Văn A23123",
+      "id": "1",
+      "name": "Nguyễn Văn A",
       "email": "nguyenvana@example.com",
       "role": "Admin",
       "status": "active",
-      "id": "1"
+      "createdAt": "2024-01-15",
+      "lastLogin": "2024-01-20"
     },
     {
       "id": "2",
@@ -17,11 +19,13 @@
       "lastLogin": "2024-01-19"
     },
     {
+      "id": "3",
       "name": "Lê Văn C",
       "email": "levanc@example.com",
       "role": "Người dùng",
-      "status": "active",
-      "id": "3"
+      "status": "inactive",
+      "createdAt": "2024-01-17",
+      "lastLogin": "2024-01-18"
     },
     {
       "id": "4",
@@ -40,15 +44,6 @@
       "status": "active",
       "createdAt": "2024-01-19",
       "lastLogin": "2024-01-20"
-    },
-    {
-      "id": "1752634295234",
-      "name": "21312421",
-      "email": "412432134@gmail.com",
-      "role": "Chủ trọ",
-      "status": "active",
-      "createdAt": "2025-07-16",
-      "lastLogin": "2025-07-16"
     }
   ],
   "rooms": [
@@ -74,7 +69,7 @@
         "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
       ],
       "createdAt": "2024-01-15",
-      "updatedAt": "2025-07-16"
+      "updatedAt": "2024-01-20"
     },
     {
       "id": "2",
@@ -105,7 +100,7 @@
       "address": "789 Nguyễn Thị Thập, Quận 7, TP.HCM",
       "price": 8000000,
       "type": "apartment",
-      "status": "rented",
+      "status": "maintenance",
       "owner": "Lê Văn C",
       "ownerId": 4,
       "area": 35,
@@ -121,7 +116,7 @@
         "https://images.pexels.com/photos/1571471/pexels-photo-1571471.jpeg"
       ],
       "createdAt": "2024-01-17",
-      "updatedAt": "2025-07-16"
+      "updatedAt": "2024-01-18"
     },
     {
       "id": "4",
@@ -147,22 +142,6 @@
       ],
       "createdAt": "2024-01-18",
       "updatedAt": "2024-01-20"
-    },
-    {
-      "id": 1752634445185,
-      "title": "21312321",
-      "description": "142131",
-      "address": "ewrfdaer23142343",
-      "price": 23232,
-      "type": "shared",
-      "status": "available",
-      "owner": "421413",
-      "ownerId": 1,
-      "area": 322,
-      "amenities": [],
-      "images": [],
-      "createdAt": "2025-07-16",
-      "updatedAt": "2025-07-16"
     }
   ],
   "comments": [
@@ -195,9 +174,18 @@
       "roomId": 2,
       "roomTitle": "Phòng trọ sinh viên quận 3",
       "createdAt": "2024-01-19",
-      "status": "approved",
+      "status": "pending",
       "rating": 4,
-      "replies": []
+      "replies": [
+        {
+          "id": 3,
+          "content": "Chúng tôi sẽ cải thiện vấn đề âm thanh. Cảm ơn phản hồi của bạn!",
+          "author": "Chủ trọ",
+          "authorEmail": "chutro@example.com",
+          "createdAt": "2024-01-20",
+          "isAdmin": false
+        }
+      ]
     },
     {
       "id": "3",
@@ -209,16 +197,7 @@
       "createdAt": "2024-01-18",
       "status": "rejected",
       "rating": 2,
-      "replies": [
-        {
-          "id": 1752634311929,
-          "content": "123213213",
-          "author": "Admin",
-          "authorEmail": "admin@system.com",
-          "isAdmin": true,
-          "createdAt": "2025-07-16"
-        }
-      ]
+      "replies": []
     },
     {
       "id": "4",
@@ -249,9 +228,157 @@
       "roomId": 1,
       "roomTitle": "Studio quận 1",
       "createdAt": "2024-01-16",
-      "status": "pending",
+      "status": "approved",
       "rating": 3,
       "replies": []
+    }
+  ],
+  "reviews": [
+    {
+      "id": "1",
+      "userId": 1,
+      "userName": "Nguyễn Văn A",
+      "userEmail": "nguyenvana@example.com",
+      "roomId": 1,
+      "roomTitle": "Phòng trọ cao cấp quận 1",
+      "rating": 5,
+      "title": "Phòng trọ tuyệt vời, rất hài lòng!",
+      "content": "Tôi đã ở đây được 6 tháng và cảm thấy rất hài lòng. Phòng sạch sẽ, thoáng mát, chủ trọ thân thiện. Vị trí thuận tiện gần trung tâm, đi làm rất dễ dàng.",
+      "pros": [
+        "Vị trí thuận tiện",
+        "Phòng sạch sẽ",
+        "Chủ trọ thân thiện",
+        "Giá cả hợp lý"
+      ],
+      "cons": [
+        "Đôi khi hơi ồn vào buổi tối"
+      ],
+      "images": [
+        "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+      ],
+      "isVerified": true,
+      "isRecommended": true,
+      "helpfulCount": 12,
+      "createdAt": "2024-01-20",
+      "updatedAt": "2024-01-20",
+      "status": "approved",
+      "adminResponse": {
+        "content": "Cảm ơn bạn đã đánh giá tích cực! Chúng tôi sẽ tiếp tục cải thiện chất lượng dịch vụ.",
+        "respondedBy": "Admin",
+        "respondedAt": "2024-01-21"
+      }
+    },
+    {
+      "id": "2",
+      "userId": 2,
+      "userName": "Trần Thị B",
+      "userEmail": "tranthib@example.com",
+      "roomId": 2,
+      "roomTitle": "Phòng trọ sinh viên quận 3",
+      "rating": 4,
+      "title": "Phù hợp cho sinh viên",
+      "content": "Phòng khá ổn cho sinh viên như tôi. Giá cả phải chăng, gần trường học. Tuy nhiên có một số điểm cần cải thiện.",
+      "pros": [
+        "Giá rẻ",
+        "Gần trường học",
+        "Có WiFi"
+      ],
+      "cons": [
+        "Phòng hơi nhỏ",
+        "Thiết bị cũ"
+      ],
+      "images": [],
+      "isVerified": true,
+      "isRecommended": true,
+      "helpfulCount": 8,
+      "createdAt": "2024-01-19",
+      "updatedAt": "2024-01-19",
+      "status": "approved"
+    },
+    {
+      "id": "3",
+      "userId": 3,
+      "userName": "Lê Văn C",
+      "userEmail": "levanc@example.com",
+      "roomId": 3,
+      "roomTitle": "Căn hộ mini quận 7",
+      "rating": 2,
+      "title": "Không như mong đợi",
+      "content": "Phòng không giống như hình ảnh quảng cáo. Nhiều thiết bị hỏng, WiFi chậm. Không khuyến khích thuê.",
+      "pros": [
+        "Vị trí ổn"
+      ],
+      "cons": [
+        "Không giống hình ảnh",
+        "Thiết bị hỏng",
+        "WiFi chậm",
+        "Dịch vụ kém"
+      ],
+      "images": [],
+      "isVerified": false,
+      "isRecommended": false,
+      "helpfulCount": 3,
+      "createdAt": "2024-01-18",
+      "updatedAt": "2024-01-18",
+      "status": "pending"
+    },
+    {
+      "id": "4",
+      "userId": 4,
+      "userName": "Phạm Thị D",
+      "userEmail": "phamthid@example.com",
+      "roomId": 4,
+      "roomTitle": "Studio quận 2",
+      "rating": 5,
+      "title": "Studio tuyệt vời, rất đáng tiền!",
+      "content": "Căn studio này thực sự tuyệt vời! Thiết kế hiện đại, đầy đủ tiện nghi, view đẹp. An ninh tốt, có hồ bơi. Rất đáng tiền!",
+      "pros": [
+        "Thiết kế hiện đại",
+        "Đầy đủ tiện nghi",
+        "View đẹp",
+        "An ninh tốt",
+        "Có hồ bơi"
+      ],
+      "cons": [],
+      "images": [
+        "https://images.pexels.com/photos/1571473/pexels-photo-1571473.jpeg"
+      ],
+      "isVerified": true,
+      "isRecommended": true,
+      "helpfulCount": 15,
+      "createdAt": "2024-01-17",
+      "updatedAt": "2024-01-17",
+      "status": "approved",
+      "adminResponse": {
+        "content": "Cảm ơn bạn đã lựa chọn và tin tưởng chúng tôi! Chúc bạn có những trải nghiệm tuyệt vời.",
+        "respondedBy": "Admin",
+        "respondedAt": "2024-01-18"
+      }
+    },
+    {
+      "id": "5",
+      "userName": "Hoàng Văn E",
+      "userEmail": "hoangvane@example.com",
+      "roomId": 1,
+      "roomTitle": "Phòng trọ cao cấp quận 1",
+      "rating": 3,
+      "title": "Tạm ổn nhưng giá hơi cao",
+      "content": "Phòng khá ổn, sạch sẽ nhưng giá hơi cao so với chất lượng. Dịch vụ bình thường.",
+      "pros": [
+        "Sạch sẽ",
+        "Vị trí tốt"
+      ],
+      "cons": [
+        "Giá cao",
+        "Dịch vụ bình thường"
+      ],
+      "images": [],
+      "isVerified": false,
+      "isRecommended": false,
+      "helpfulCount": 2,
+      "createdAt": "2024-01-16",
+      "updatedAt": "2024-01-16",
+      "status": "rejected"
     }
   ]
 }

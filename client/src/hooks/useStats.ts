@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { userService } from '../services/userService';
+import { roomService } from '../services/roomService';
 import type { UserStats } from '../types/user';
 import type { RoomStats } from '../types/room';
 
@@ -26,42 +28,10 @@ export const useStats = () => {
     const loadStats = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/db.json');
-        const data = await response.json();
-        
-        // Calculate user stats
-        const users = data.users || [];
-        const userStatsData: UserStats = {
-          total: users.length,
-          active: users.filter((u: any) => u.status === 'active').length,
-          inactive: users.filter((u: any) => u.status === 'inactive').length,
-          byRole: {
-            'Admin': users.filter((u: any) => u.role === 'Admin').length,
-            'Chủ trọ': users.filter((u: any) => u.role === 'Chủ trọ').length,
-            'Người dùng': users.filter((u: any) => u.role === 'Người dùng').length
-          }
-        };
-
-        // Calculate room stats
-        const rooms = data.rooms || [];
-        const totalRevenue = rooms
-          .filter((r: any) => r.status === 'rented')
-          .reduce((sum: number, room: any) => sum + room.price, 0);
-        
-        const roomStatsData: RoomStats = {
-          total: rooms.length,
-          available: rooms.filter((r: any) => r.status === 'available').length,
-          rented: rooms.filter((r: any) => r.status === 'rented').length,
-          maintenance: rooms.filter((r: any) => r.status === 'maintenance').length,
-          byType: {
-            single: rooms.filter((r: any) => r.type === 'single').length,
-            shared: rooms.filter((r: any) => r.type === 'shared').length,
-            apartment: rooms.filter((r: any) => r.type === 'apartment').length,
-            studio: rooms.filter((r: any) => r.type === 'studio').length
-          },
-          averagePrice: rooms.length > 0 ? rooms.reduce((sum: number, room: any) => sum + room.price, 0) / rooms.length : 0,
-          totalRevenue
-        };
+        const [userStatsData, roomStatsData] = await Promise.all([
+          userService.getUserStats(),
+          roomService.getRoomStats()
+        ]);
 
         setUserStats(userStatsData);
         setRoomStats(roomStatsData);

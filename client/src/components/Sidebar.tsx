@@ -62,8 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ sidebarOpen }) => {
       label: 'Đánh giá & Phản hồi', 
       icon: Star, 
       path: '/reviews',
-      active: false, 
-      disabled: true 
+      active: location.pathname === '/reviews'
     },
     { 
       id: 'contacts', 

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Home, MapPin, DollarSign, Users, Plus, Search, Filter, MoreVertical, Edit, Trash2, Eye, Calendar } from 'lucide-react';
+import { Home, MapPin, DollarSign, Users, Plus, Search, Edit, Trash2, Eye } from 'lucide-react';
 import { useToastContext } from '../../../contexts/ToastContext';
-import { roomService } from '../../../services/roomService';
 import type { Room, RoomStats } from '../../../types/room';
 import RoomModal from './RoomModal';
+import { roomService } from '../../../services/roomService';
+import RoomDetailModal from '../components/RoomDetailModal';
 
 const RoomManagement: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -20,6 +21,8 @@ const RoomManagement: React.FC = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedRoomId, setSelectedRoomId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState<Room['type'] | 'all'>('all');
   const [statusFilter, setStatusFilter] = useState<Room['status'] | 'all'>('all');
@@ -67,6 +70,11 @@ const RoomManagement: React.FC = () => {
   const handleEditRoom = (room: Room) => {
     setEditingRoom(room);
     setIsModalOpen(true);
+  };
+
+  const handleViewDetail = (roomId: number) => {
+    setSelectedRoomId(roomId);
+    setIsDetailModalOpen(true);
   };
 
   const handleSubmitRoom = async (roomData: any) => {
@@ -128,18 +136,20 @@ const RoomManagement: React.FC = () => {
     }
   };
 
-  const getStatusText = (status: Room['status']) => {
-    switch (status) {
-      case 'available':
-        return 'Còn trống';
-      case 'rented':
-        return 'Đã thuê';
-      case 'maintenance':
-        return 'Bảo trì';
-      default:
-        return 'Không xác định';
-    }
-  };
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const getStatusText = (status: Room['status']) => {
+  switch (status) {
+    case 'available':
+      return 'Còn trống';
+    case 'rented':
+      return 'Đã thuê';
+    case 'maintenance':
+      return 'Bảo trì';
+    default:
+      return 'Không xác định';
+  }
+};
+
 
   const getTypeText = (type: Room['type']) => {
     switch (type) {
@@ -357,7 +367,11 @@ const RoomManagement: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
-                      <button className="text-blue-600 hover:text-blue-900" title="Xem chi tiết">
+                      <button 
+                        onClick={() => handleViewDetail(room.id)}
+                        className="text-blue-600 hover:text-blue-900" 
+                        title="Xem chi tiết"
+                      >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
@@ -397,6 +411,15 @@ const RoomManagement: React.FC = () => {
         onSubmit={handleSubmitRoom}
         room={editingRoom}
         loading={modalLoading}
+      />
+
+      {/* Room Detail Modal */}
+      <RoomDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        roomId={selectedRoomId}
+        onEdit={handleEditRoom}
+        onDelete={handleDeleteRoom}
       />
     </div>
   );
