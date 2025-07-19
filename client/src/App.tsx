@@ -1,26 +1,29 @@
-import './App.css';
-import Header from './components/user/Header';
-import Footer from './components/user/Footer';
+import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import AdminLayout from './pages/layout/AdminLayout';
+import ClientLayout from './pages/layout/ClientLayout';
 import HomePage from './pages/user/HomePage';
 import PostDetail from './pages/user/PostDetail';
+import Dashboard from './pages/admin/Dashboard';
+import UserTable from './pages/admin/UserTable';
+import RoomManagement from './pages/admin/RoomManagement';
 
 function App() {
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      minHeight: '100vh'
-    }}>
-      <Header />
-      <main style={{ flex: 1 }}>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/posts/:id" element={<PostDetail />} />
-        </Routes>
-      </main>
-      <Footer />
-    </div>
+    <Routes>
+      {/* Client Layout */}
+      <Route element={<ClientLayout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/posts/:id" element={<PostDetail />} />
+      </Route>
+
+      {/* Admin Layout */}
+      <Route path="/admin" element={<AdminLayout />}>
+        <Route index element={<Dashboard />} />
+        <Route path="users" element={<UserTable />} />
+        <Route path="rooms" element={<RoomManagement />} />
+      </Route>
+    </Routes>
   );
 }
 
