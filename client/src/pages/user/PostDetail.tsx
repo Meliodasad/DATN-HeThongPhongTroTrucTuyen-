@@ -1,8 +1,10 @@
-import { useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import posts from '../../data/postsData';
 import '../../css/PostDetail.css'
+import ReportForm from '../../components/user/ReportForm';
+
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -46,27 +48,17 @@ const PostDetail = () => {
       </div>
 
       <div className="contact-box">
-        <div className="contact-header">
-          <img
-            src={post.author?.avatar}
-            alt="avatar"
-            className="avatar"
-          />
+        <Link to={`/user/${post.author.id}`} className="contact-header">
+          <img src={post.author.avatar} alt="avatar" className="avatar" />
           <div>
-            <h3>{post.author?.name}</h3>
-            <p className="sub-info">
-              {post.author?.status} • Tham gia từ: {post.author?.joinedDate}
-            </p>
+            <h3>{post.author.name}</h3>
+            <p className="sub-info">{post.author.status} • Tham gia từ: {post.author.joinedDate}</p>
           </div>
-        </div>
+        </Link>
 
-        <div className="contact-buttons">
-          <a href={`tel:${post.author?.phone}`} className="phone-button">
-            📞 {post.author?.phone}
-          </a>
-          <a href={post.author?.zalo} className="zalo-button" target="_blank" rel="noopener noreferrer">
-            💬 Nhắn Zalo
-          </a>
+        <div className="contact-info">
+          <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${post.author.phone}`}>{post.author.phone}</a></p>
+          <p><strong>💬 Zalo:</strong> <a href={post.author.zalo} target="_blank" rel="noopener noreferrer">Nhắn Zalo</a></p>
         </div>
 
         <div className="contact-actions">
@@ -74,6 +66,8 @@ const PostDetail = () => {
           <button className="action-button"> Chia sẻ</button>
           <button className="action-button"> Báo cáo</button>
         </div>
+
+        <ReportForm postId={post.id} />
       </div>
 
     </div>
