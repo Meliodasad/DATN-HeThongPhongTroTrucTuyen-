@@ -64,7 +64,7 @@ const PostDetail = () => {
           <button className="action-button"> Lưu tin</button>
           <button className="action-button"> Chia sẻ</button>
           <button className="action-button"> Báo cáo</button>
-        </div>
+        </div>~
 
         <ReportForm postId={post.id} />
       </div>
