@@ -3,7 +3,8 @@ import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import posts from '../../data/postsData';
 import '../../css/PostDetail.css'
-import ReportForm from '../../components/ReportForm';
+import ReportForm from '../../components/user/ReportForm';
+
 
 const PostDetail = () => {
   const { id } = useParams();
@@ -64,7 +65,7 @@ const PostDetail = () => {
           <button className="action-button"> Lưu tin</button>
           <button className="action-button"> Chia sẻ</button>
           <button className="action-button"> Báo cáo</button>
-        </div>~
+        </div>
 
         <ReportForm postId={post.id} />
       </div>
