@@ -34,6 +34,7 @@ const posts = [
     Liên hệ: 0938 864 405 để gặp Cường Phạm (phone/zalo), Để biết thêm thông tin chi tiết và xem nhà trong ngày. Thiện chí đón tiếp khách thuê 24/7.
         Xem phòng trực tiếp – chốt phòng nhanh – hỗ trợ nhiệt tình 24/7`,
         author: {
+            id: 'user1',
             name: 'Cường Phạm',
             phone: '0938864405',
             zalo: 'https://zalo.me/0938864405',
@@ -69,6 +70,7 @@ const posts = [
         - Địa chỉ 3: 43/3 Thành Thái, P14, Q.10.
         Liên hệ thuê phòng: 0938297275 Anh Việt`,
         author: {
+            id: 'user2',
             name: 'Anh Việt',
             phone: '0938297275',
             zalo: 'https://zalo.me/0938297275',
@@ -98,6 +100,7 @@ const posts = [
     Gần Aeon Mall, chợ Sơn Kỳ, siêu thị, thuận tiện di chuyển sang các quận trung tâm như Tân Bình, Gò Vấp.
     Điện 3.500đ/kWh, nước 100.000đ/người. Ưu tiên sinh viên, người đi làm. Có thể chuyển vào ở ngay.`,
         author: {
+            id: 'user3',
             name: 'Hồng Thu ',
             phone: '093829890',
             zalo: 'https://zalo.me/093829890',
@@ -127,6 +130,7 @@ const posts = [
     Gần nhiều tiện ích như trường học, chợ, Vinmart, quán ăn, trạm xe buýt. Phù hợp với sinh viên, người đi làm. 
     Internet tốc độ cao, miễn phí truyền hình cáp. Điện nước tính riêng theo giá nhà nước. Hỗ trợ dọn vào nhanh chóng.`,
         author: {
+            id: 'user4',
             name: 'Nguyễn Đăng Xin',
             phone: '093826523',
             zalo: 'https://zalo.me/093826523',
@@ -155,6 +159,7 @@ const posts = [
     Phù hợp sinh viên, người đi làm thu nhập trung bình.
     Giá cả hợp lý, hợp đồng lâu dài ổn định.`,
         author: {
+            id: 'user5',
             name: 'Thùy Linh',
             phone: '0938261353',
             zalo: 'https://zalo.me/0938261353',
@@ -183,6 +188,7 @@ const posts = [
     Cách công viên Gia Định chỉ 3 phút đi bộ. Có bảo vệ và camera 24/7.
     Phù hợp người đi làm, thuê ở lâu dài.`,
         author: {
+            id: 'user6',
             name: 'Trọng Khải',
             phone: '0938268421',
             zalo: 'https://zalo.me/0938268421',
@@ -231,6 +237,7 @@ GIÁ THUÊ:
 LH hotline: 0909814679 (Chị Ánh), 0909281128 (Chị Ly)
 Clip video phòng giá 6tr5`,
         author: {
+            id: 'user7',
             name: 'Trung Hiếu',
             phone: '0938268935',
             zalo: 'https://zalo.me/0938268935',

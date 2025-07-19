@@ -4,6 +4,8 @@ import Footer from './components/user/Footer';
 import { Routes, Route } from 'react-router-dom';
 import HomePage from './pages/user/HomePage';
 import PostDetail from './pages/user/PostDetail';
+import UserProfile from './pages/user/UserProfile';
+import EditProfile from './pages/user/EditProfile';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/posts/:id" element={<PostDetail />} />
+           <Route path="/user/:userId" element={<UserProfile />} />
+          <Route path="/edit-profile/:userId" element={<EditProfile />} />
         </Routes>
       </main>
       <Footer />
