@@ -3,7 +3,7 @@ import Header from "../src/pages/host/Header";
 import Footer from "../src/pages/host/Footer";
 import Profile from "../src/pages/host/Profile";
 import RoomStatus from "./pages/host/RoomStatus";
-// import RentalRequests from "./pages/host/RentalRequests";
+import RentalRequests from "./pages/host/RentalRequests";
 // import AssignTenant from "./pages/host/AssignTenant";
 // import TenantList from "./pages/host/TenantList";
 // import TerminateContract from "./pages/host/TerminateContract";
