@@ -13,17 +13,17 @@
     {
       "id": "1",
       "name": "Phòng 101",
-      "status": "trống"
+      "status": "Đã cho thuê"
     },
     {
       "id": "2",
       "name": "Phòng 102",
-      "status": "đã cho thuê"
+      "status": "Đang sửa chữa"
     },
     {
       "id": "3",
       "name": "Phòng 103",
-      "status": "đang sửa chữa"
+      "status": "Đã cho thuê"
     }
   ],
   "rentalRequests": [
