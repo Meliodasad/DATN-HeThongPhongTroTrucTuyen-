@@ -1,0 +1,103 @@
+{
+  "hosts": [
+    {
+      "id": "1",
+      "name": "Nguyễn Văn A",
+      "phone": "0909123456",
+      "email": "vana@gmail.con",
+      "avatar": "https://i.pravatar.cc/100?img=1",
+      "address": "123 Đường Lê Lợi, Quận 1, TP.HCM"
+    }
+  ],
+  "rooms": [
+    {
+      "id": "1",
+      "name": "Phòng 101",
+      "status": "trống"
+    },
+    {
+      "id": "2",
+      "name": "Phòng 102",
+      "status": "đã cho thuê"
+    },
+    {
+      "id": "3",
+      "name": "Phòng 103",
+      "status": "đang sửa chữa"
+    }
+  ],
+  "rentalRequests": [
+    {
+      "id": "1",
+      "tenantName": "Lê Thị B",
+      "phone": "0987654321",
+      "email": "btenant@example.com",
+      "desiredRoomId": 1,
+      "status": "chờ duyệt"
+    }
+  ],
+  "tenants": [
+    {
+      "id": "1",
+      "name": "Lê Thị B",
+      "phone": "0987654321",
+      "roomId": 2,
+      "startDate": "2024-05-01"
+    }
+  ],
+  "contracts": [
+    {
+      "id": "1",
+      "tenantId": 1,
+      "roomId": 2,
+      "startDate": "2024-05-01",
+      "endDate": "2025-05-01",
+      "deposit": 3000000,
+      "monthlyRent": 2500000,
+      "terms": "Không nuôi thú, không làm ồn"
+    }
+  ],
+  "invoices": [
+    {
+      "id": "1",
+      "contractId": 1,
+      "month": "2024-06",
+      "amount": 2500000,
+      "status": "chưa thanh toán"
+    },
+    {
+      "id": "2",
+      "contractId": 1,
+      "month": "2024-07",
+      "amount": 2500000,
+      "status": "đã thanh toán"
+    }
+  ],
+  "statistics": [
+    {
+      "id": "1",
+      "month": "2024-07",
+      "totalRevenue": 2500000,
+      "occupiedRooms": 1,
+      "emptyRooms": 1,
+      "waterFee": 150000,
+      "electricityFee": 200000
+    }
+  ],
+  "payments": [
+    {
+      "id": "1",
+      "invoiceId": 2,
+      "method": "Momo",
+      "paymentTime": "2024-07-10T10:00:00Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "1",
+      "channel": "Zalo",
+      "message": "Hóa đơn tháng 7 đã được tạo",
+      "sentAt": "2024-07-01T08:00:00Z"
+    }
+  ]
+}
