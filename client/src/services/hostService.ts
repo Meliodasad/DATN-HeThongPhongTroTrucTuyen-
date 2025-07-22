@@ -7,7 +7,9 @@ export const hostService = {
   getProfile: () => axios.get(`${API}/hosts/1`), //Lấy thông tin cá nhân (lấy phần tử đầu tiên trong hosts)
   updateProfile: (data: any) => axios.put(`${API}/hosts/1`, data),// 1.Cập nhật thông tin cá nhân
   
-  getRoomStatus: () => axios.get(`${API}/rooms/status`),// 2. Quản lý trạng thái phòng
+  getRooms: () => axios.get(`${API}/rooms`), //Lấy danh sách phòng
+  updateRoomStatus: (roomId: number, status: string) =>
+    axios.patch(`${API}/rooms/${roomId}`, { status }),        // 2. Quản lý trạng thái phòng
 
   approveRentalRequest: (id: string) => axios.post(`${API}/rental-requests/${id}/approve`),// 3. Duyệt yêu cầu thuê phòng
 

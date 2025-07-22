@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "../src/pages/host/Header";
 import Footer from "../src/pages/host/Footer";
 import Profile from "../src/pages/host/Profile";
-// import RoomStatus from "./pages/host/RoomStatus";
+import RoomStatus from "./pages/host/RoomStatus";
 // import RentalRequests from "./pages/host/RentalRequests";
 // import AssignTenant from "./pages/host/AssignTenant";
 // import TenantList from "./pages/host/TenantList";
@@ -26,7 +26,7 @@ function App() {
         <Routes>
           
           <Route path="/host/profile" element={<Profile />} />                                        {/* 1. Cập nhật thông tin cá nhân */}
-          {/* <Route path="/host/room-status" element={<RoomStatus />} />                                 {/* 2. Quản lý trạng thái phòng */} 
+          <Route path="/host/room-status" element={<RoomStatus />} />                                 {/* 2. Quản lý trạng thái phòng */} 
           {/* <Route path="/host/rental-requests" element={<RentalRequests />} />                         3. Duyệt yêu cầu thuê phòng */}
           {/* <Route path="/host/assign-tenant" element={<AssignTenant />} />                             4. Gắn người thuê vào phòng         */}
           {/* <Route path="/host/tenant-list" element={<TenantList />} />                                 5. Danh sách người thuê hiện tại   */}
