@@ -7,6 +7,8 @@ const Header = () => {
         <Link to="/host/profile">Thông tin cá nhân</Link>
         <Link to="/host/room-status">Trạng thái phòng</Link>
         <Link to="/host/rental-requests">Yêu cầu thuê</Link>
+        <Link to="/host/create-contract">Tạo hợp đồng</Link>
+        <Link to="/host/contracts">Hợp đồng</Link>
         <Link to="/host/tenant-list">DS người thuê</Link>
         <Link to="/host/contract-history">Hợp đồng</Link>
         <Link to="/host/revenue-stats">Thống kê</Link>

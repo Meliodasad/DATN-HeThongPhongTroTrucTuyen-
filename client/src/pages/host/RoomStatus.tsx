@@ -1,4 +1,5 @@
 // 📁 src/pages/host/RoomStatus.tsx
+// Trang quản lý trạng thái phòng của chủ nhà
 import { useEffect, useState } from "react";
 import { hostService } from "../../services/hostService";
 
@@ -67,6 +68,7 @@ const RoomStatus = () => {
                     <option value="Trống">Trống</option>
                     <option value="Đã cho thuê">Đã cho thuê</option>
                     <option value="Đang sửa chữa">Đang sửa chữa</option>
+                    
                   </select>
                 </td>
               </tr>

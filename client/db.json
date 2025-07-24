@@ -32,8 +32,16 @@
       "tenantName": "Lê Thị B",
       "phone": "0987654321",
       "email": "btenant@example.com",
-      "desiredRoomId": 1,
-      "status": "chờ duyệt"
+      "desiredRoomId": 102,
+      "status": "đã duyệt"
+    },
+    {
+      "id": "2",
+      "tenantName": "Nguyễn Văn A",
+      "phone": "0123456789",
+      "email": "atenant@example.com",
+      "desiredRoomId": 101,
+      "status": "đã duyệt"
     }
   ],
   "tenants": [
@@ -47,14 +55,24 @@
   ],
   "contracts": [
     {
-      "id": "1",
-      "tenantId": 1,
+      "id": 1,
+      "tenantName": "Lê Thị B",
+      "phone": "0987654321",
+      "roomId": 1,
+      "startDate": "2025-07-01",
+      "endDate": "2026-07-01",
+      "deposit": 1000000,
+      "terms": "Người thuê có trách nhiệm bảo vệ tài sản phòng trọ."
+    },
+    {
+      "id": 2,
+      "tenantName": "Nguyễn Văn A",
+      "phone": "0123456789",
       "roomId": 2,
-      "startDate": "2024-05-01",
-      "endDate": "2025-05-01",
-      "deposit": 3000000,
-      "monthlyRent": 2500000,
-      "terms": "Không nuôi thú, không làm ồn"
+      "startDate": "2025-06-01",
+      "endDate": "2026-06-01",
+      "deposit": 800000,
+      "terms": "Không nuôi thú cưng."
     }
   ],
   "invoices": [
