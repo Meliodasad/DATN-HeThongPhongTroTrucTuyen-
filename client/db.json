@@ -1,109 +1,364 @@
 {
-  "quan_tri_vien": [
+  "users": [
     {
-      "id": "1",
-      "ten_dang_nhap": "admin1",
-      "mat_khau": "admin123",
-      "ho_ten": "Quản trị viên 1"
-    }
-  ],
-  "nguoi_dung": [
-    {
-      "id": 1,
-      "name": "Nguyễn Văn A",
-      "email": "vana@gmail.com",
-      "role": "Chủ trọ",
-      "password": "123456",
-      "createdAt": "2025-07-01"
-    },
-    {
-      "id": 2,
-      "name": "Nguyễn Văn B",
-      "email": "vanb@gmail.com",
+      "name": "Nguyễn Văn A32131",
+      "email": "nguyenvana@example.com",
       "role": "Người dùng",
-      "password": "abc123",
-      "createdAt": "2025-07-02"
+      "status": "active",
+      "id": "1"
     },
     {
-      "id": 3,
-      "name": "Lê Văn C",
-      "email": "vanc@gmail.com",
-      "role": "Admin",
-      "password": "admin123",
-      "createdAt": "2025-07-03"
+      "name": "Trần Thị B",
+      "email": "tranthib@example.com",
+      "role": "Chủ trọ",
+      "status": "active",
+      "id": "2"
+    },
+    {
+      "name": "Phạm Thị Dung",
+      "email": "phamthid@example.com",
+      "role": "Người dùng",
+      "status": "active",
+      "id": "4"
+    },
+    {
+      "id": "5",
+      "name": "Hoàng Văn E",
+      "email": "hoangvane@example.com",
+      "role": "Chủ trọ",
+      "status": "active",
+      "createdAt": "2024-01-19",
+      "lastLogin": "2024-01-20"
+    },
+    {
+      "name": "4324532",
+      "email": "213@gmail.com",
+      "role": "Người dùng",
+      "status": "active",
+      "id": "1752649874245"
+    },
+    {
+      "id": 1752672367409,
+      "name": "214wqr4",
+      "email": "124e4@gmail.com",
+      "role": "Người dùng",
+      "status": "inactive",
+      "createdAt": "2025-07-16",
+      "lastLogin": "2025-07-16"
+    },
+    {
+      "id": 1752672588195,
+      "name": "14124",
+      "email": "xuantungbui1811@gmail.com",
+      "role": "Người dùng",
+      "status": "active",
+      "createdAt": "2025-07-16",
+      "lastLogin": "2025-07-16"
+    },
+    {
+      "name": "32132",
+      "email": "3213@gmail.com",
+      "role": "Người dùng",
+      "status": "active",
+      "id": "1752672846877"
     }
   ],
-  "phong_tro": [
+  "rooms": [
+    {
+      "title": "Phòng trọ cao cấp quận 133333333333333333333",
+      "description": "Phòng trọ cao cấp với đầy đủ tiện231321321 nghi, vị trí trung tâm3333333333333",
+      "address": "123 Nguyễn Huệ, Quận 1, TP.HCMq",
+      "price": 132,
+      "type": "single",
+      "status": "available",
+      "owner": "Nguyễn Văn A",
+      "ownerId": 2,
+      "area": 25,
+      "amenities": [
+        "Điều hòa",
+        "Tủ lạnh",
+        "Máy giặt",
+        "WiFi",
+        "Bảo vệ 24/7"
+      ],
+      "images": [
+        "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+      ],
+      "updatedAt": "2025-07-16",
+      "id": "1"
+    },
+    {
+      "title": "Phòng trọ sinh viên quận 3",
+      "description": "Phòng trọ dành cho sinh viên, giá cả phải chăng",
+      "address": "456 Võ Văn Tần, Quận 3, TP.HCM",
+      "price": 3000000,
+      "type": "shared",
+      "status": "available",
+      "owner": "Trần Thị B",
+      "ownerId": 3,
+      "area": 20,
+      "amenities": [
+        "WiFi",
+        "Máy giặt chung",
+        "Bếp chung",
+        "Thang Máy"
+      ],
+      "images": [
+        "https://images.pexels.com/photos/1571468/pexels-photo-1571468.jpeg"
+      ],
+      "updatedAt": "2025-07-16T13:23:26.535Z",
+      "id": "2"
+    },
+    {
+      "title": "Căn hộ mini quận 7",
+      "description": "Căn hộ mini hiện đại, view đẹp",
+      "address": "789 Nguyễn Thị Thập, Quận 7, TP.HCM2323",
+      "price": 8000000,
+      "type": "apartment",
+      "status": "available",
+      "owner": "Lê Văn C",
+      "ownerId": 4,
+      "area": 35,
+      "amenities": [
+        "Điều hòa",
+        "Tủ lạnh",
+        "Máy giặt",
+        "WiFi",
+        "Ban công",
+        "Thang máy"
+      ],
+      "images": [
+        "https://images.pexels.com/photos/1571471/pexels-photo-1571471.jpeg"
+      ],
+      "updatedAt": "2025-07-16T13:37:12.348Z",
+      "id": "3"
+    },
+    {
+      "id": "1752649857437",
+      "title": "5342",
+      "description": "re42533rew253431",
+      "address": "3r23413r2",
+      "price": 4,
+      "type": "shared",
+      "status": "available",
+      "owner": "453241342",
+      "ownerId": 1,
+      "area": 43,
+      "amenities": [],
+      "images": [],
+      "createdAt": "2025-07-16",
+      "updatedAt": "2025-07-16"
+    },
+    {
+      "id": "1752651107134",
+      "title": "3241",
+      "description": "333redeqr3e",
+      "address": "3412413124",
+      "price": 1232,
+      "type": "single",
+      "status": "rented",
+      "owner": "3241324",
+      "ownerId": 1,
+      "area": 0,
+      "amenities": [
+        "Thang Máy",
+        "Wifi"
+      ],
+      "images": [],
+      "createdAt": "2025-07-16",
+      "updatedAt": "2025-07-16"
+    },
+    {
+      "title": "3214132",
+      "description": "24t423142rtr314",
+      "address": "23152`1312313ttttt",
+      "price": 3223,
+      "type": "shared",
+      "status": "available",
+      "owner": "4132413",
+      "ownerId": 1,
+      "area": 1221321,
+      "amenities": [
+        "Wifi"
+      ],
+      "images": [],
+      "id": "1752651107135",
+      "updatedAt": "2025-07-16T13:24:18.432Z"
+    }
+  ],
+  "roomStats": {
+    "total": 6,
+    "available": 4,
+    "rented": 1,
+    "maintenance": 1
+  },
+  "comments": [
     {
       "id": "1",
-      "tieu_de": "Phòng trọ Gò Vấ222p, có gác lửng",
-      "dia_chi": "456 Quang Trung, Gò Vấp, TP.HCM",
-      "gia_thue": 1800000333,
-      "dien_tich": 18,
-      "mo_ta": "Phòng rộng rãi, khu an ninh",
-      "hinh_anh": [
-        "https://bandon.vn/resize/1000x700/a-c/zc-1/f/uploads/posts/thiet-ke-nha-tro-dep-2020-bandon-0.jpg"
+      "content": "Phòng rất sạch sẽ và thoáng mát. Chủ trọ thân thiện, giá cả hợp lý.",
+      "author": "Nguyễn Văn A",
+      "authorEmail": "nguyenvana@example.com",
+      "roomId": 1,
+      "roomTitle": "Phòng trọ cao cấp quận 1",
+      "createdAt": "2024-01-20",
+      "status": "approved",
+      "rating": 5,
+      "replies": [
+        {
+          "id": 1,
+          "content": "Cảm ơn bạn đã đánh giá tích cực! Chúng tôi sẽ tiếp tục duy trì chất lượng.",
+          "author": "Admin",
+          "authorEmail": "admin@system.com",
+          "createdAt": "2024-01-21",
+          "isAdmin": true
+        },
+        {
+          "id": 1752650391088,
+          "content": "sàqrewe",
+          "author": "Admin",
+          "authorEmail": "admin@system.com",
+          "isAdmin": true,
+          "createdAt": "2025-07-16"
+        }
+      ]
+    },
+    {
+      "id": "5",
+      "content": "Giá hơi cao so với chất lượng. Phòng nhỏ và không có ban công.",
+      "author": "Hoàng Văn E",
+      "authorEmail": "hoangvane@example.com",
+      "roomId": 1,
+      "roomTitle": "Studio quận 1",
+      "createdAt": "2024-01-16",
+      "status": "approved",
+      "rating": 3,
+      "replies": []
+    }
+  ],
+  "reviews": [
+    {
+      "id": "1",
+      "userId": 1,
+      "userName": "Nguyễn Văn A",
+      "userEmail": "nguyenvana@example.com",
+      "roomId": 1,
+      "roomTitle": "Phòng trọ cao cấp quận 1",
+      "rating": 5,
+      "title": "Phòng trọ tuyệt vời, rất hài lòng!",
+      "content": "Tôi đã ở đây được 6 tháng và cảm thấy rất hài lòng. Phòng sạch sẽ, thoáng mát, chủ trọ thân thiện. Vị trí thuận tiện gần trung tâm, đi làm rất dễ dàng.",
+      "pros": [
+        "Vị trí thuận tiện",
+        "Phòng sạch sẽ",
+        "Chủ trọ thân thiện",
+        "Giá cả hợp lý"
       ],
-      "trang_thai": "da_thue",
-      "chu_tro_id": 2
+      "cons": [
+        "Đôi khi hơi ồn vào buổi tối"
+      ],
+      "images": [
+        "https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg"
+      ],
+      "isVerified": true,
+      "isRecommended": true,
+      "helpfulCount": 12,
+      "createdAt": "2024-01-20",
+      "updatedAt": "2024-01-20",
+      "status": "approved",
+      "adminResponse": {
+        "content": "Cảm ơn bạn đã đánh giá tích cực! Chúng tôi sẽ tiếp tục cải thiện chất lượng dịch vụ.",
+        "respondedBy": "Admin",
+        "respondedAt": "2024-01-21"
+      }
+    },
+    {
+      "id": "2",
+      "userId": 2,
+      "userName": "Trần Thị B",
+      "userEmail": "tranthib@example.com",
+      "roomId": 2,
+      "roomTitle": "Phòng trọ sinh viên quận 3",
+      "rating": 4,
+      "title": "Phù hợp cho sinh viên",
+      "content": "Phòng khá ổn cho sinh viên như tôi. Giá cả phải chăng, gần trường học. Tuy nhiên có một số điểm cần cải thiện.",
+      "pros": [
+        "Giá rẻ",
+        "Gần trường học",
+        "Có WiFi"
+      ],
+      "cons": [
+        "Phòng hơi nhỏ",
+        "Thiết bị cũ"
+      ],
+      "images": [],
+      "isVerified": true,
+      "isRecommended": true,
+      "helpfulCount": 8,
+      "createdAt": "2024-01-19",
+      "updatedAt": "2024-01-19",
+      "status": "approved"
     },
     {
       "id": "4",
-      "tieu_de": "Phòng đẹp Bình Thạnh",
-      "dia_chi": "321 Bạch Đằng, Bình Thạnh, TP.HCM",
-      "gia_thue": 2600000,
-      "dien_tich": 19,
-      "mo_ta": "Gần bến xe miền Đông",
-      "hinh_anh": [
-        "https://kientructrangkim.com/wp-content/uploads/2022/11/thiet-ke-noi-that-phong-tro-19.jpg"
+      "userId": 4,
+      "userName": "Phạm Thị D",
+      "userEmail": "phamthid@example.com",
+      "roomId": 4,
+      "roomTitle": "Studio quận 2",
+      "rating": 5,
+      "title": "Studio tuyệt vời, rất đáng tiền!",
+      "content": "Căn studio này thực sự tuyệt vời! Thiết kế hiện đại, đầy đủ tiện nghi, view đẹp. An ninh tốt, có hồ bơi. Rất đáng tiền!",
+      "pros": [
+        "Thiết kế hiện đại",
+        "Đầy đủ tiện nghi",
+        "View đẹp",
+        "An ninh tốt",
+        "Có hồ bơi"
       ],
-      "trang_thai": "da_thue",
-      "chu_tro_id": 2
+      "cons": [],
+      "images": [
+        "https://images.pexels.com/photos/1571473/pexels-photo-1571473.jpeg"
+      ],
+      "isVerified": true,
+      "isRecommended": true,
+      "helpfulCount": 15,
+      "createdAt": "2024-01-17",
+      "updatedAt": "2024-01-17",
+      "status": "approved",
+      "adminResponse": {
+        "content": "Cảm ơn bạn đã lựa chọn và tin tưởng chúng tôi! Chúc bạn có những trải nghiệm tuyệt vời.",
+        "respondedBy": "Admin",
+        "respondedAt": "2024-01-18"
+      }
     },
     {
-      "id": "1752068966854",
-      "tieu_de": "Phòng trọ Gò Vấ222p, có gác lửng22222222",
-      "dia_chi": "Hà Nội",
-      "gia_thue": 222222222222,
-      "dien_tich": 3333,
-      "mo_ta": "sâfafa",
-      "hinh_anh": [
-        "https://s-housing.vn/wp-content/uploads/2022/09/thiet-ke-phong-tro-dep-54.jpg"
+      "id": "5",
+      "userName": "Hoàng Văn E",
+      "userEmail": "hoangvane@example.com",
+      "roomId": 1,
+      "roomTitle": "Phòng trọ cao cấp quận 1",
+      "rating": 3,
+      "title": "Tạm ổn nhưng giá hơi cao",
+      "content": "Phòng khá ổn, sạch sẽ nhưng giá hơi cao so với chất lượng. Dịch vụ bình thường.",
+      "pros": [
+        "Sạch sẽ",
+        "Vị trí tốt"
       ],
-      "trang_thai": "con_trong",
-      "chu_tro_id": 2
-    }
-  ],
-  "don_thue": [
-    {
-      "id": "1",
-      "phong_id": 1,
-      "nguoi_thue_id": 1,
-      "trang_thai": "cho_duyet",
-      "ngay_bat_dau": "2025-07-15",
-      "ngay_ket_thuc": "2025-12-15",
-      "ghi_chu": "Cần phòng cho sinh viên ở lâu dài"
-    }
-  ],
-  "danh_gia": [
-    {
-      "id": "1",
-      "phong_id": 2,
-      "nguoi_dung_id": 1,
-      "so_sao": 4,
-      "binh_luan": "Phòng sạch sẽ, chủ dễ thương",
-      "ngay_danh_gia": "2025-07-01"
-    }
-  ],
-  "khach_tham_quan": [
-    {
-      "id": "1",
-      "dia_chi_ip": "192.168.1.100",
-      "thoi_gian_truy_cap": "2025-07-09T09:00:00",
-      "phong_quan_tam": [
-        1,
-        2
-      ]
+      "cons": [
+        "Giá cao",
+        "Dịch vụ bình thường"
+      ],
+      "images": [],
+      "isVerified": true,
+      "isRecommended": false,
+      "helpfulCount": 2,
+      "createdAt": "2024-01-16",
+      "updatedAt": "2025-07-16",
+      "status": "rejected",
+      "adminResponse": {
+        "content": "321424",
+        "respondedBy": "Admin",
+        "respondedAt": "2025-07-16"
+      }
     }
   ]
 }

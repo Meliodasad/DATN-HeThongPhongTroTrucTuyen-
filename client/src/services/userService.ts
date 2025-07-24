@@ -1,88 +1,63 @@
+import { apiService } from './api';
 import type { User, UserFormData, UserStats } from '../types/user';
-import { mockUsers, delay } from '../utils/mockData';
 
 class UserService {
-  private users: User[] = [...mockUsers];
-
+  // Lấy tất cả người dùng
   async getUsers(): Promise<User[]> {
-    await delay(500); // Simulate network delay
-    return [...this.users].sort((a, b) => a.id - b.id);
+    return apiService.get<User[]>('/users');
   }
 
-  async getUserById(id: number): Promise<User | undefined> {
-    await delay(300);
-    return this.users.find(user => user.id === id);
+  // Lấy người dùng theo ID
+  async getUserById(id: number | string): Promise<User> {
+    return apiService.get<User>(`/users/${id}`);
   }
 
+  // Tạo người dùng mới
   async createUser(userData: UserFormData): Promise<User> {
-    await delay(600);
-    
     const newUser: User = {
-      id: Math.max(...this.users.map(u => u.id)) + 1,
       ...userData,
-      role: userData.role as User['role'],
+      id: Date.now(),
       createdAt: new Date().toISOString().split('T')[0],
       status: 'active',
-      avatar: `https://images.pexels.com/photos/${Math.floor(Math.random() * 1000000)}/pexels-photo-${Math.floor(Math.random() * 1000000)}.jpeg?auto=compress&cs=tinysrgb&w=400`
+      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${userData.name}`
     };
 
-    this.users.push(newUser);
-    return newUser;
+    return apiService.post<User>('/users', newUser);
   }
 
-  async updateUser(id: number, userData: Partial<UserFormData>): Promise<User> {
-    await delay(600);
-    
-    const userIndex = this.users.findIndex(user => user.id === id);
-    if (userIndex === -1) {
-      throw new Error('User not found');
-    }
-
-    this.users[userIndex] = {
-      ...this.users[userIndex],
-      ...userData,
-      role: userData.role as User['role'] || this.users[userIndex].role
-    };
-
-    return this.users[userIndex];
+  // Cập nhật thông tin người dùng
+  async updateUser(id: number | string, userData: Partial<UserFormData>): Promise<User> {
+    return apiService.patch<User>(`/users/${id}`, userData);
   }
 
-  async deleteUser(id: number): Promise<void> {
-    await delay(400);
-    
-    const userIndex = this.users.findIndex(user => user.id === id);
-    if (userIndex === -1) {
-      throw new Error('User not found');
-    }
-
-    this.users.splice(userIndex, 1);
+  // Xóa người dùng
+  async deleteUser(id: number | string): Promise<void> {
+    return apiService.delete<void>(`/users/${id}`);
   }
 
-  async toggleUserStatus(id: number): Promise<User> {
-    await delay(300);
-    
-    const userIndex = this.users.findIndex(user => user.id === id);
-    if (userIndex === -1) {
-      throw new Error('User not found');
-    }
-
-    this.users[userIndex].status = this.users[userIndex].status === 'active' ? 'inactive' : 'active';
-    return this.users[userIndex];
+  // Chuyển trạng thái active/inactive
+  async toggleUserStatus(id: number | string): Promise<User> {
+    const user = await this.getUserById(id);
+    const newStatus = user.status === 'active' ? 'inactive' : 'active';
+    return apiService.patch<User>(`/users/${id}`, { status: newStatus });
   }
 
+  // Thống kê người dùng
   async getUserStats(): Promise<UserStats> {
-    await delay(200);
-    
-    const total = this.users.length;
-    const active = this.users.filter(u => u.status === 'active').length;
-    const inactive = total - active;
-    
-    const byRole = this.users.reduce((acc, user) => {
-      acc[user.role] = (acc[user.role] || 0) + 1;
-      return acc;
-    }, {} as Record<User['role'], number>);
+    const users = await this.getUsers();
 
-    return { total, active, inactive, byRole };
+    const stats: UserStats = {
+      total: users.length,
+      active: users.filter(u => u.status === 'active').length,
+      inactive: users.filter(u => u.status === 'inactive').length,
+      byRole: {
+        Admin: users.filter(u => u.role === 'Admin').length,
+        'Chủ trọ': users.filter(u => u.role === 'Chủ trọ').length,
+        'Người dùng': users.filter(u => u.role === 'Người dùng').length
+      }
+    };
+
+    return stats;
   }
 }
 

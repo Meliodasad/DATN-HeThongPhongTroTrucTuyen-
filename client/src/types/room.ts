@@ -1,4 +1,5 @@
 export interface Room {
+<<<<<<< HEAD
   id: number;
   title: string;
   description: string;
@@ -25,11 +26,37 @@ export interface Room {
   parkingIncluded: boolean;
   petAllowed: boolean;
 }
+=======
+  id: string;
+  title: string;
+  description?: string;
+  price: number;
+  area: number;
+  address: string;
+  type: 'single' | 'shared' | 'apartment' | 'studio';
+  status: 'available' | 'rented' | 'maintenance' | 'pending' | 'rejected';
+  amenities?: string[];
+  images?: string[];
+  owner: string;
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  rating?: number;
+  approved?: boolean;
+  approvedBy?: string;
+  approvedAt?: string;
+  rejectionReason?: string;
+   pending: number;
+  rejected: number;
+}
+ 
+>>>>>>> xuan-tung
 
 export interface RoomFormData {
   title: string;
   description: string;
   address: string;
+<<<<<<< HEAD
   district: string;
   city: string;
   price: number;
@@ -56,6 +83,16 @@ export interface RoomFormErrors {
   price?: string;
   area?: string;
   maxOccupants?: string;
+=======
+  price: number;
+  type: 'single' | 'shared' | 'apartment' | 'studio';
+  status: 'available' | 'rented' | 'maintenance';
+  owner: string;
+  ownerId: number;
+  area: number;
+  amenities: string[];
+  images: string[];
+>>>>>>> xuan-tung
 }
 
 export interface RoomStats {
@@ -63,6 +100,7 @@ export interface RoomStats {
   available: number;
   rented: number;
   maintenance: number;
+<<<<<<< HEAD
   byType: Record<Room['roomType'], number>;
   averagePrice: number;
   totalRevenue: number;
@@ -77,4 +115,14 @@ export interface RoomFilters {
   maxPrice: number;
   minArea: number;
   maxArea: number;
+=======
+  byType: {
+    single: number;
+    shared: number;
+    apartment: number;
+    studio: number;
+  };
+  averagePrice: number;
+  totalRevenue: number;
+>>>>>>> xuan-tung
 }

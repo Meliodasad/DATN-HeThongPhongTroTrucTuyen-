@@ -1,133 +1,165 @@
 import type { Room, RoomFormData, RoomStats } from '../types/room';
-import { mockRooms, delay } from '../utils/roomMockData';
 
-class RoomService {
-  private rooms: Room[] = [...mockRooms];
+const API_BASE_URL = 'http://localhost:3000';
 
+export const roomService = {
   async getRooms(): Promise<Room[]> {
-    await delay(500);
-    return [...this.rooms].sort((a, b) => b.id - a.id);
-  }
+    try {
+      const response = await fetch(`${API_BASE_URL}/rooms`);
+      if (!response.ok) throw new Error('Failed to fetch rooms');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      throw error;
+    }
+  },
 
-  async getRoomById(id: number): Promise<Room | undefined> {
-    await delay(300);
-    return this.rooms.find(room => room.id === id);
-  }
+  async getRoomById(id: string | number): Promise<Room> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/rooms/${id}`);
+      if (!response.ok) throw new Error('Failed to fetch room');
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching room:', error);
+      throw error;
+    }
+  },
 
   async createRoom(roomData: RoomFormData): Promise<Room> {
-    await delay(600);
-    
-    const newRoom: Room = {
-      id: Math.max(...this.rooms.map(r => r.id)) + 1,
-      ...roomData,
-      roomType: roomData.roomType as Room['roomType'],
-      status: 'available',
-      createdAt: new Date().toISOString().split('T')[0],
-      updatedAt: new Date().toISOString().split('T')[0],
-      landlordName: this.getLandlordName(roomData.landlordId),
-      landlordPhone: this.getLandlordPhone(roomData.landlordId),
-      landlordEmail: this.getLandlordEmail(roomData.landlordId)
-    };
+    try {
+      const now = new Date().toISOString();
+      const newRoom: Room = {
+        ...roomData,
+        id: Date.now(),
+        createdAt: now,
+        updatedAt: now,
+        status: 'pending',
+        approved: false,
+      };
 
-    this.rooms.push(newRoom);
-    return newRoom;
-  }
+      const response = await fetch(`${API_BASE_URL}/rooms`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRoom),
+      });
 
-  async updateRoom(id: number, roomData: Partial<RoomFormData>): Promise<Room> {
-    await delay(600);
-    
-    const roomIndex = this.rooms.findIndex(room => room.id === id);
-    if (roomIndex === -1) {
-      throw new Error('Room not found');
+      if (!response.ok) throw new Error('Failed to create room');
+      return await response.json();
+    } catch (error) {
+      console.error('Error creating room:', error);
+      throw error;
     }
+  },
 
-    this.rooms[roomIndex] = {
-      ...this.rooms[roomIndex],
-      ...roomData,
-      roomType: roomData.roomType as Room['roomType'] || this.rooms[roomIndex].roomType,
-      updatedAt: new Date().toISOString().split('T')[0],
-      landlordName: roomData.landlordId ? this.getLandlordName(roomData.landlordId) : this.rooms[roomIndex].landlordName,
-      landlordPhone: roomData.landlordId ? this.getLandlordPhone(roomData.landlordId) : this.rooms[roomIndex].landlordPhone,
-      landlordEmail: roomData.landlordId ? this.getLandlordEmail(roomData.landlordId) : this.rooms[roomIndex].landlordEmail
-    };
+  async updateRoom(id: string | number, roomData: Partial<RoomFormData>): Promise<Room> {
+    try {
+      const updatedRoom = {
+        ...roomData,
+        updatedAt: new Date().toISOString(),
+      };
 
-    return this.rooms[roomIndex];
-  }
+      const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedRoom),
+      });
 
-  async deleteRoom(id: number): Promise<void> {
-    await delay(400);
-    
-    const roomIndex = this.rooms.findIndex(room => room.id === id);
-    if (roomIndex === -1) {
-      throw new Error('Room not found');
+      if (!response.ok) throw new Error('Failed to update room');
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating room:', error);
+      throw error;
     }
+  },
 
-    this.rooms.splice(roomIndex, 1);
-  }
+  async deleteRoom(id: string | number): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/rooms/${id}`, {
+        method: 'DELETE',
+      });
 
-  async updateRoomStatus(id: number, status: Room['status']): Promise<Room> {
-    await delay(300);
-    
-    const roomIndex = this.rooms.findIndex(room => room.id === id);
-    if (roomIndex === -1) {
-      throw new Error('Room not found');
+      if (!response.ok) throw new Error('Failed to delete room');
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      throw error;
     }
+  },
 
-    this.rooms[roomIndex].status = status;
-    this.rooms[roomIndex].updatedAt = new Date().toISOString().split('T')[0];
-    return this.rooms[roomIndex];
-  }
+  async approveRoom(id: string | number, approvedBy: string): Promise<Room> {
+    try {
+      const room = await this.getRoomById(id);
+      const updatedRoom = {
+        ...room,
+        status: 'available' as Room['status'],
+        approved: true,
+        approvedBy,
+        approvedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return await this.updateRoom(id, updatedRoom);
+    } catch (error) {
+      console.error('Error approving room:', error);
+      throw error;
+    }
+  },
+
+  async rejectRoom(id: string | number, rejectionReason: string, rejectedBy: string): Promise<Room> {
+    try {
+      const room = await this.getRoomById(id);
+      const updatedRoom = {
+        ...room,
+        status: 'rejected' as Room['status'],
+        approved: false,
+        rejectionReason,
+        approvedBy: rejectedBy,
+        approvedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      return await this.updateRoom(id, updatedRoom);
+    } catch (error) {
+      console.error('Error rejecting room:', error);
+      throw error;
+    }
+  },
+
+  async updateRoomStatus(id: string | number, status: Room['status']): Promise<Room> {
+    try {
+      const room = await this.getRoomById(id);
+      return await this.updateRoom(id, { ...room, status });
+    } catch (error) {
+      console.error('Error updating room status:', error);
+      throw error;
+    }
+  },
 
   async getRoomStats(): Promise<RoomStats> {
-    await delay(200);
-    
-    const total = this.rooms.length;
-    const available = this.rooms.filter(r => r.status === 'available').length;
-    const rented = this.rooms.filter(r => r.status === 'rented').length;
-    const maintenance = this.rooms.filter(r => r.status === 'maintenance').length;
-    
-    const byType = this.rooms.reduce((acc, room) => {
-      acc[room.roomType] = (acc[room.roomType] || 0) + 1;
-      return acc;
-    }, {} as Record<Room['roomType'], number>);
+    try {
+      const rooms = await this.getRooms();
 
-    const averagePrice = this.rooms.length > 0 
-      ? Math.round(this.rooms.reduce((sum, room) => sum + room.price, 0) / this.rooms.length)
-      : 0;
+      const total = rooms.length;
+      const available = rooms.filter(r => r.status === 'available').length;
+      const rented = rooms.filter(r => r.status === 'rented').length;
+      const maintenance = rooms.filter(r => r.status === 'maintenance').length;
+      const byType = rooms.reduce((acc, room) => {
+        const type = room.type || 'unknown';
+        acc[type] = (acc[type] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
 
-    const totalRevenue = this.rooms
-      .filter(room => room.status === 'rented')
-      .reduce((sum, room) => sum + room.price, 0);
+      const averagePrice = rooms.length > 0
+        ? Math.round(rooms.reduce((sum, r) => sum + r.price, 0) / rooms.length)
+        : 0;
 
-    return { total, available, rented, maintenance, byType, averagePrice, totalRevenue };
+      const totalRevenue = rooms
+        .filter(r => r.status === 'rented')
+        .reduce((sum, r) => sum + r.price, 0);
+
+      return { total, available, rented, maintenance, byType, averagePrice, totalRevenue };
+    } catch (error) {
+      console.error('Error getting room stats:', error);
+      throw error;
+    }
   }
-
-  private getLandlordName(landlordId: number): string {
-    const landlords: { [key: number]: string } = {
-      1: 'Nguyễn Văn Admin',
-      2: 'Trần Thị Lan',
-      4: 'Phạm Thị Hoa'
-    };
-    return landlords[landlordId] || 'Chưa xác định';
-  }
-
-  private getLandlordPhone(landlordId: number): string {
-    const phones: { [key: number]: string } = {
-      1: '0900000000',
-      2: '0901234567',
-      4: '0912345678'
-    };
-    return phones[landlordId] || '0000000000';
-  }
-
-  private getLandlordEmail(landlordId: number): string {
-    const emails: { [key: number]: string } = {
-      1: 'admin@example.com',
-      2: 'lan.tran@example.com',
-      4: 'hoa.pham@example.com'
-    };
-    return emails[landlordId] || 'unknown@example.com';
-  }
-}
-
-export const roomService = new RoomService();
+};
