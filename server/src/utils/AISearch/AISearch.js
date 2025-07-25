@@ -4,7 +4,7 @@ const genAI = new GoogleGenerativeAI('AIzaSyCYw6RqNcWwjtG9bjONG2P9nGI8RE0D4m8');
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 const modelPost = require('../../models/post.model');
-// m
+// mccccccscsc
 async function AiSearchKeyword(question) {
     try {
         const prompt = `
