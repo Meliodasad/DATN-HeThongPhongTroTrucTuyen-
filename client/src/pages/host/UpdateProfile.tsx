@@ -1,10 +1,11 @@
 // 📁 src/pages/host/UpdateProfile.tsx
 // Trang cập nhật thông tin cá nhân của chủ nhà
+// 📁 src/pages/host/UpdateProfile.tsx
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Thêm dòng này
 import { hostService } from "../../services/hostService";
-import { useNavigate } from "react-router-dom";
 
-const UpdateProfile = () => {
+const UpdateProfile = ({ closeModal }: { closeModal?: () => void }) => {
   const [profile, setProfile] = useState({
     name: "",
     phone: "",
@@ -12,9 +13,8 @@ const UpdateProfile = () => {
     avatar: "",
     address: ""
   });
-
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Thêm dòng này
 
   useEffect(() => {
     setLoading(true);
@@ -28,86 +28,98 @@ const UpdateProfile = () => {
     hostService.updateProfile(profile)
       .then(() => {
         alert("✅ Cập nhật thành công!");
-        navigate("/host/profile");
-    })
+        if (closeModal) {
+          closeModal();
+        } else {
+          navigate("/host/profile"); // Nếu không có closeModal thì chuyển hướng
+        }
+      })
       .catch(() => alert("❌ Cập nhật thất bại!"))
       .finally(() => setLoading(false));
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-2xl shadow-xl">
-      <h2 className="text-2xl font-bold mb-6 text-center text-indigo-600">
-        🧑‍💼 Cập nhật thông tin cá nhân
+    <div className="p-6 bg-white rounded-xl shadow-lg w-full max-w-lg">
+      <h2 className="text-xl font-bold mb-4 text-center text-indigo-600">
+        🧑‍💼 Cập nhật thông tin
       </h2>
 
       <div className="flex flex-col gap-4">
-        <label className="flex flex-col">
-          <span className="text-gray-700 font-medium">Họ tên:</span>
+        <label>
+          <span className="text-sm text-gray-700 font-medium">Họ tên:</span>
           <input
             type="text"
             value={profile.name}
             onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-2 border rounded-md"
           />
         </label>
 
-        <label className="flex flex-col">
-          <span className="text-gray-700 font-medium">Số điện thoại:</span>
+        <label>
+          <span className="text-sm text-gray-700 font-medium">Số điện thoại:</span>
           <input
             type="text"
             value={profile.phone}
             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-2 border rounded-md"
           />
         </label>
 
-        <label className="flex flex-col">
-          <span className="text-gray-700 font-medium">Email:</span>
+        <label>
+          <span className="text-sm text-gray-700 font-medium">Email:</span>
           <input
             type="email"
             value={profile.email}
             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-2 border rounded-md"
           />
         </label>
 
-        <label className="flex flex-col">
-          <span className="text-gray-700 font-medium">Ảnh đại diện (URL):</span>
+        <label>
+          <span className="text-sm text-gray-700 font-medium">Ảnh đại diện (URL):</span>
           <input
             type="text"
             value={profile.avatar}
             onChange={(e) => setProfile({ ...profile, avatar: e.target.value })}
-            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-2 border rounded-md"
           />
         </label>
 
         {profile.avatar && (
-          <div className="flex justify-center">
-            <img
-              src={profile.avatar}
-              alt="avatar"
-              className="w-24 h-24 rounded-full object-cover border-2 border-indigo-300"
-            />
-          </div>
+          <img
+            src={profile.avatar}
+            alt="avatar"
+            className="w-20 h-20 mx-auto rounded-full object-cover border"
+          />
         )}
 
-        <label className="flex flex-col">
-          <span className="text-gray-700 font-medium">Địa chỉ:</span>
+        <label>
+          <span className="text-sm text-gray-700 font-medium">Địa chỉ:</span>
           <input
             type="text"
             value={profile.address}
             onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-            className="p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-400"
+            className="w-full p-2 border rounded-md"
           />
         </label>
 
-        <button
-          onClick={handleUpdate}
-          disabled={loading}
-          className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-4 rounded-lg transition-all disabled:opacity-50"
-        >
-          {loading ? "🔄 Đang lưu..." : "💾 Lưu thông tin"}
-        </button>
+        <div className="flex justify-between mt-4">
+          {closeModal && (
+            <button
+              onClick={closeModal}
+              className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400"
+            >
+              ❌ Hủy
+            </button>
+          )}
+          <button
+            onClick={handleUpdate}
+            disabled={loading}
+            className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+          >
+            {loading ? "🔄 Đang lưu..." : "💾 Lưu"}
+          </button>
+        </div>
       </div>
     </div>
   );

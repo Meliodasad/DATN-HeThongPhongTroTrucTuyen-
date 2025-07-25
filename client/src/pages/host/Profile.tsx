@@ -1,8 +1,10 @@
 // 📁 src/pages/host/Profile.tsx
 // Trang thông tin cá nhân của chủ nhà
+// 📁 src/pages/host/Profile.tsx
 import { useEffect, useState } from "react";
 import { hostService } from "../../services/hostService";
-import { useNavigate } from "react-router-dom";
+import UpdateProfile from "./UpdateProfile"; // 👈 Import component modal
+import Modal from "../../components/Modal"; // 👈 Modal bạn cần có sẵn (hoặc tạo modal riêng)
 
 const Profile = () => {
   const [profile, setProfile] = useState({
@@ -12,9 +14,8 @@ const Profile = () => {
     avatar: "",
     address: "",
   });
-
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [openModal, setOpenModal] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -51,12 +52,18 @@ const Profile = () => {
 
       <div className="text-center mt-8">
         <button
-          onClick={() => navigate("/host/update-profile")}
+          onClick={() => setOpenModal(true)}
           className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
         >
           ✏️ Chỉnh sửa thông tin
         </button>
       </div>
+
+      {openModal && (
+        <Modal onClose={() => setOpenModal(false)}>
+          <UpdateProfile closeModal={() => setOpenModal(false)} />
+        </Modal>
+      )}
     </div>
   );
 };
