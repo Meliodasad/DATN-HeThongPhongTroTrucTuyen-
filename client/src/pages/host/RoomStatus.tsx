@@ -3,21 +3,21 @@
 import { useEffect, useState } from "react";
 import { hostService } from "../../services/hostService";
 
-interface Room {
+interface RoomStatus {
   id: number;
   name: string;
   status: string;
 }
 
 const RoomStatus = () => {
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomStatus, setRoomStatus] = useState<RoomStatus[]>([]);
   const [loading, setLoading] = useState(false);
 
   const fetchRooms = () => {
     setLoading(true);
     hostService
-      .getRooms()
-      .then((res) => setRooms(res.data))
+      .getRoomStatus()
+      .then((res) => setRoomStatus(res.data))
       .finally(() => setLoading(false));
   };
 
@@ -29,7 +29,7 @@ const RoomStatus = () => {
     hostService
       .updateRoomStatus(roomId, newStatus)
       .then(() => {
-        setRooms((prev) =>
+        setRoomStatus((prev) =>
           prev.map((room) =>
             room.id === roomId ? { ...room, status: newStatus } : room
           )
@@ -60,7 +60,7 @@ const RoomStatus = () => {
               </tr>
             </thead>
             <tbody>
-              {rooms.map((room) => (
+              {roomStatus.map((room) => (
                 <tr key={room.id} className="border-t hover:bg-gray-50">
                   <td className="p-3 font-medium">{room.name}</td>
                   <td className="p-3 text-gray-600">{room.status}</td>

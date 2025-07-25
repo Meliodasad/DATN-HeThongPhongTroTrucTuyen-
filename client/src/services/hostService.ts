@@ -9,9 +9,9 @@ export const hostService = {
   updateProfile: (data: any) => axios.put(`${API}/hosts/1`, data),
   
   // 2. Quản lý trạng thái phòng
-  getRooms: () => axios.get(`${API}/rooms`), //Lấy danh sách phòng
+  getRoomStatus: () => axios.get(`${API}/roomStatus`), //Lấy danh sách phòng
   updateRoomStatus: (roomId: number, status: string) =>
-    axios.patch(`${API}/rooms/${roomId}`, { status }),        
+    axios.patch(`${API}/roomStatus/${roomId}`, { status }),        
 
   // 3. Duyệt yêu cầu thuê phòng
   getRentalRequests: () => axios.get(`${API}/rentalRequests`),
@@ -30,4 +30,13 @@ export const hostService = {
   // Xem chi tiết hợp đồng
   getContractById: (id: string) => axios.get(`${API}/contracts/${id}`),
   deleteContract: (id: number) => axios.delete(`${API}/contracts/${id}`),
+
+  // Tạo phòng mới
+  createRoom: (data: any) => axios.post(`${API}/rooms`, data),
+  getRooms: () => axios.get(`${API}/rooms`), // Lấy danh sách phòng
+  deleteRoom: (id: number) => axios.delete(`${API}/rooms/${id}`), // Xóa phòng
+
+  // Sửa thông tin phòng
+  getRoomById: (id: number) => axios.get(`${API}/rooms/${id}`),
+  updateRoom: (id: number, data: any) => axios.put(`${API}/rooms/${id}`, data),
 };

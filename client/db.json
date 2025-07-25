@@ -9,7 +9,7 @@
       "address": "123 Đường Lê Lợi, Quận 1, TP.HCM"
     }
   ],
-  "rooms": [
+  "roomStatus": [
     {
       "id": "1",
       "name": "Phòng 101",
@@ -23,7 +23,7 @@
     {
       "id": "3",
       "name": "Phòng 103",
-      "status": "Đã cho thuê"
+      "status": "Đang sửa chữa"
     }
   ],
   "rentalRequests": [
@@ -63,7 +63,7 @@
   ],
   "contracts": [
     {
-      "id": 1,
+      "id": "1",
       "tenantName": "Lê Thị B",
       "phone": "0987654321",
       "roomId": 1,
@@ -73,7 +73,7 @@
       "terms": "Người thuê có trách nhiệm bảo vệ tài sản phòng trọ."
     },
     {
-      "id": 2,
+      "id": "2",
       "tenantName": "Nguyễn Văn A",
       "phone": "0123456789",
       "roomId": 2,
@@ -81,6 +81,26 @@
       "endDate": "2026-06-01",
       "deposit": 800000,
       "terms": "Không nuôi thú cưng."
+    }
+  ],
+  "rooms": [
+    {
+      "id": "1",
+      "code": "P101",
+      "area": 25,
+      "price": "2999998",
+      "utilities": "Máy lạnh, Wifi, Máy giặt",
+      "maxPeople": 3,
+      "image": "https://images.unsplash.com/photo-1600585154340-be6161a56a0c",
+      "description": "Phòng mới xây, sạch sẽ, có cửa sổ lớn thoáng mát,đẹp.",
+      "location": "Lầu 1, Số 10 Nguyễn Văn Bảo, Gò Vấp",
+      "deposit": "1 tháng tiền phòng",
+      "electricity": "3.500",
+      "tenant": {
+        "name": "Nguyễn Văn A",
+        "phone": "0909123456",
+        "avatar": "https://i.pravatar.cc/100?img=1"
+      }
     }
   ]
 }

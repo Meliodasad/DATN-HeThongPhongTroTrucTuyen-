@@ -6,6 +6,7 @@ const Header = () => {
 
   const navItems = [
     { path: "/host/profile", label: "Thông tin cá nhân" },
+    { path: "/host/room-list", label: "Danh sách phòng của tôi" },
     { path: "/host/room-status", label: "Trạng thái phòng" },
     { path: "/host/rental-requests", label: "Yêu cầu thuê" },
     { path: "/host/create-contract", label: "Tạo hợp đồng" },
