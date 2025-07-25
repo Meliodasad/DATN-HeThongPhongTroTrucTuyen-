@@ -1,4 +1,5 @@
-// TRANG DUYỆT VÀ TỪ CHỐI YÊU CẦU THUÊ PHÒNG
+// 📁 src/pages/host/RentalRequests.tsx
+// TRANG DUYỆT YÊU CẦU THUÊ PHÒNG
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { hostService } from "../../services/hostService";
@@ -24,10 +25,8 @@ const RentalRequests = () => {
     const confirm = window.confirm("Bạn có chắc muốn duyệt và tạo hợp đồng?");
     if (!confirm) return;
 
-    // Cập nhật trạng thái yêu cầu
     hostService.approveRentalRequest(req.id).then(() => {
       alert("Đã duyệt yêu cầu. Chuyển sang trang tạo hợp đồng.");
-      // Điều hướng tới trang tạo hợp đồng và truyền dữ liệu qua state
       navigate("/host/create-contract", {
         state: {
           tenantName: req.tenantName,
@@ -49,46 +48,59 @@ const RentalRequests = () => {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>📄 Yêu cầu thuê phòng</h2>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold text-indigo-600 mb-6 text-center">📄 Yêu cầu thuê phòng</h2>
+
       {loading ? (
-        <p>Đang tải dữ liệu...</p>
+        <p className="text-center text-gray-500">Đang tải dữ liệu...</p>
       ) : requests.length === 0 ? (
-        <p>Không có yêu cầu nào.</p>
+        <p className="text-center text-gray-400">Không có yêu cầu nào.</p>
       ) : (
-        <table border={1} cellPadding={10} style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead>
-            <tr>
-              <th>👤 Họ tên</th>
-              <th>📞 SĐT</th>
-              <th>✉️ Email</th>
-              <th>🏠 Phòng muốn thuê</th>
-              <th>📌 Trạng thái</th>
-              <th>⚙️ Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {requests.map((req) => (
-              <tr key={req.id}>
-                <td>{req.tenantName}</td>
-                <td>{req.phone}</td>
-                <td>{req.email}</td>
-                <td>{req.desiredRoomId}</td>
-                <td>{req.status}</td>
-                <td>
-                  {req.status === "chờ duyệt" ? (
-                    <>
-                      <button onClick={() => handleApprove(req)}>✅ Duyệt</button>{" "}
-                      <button onClick={() => handleReject(req.id)}>❌ Từ chối</button>
-                    </>
-                  ) : (
-                    <em>{req.status}</em>
-                  )}
-                </td>
+        <div className="overflow-x-auto shadow-md rounded-lg">
+          <table className="min-w-full bg-white border border-gray-200">
+            <thead className="bg-indigo-100 text-indigo-700 text-sm">
+              <tr>
+                <th className="p-3 text-left">👤 Họ tên</th>
+                <th className="p-3 text-left">📞 SĐT</th>
+                <th className="p-3 text-left">✉️ Email</th>
+                <th className="p-3 text-left">🏠 Phòng muốn thuê</th>
+                <th className="p-3 text-left">📌 Trạng thái</th>
+                <th className="p-3 text-center">⚙️ Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {requests.map((req) => (
+                <tr key={req.id} className="border-t hover:bg-gray-50">
+                  <td className="p-3">{req.tenantName}</td>
+                  <td className="p-3">{req.phone}</td>
+                  <td className="p-3">{req.email}</td>
+                  <td className="p-3">{req.desiredRoomId}</td>
+                  <td className="p-3 capitalize">{req.status}</td>
+                  <td className="p-3 text-center">
+                    {req.status === "chờ duyệt" ? (
+                      <div className="space-x-2">
+                        <button
+                          onClick={() => handleApprove(req)}
+                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm"
+                        >
+                          ✅ Duyệt
+                        </button>
+                        <button
+                          onClick={() => handleReject(req.id)}
+                          className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm"
+                        >
+                          ❌ Từ chối
+                        </button>
+                      </div>
+                    ) : (
+                      <span className="italic text-gray-500">{req.status}</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

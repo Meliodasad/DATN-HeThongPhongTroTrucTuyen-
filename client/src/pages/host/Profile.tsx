@@ -1,7 +1,8 @@
 // 📁 src/pages/host/Profile.tsx
-// Trang cập nhật thông tin cá nhân của chủ nhà
+// Trang thông tin cá nhân của chủ nhà
 import { useEffect, useState } from "react";
 import { hostService } from "../../services/hostService";
+import { useNavigate } from "react-router-dom";
 
 const Profile = () => {
   const [profile, setProfile] = useState({
@@ -9,79 +10,51 @@ const Profile = () => {
     phone: "",
     email: "",
     avatar: "",
-    address: ""
+    address: "",
   });
 
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (hostService.getProfile) {
-      setLoading(true);
-      hostService.getProfile()
-        .then((res) => setProfile(res.data))
-        .finally(() => setLoading(false));
-    }
+    setLoading(true);
+    hostService
+      .getProfile()
+      .then((res) => setProfile(res.data))
+      .finally(() => setLoading(false));
   }, []);
 
-  const handleUpdate = () => {
-    setLoading(true);
-    hostService.updateProfile(profile)
-      .then(() => alert("Cập nhật thành công!"))
-      .catch(() => alert("Cập nhật thất bại!"))
-      .finally(() => setLoading(false));
-  };
+  if (loading) {
+    return <p className="text-center mt-10">Đang tải thông tin...</p>;
+  }
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto" }}>
-      <h2 style={{ marginBottom: 20 }}>Cập nhật thông tin cá nhân</h2>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <label>
-          Họ tên:
-          <input
-            type="text"
-            value={profile.name}
-            onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-          />
-        </label>
+    <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md mt-6">
+      <h2 className="text-2xl font-bold text-indigo-700 text-center mb-6">
+        Thông tin cá nhân
+      </h2>
 
-        <label>
-          Số điện thoại:
-          <input
-            type="text"
-            value={profile.phone}
-            onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-          />
-        </label>
+      <div className="flex justify-center mb-6">
+        <img
+          src={profile.avatar}
+          alt="Avatar"
+          className="w-24 h-24 rounded-full border-4 border-indigo-500 object-cover"
+        />
+      </div>
 
-        <label>
-          Email:
-          <input
-            type="email"
-            value={profile.email}
-            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-          />
-        </label>
+      <div className="space-y-4 text-gray-700 text-base">
+        <p><strong>👤 Họ tên:</strong> {profile.name}</p>
+        <p><strong>📞 Số điện thoại:</strong> {profile.phone}</p>
+        <p><strong>✉️ Email:</strong> {profile.email}</p>
+        <p><strong>📍 Địa chỉ:</strong> {profile.address}</p>
+      </div>
 
-        <label>
-          Ảnh đại diện (URL):
-          <input
-            type="text"
-            value={profile.avatar}
-            onChange={(e) => setProfile({ ...profile, avatar: e.target.value })}
-          />
-        </label>
-
-        <label>
-          Địa chỉ:
-          <input
-            type="text"
-            value={profile.address}
-            onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-          />
-        </label>
-
-        <button onClick={handleUpdate} disabled={loading}>
-          {loading ? "Đang lưu..." : "Lưu thông tin"}
+      <div className="text-center mt-8">
+        <button
+          onClick={() => navigate("/host/update-profile")}
+          className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
+        >
+          ✏️ Chỉnh sửa thông tin
         </button>
       </div>
     </div>

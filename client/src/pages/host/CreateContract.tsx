@@ -1,5 +1,5 @@
-// TRANG TẠO HỢP ĐỒNG THUÊ PHÒNG
-
+// 📁 src/pages/host/ContractCreate.tsx
+// TRANG TẠO HỢP ĐỒNG MỚI
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { hostService } from "../../services/hostService";
@@ -34,98 +34,105 @@ const ContractCreate = () => {
 
     hostService.createContract(dataToSubmit).then(() => {
       alert("Tạo hợp đồng thành công!");
-      navigate("/host/contracts"); // trang danh sách hợp đồng
+      navigate("/host/contracts");
     });
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "0 auto", padding: 20 }}>
-      <h2 style={{ textAlign: "center" }}>Tạo Hợp Đồng Mới</h2>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 15 }}>
+    <div className="max-w-xl mx-auto p-6 bg-white shadow-md rounded-md mt-6">
+      <h2 className="text-2xl font-bold text-center text-indigo-600 mb-6">
+        📝 Tạo Hợp Đồng Mới
+      </h2>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label>Họ tên người thuê:</label>
+          <label className="block font-medium mb-1">👤 Họ tên người thuê:</label>
           <input
             name="tenantName"
             value={contract.tenantName}
             onChange={handleChange}
             required
-            style={{ width: "100%", padding: 8 }}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div>
-          <label>Số điện thoại:</label>
+          <label className="block font-medium mb-1">📞 Số điện thoại:</label>
           <input
             name="phone"
             value={contract.phone}
             onChange={handleChange}
             required
-            style={{ width: "100%", padding: 8 }}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
         <div>
-          <label>ID Phòng:</label>
+          <label className="block font-medium mb-1">🏠 ID Phòng:</label>
           <input
             name="roomId"
             value={contract.roomId}
             onChange={handleChange}
             required
             type="number"
-            style={{ width: "100%", padding: 8 }}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
-        <div>
-          <label>Ngày bắt đầu thuê:</label>
-          <input
-            name="startDate"
-            value={contract.startDate}
-            onChange={handleChange}
-            type="date"
-            required
-            style={{ width: "100%", padding: 8 }}
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block font-medium mb-1">📅 Ngày bắt đầu:</label>
+            <input
+              name="startDate"
+              value={contract.startDate}
+              onChange={handleChange}
+              type="date"
+              required
+              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium mb-1">📅 Ngày kết thúc:</label>
+            <input
+              name="endDate"
+              value={contract.endDate}
+              onChange={handleChange}
+              type="date"
+              required
+              className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </div>
         </div>
 
         <div>
-          <label>Ngày bắt đầu thuê:</label>
-          <input
-            name="endDate"
-            value={contract.endDate}
-            onChange={handleChange}
-            type="date"
-            required
-            style={{ width: "100%", padding: 8 }}
-          />
-        </div>
-
-        <div>
-          <label>Tiền đặt cọc (VNĐ):</label>
+          <label className="block font-medium mb-1">💰 Tiền đặt cọc (VNĐ):</label>
           <input
             name="deposit"
             value={contract.deposit}
             onChange={handleChange}
             type="number"
             required
-            style={{ width: "100%", padding: 8 }}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
-        
+
         <div>
-          <label>Điều khoản:</label>
+          <label className="block font-medium mb-1">📄 Điều khoản:</label>
           <textarea
             name="terms"
             value={contract.terms}
             onChange={handleChange}
             rows={4}
             required
-            style={{ width: "100%", padding: 8 }}
+            className="w-full border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
         </div>
 
-        <button type="submit" style={{ padding: 10, backgroundColor: "#007bff", color: "#fff", border: "none", cursor: "pointer" }}>
-          Tạo hợp đồng
+        <button
+          type="submit"
+          className="w-full bg-indigo-600 text-white font-semibold py-2 rounded hover:bg-indigo-700 transition duration-200"
+        >
+          ✅ Tạo Hợp Đồng
         </button>
       </form>
     </div>

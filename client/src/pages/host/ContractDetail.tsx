@@ -1,10 +1,10 @@
-// src/pages/host/ContractDetail.tsx
-// TRANG XEM CHI TIẾT HỢP ĐỒNG THUÊ PHÒNG
+// 📁 src/pages/host/ContractDetail.tsx
+// Trang xem chi tiết hợp đồng thuê phòng
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { hostService } from "../../services/hostService";
-import jsPDF from "jspdf";      // Thư viện tạo PDF 
-import html2canvas from "html2canvas";      // Thư viện chuyển đổi HTML sang canvas
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const ContractDetail = () => {
   const { id } = useParams();
@@ -12,16 +12,12 @@ const ContractDetail = () => {
   const [loading, setLoading] = useState(false);
   const contractRef = useRef<HTMLDivElement>(null);
 
-  const fetchDetail = () => {
+  useEffect(() => {
     setLoading(true);
     hostService
       .getContractById(id as string)
       .then((res) => setContract(res.data))
       .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchDetail();
   }, [id]);
 
   const exportToPDF = async () => {
@@ -36,28 +32,40 @@ const ContractDetail = () => {
     pdf.save(`hop_dong_${contract?.tenantName}.pdf`);
   };
 
-  if (loading) return <p>Đang tải chi tiết hợp đồng...</p>;
-  if (!contract) return <p>Không tìm thấy hợp đồng.</p>;
+  if (loading) return <p className="text-center mt-10 text-gray-500">Đang tải chi tiết hợp đồng...</p>;
+  if (!contract) return <p className="text-center mt-10 text-red-500">Không tìm thấy hợp đồng.</p>;
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2>Chi tiết hợp đồng thuê phòng</h2>
+    <div className="max-w-2xl mx-auto mt-10 px-4">
+      <h2 className="text-2xl font-bold text-indigo-600 mb-6 text-center">
+        📑 Chi tiết hợp đồng thuê phòng
+      </h2>
 
-      <div ref={contractRef} style={{ background: "#fff", padding: 20, border: "1px solid #ccc" }}>
-        <p><strong>ID:</strong> {contract.id}</p>
-        <p><strong>Người thuê:</strong> {contract.tenantName}</p>
-        <p><strong>SĐT:</strong> {contract.phone}</p>
-        <p><strong>Phòng thuê:</strong> {contract.roomId}</p>
-        <p><strong>Ngày bắt đầu:</strong> {contract.startDate}</p>
-        <p><strong>Ngày kết thúc:</strong> {contract.endDate}</p>
-        <p><strong>Tiền cọc:</strong> {contract.deposit.toLocaleString()}₫</p>
-        <p><strong>Điều khoản:</strong></p>
-        <p style={{ whiteSpace: "pre-line" }}>{contract.terms}</p>
+      <div
+        ref={contractRef}
+        className="bg-white p-6 rounded-xl shadow-md border border-gray-200 space-y-3"
+      >
+        <p><strong className="text-gray-600">ID:</strong> {contract.id}</p>
+        <p><strong className="text-gray-600">👤 Người thuê:</strong> {contract.tenantName}</p>
+        <p><strong className="text-gray-600">📞 SĐT:</strong> {contract.phone}</p>
+        <p><strong className="text-gray-600">🏠 Phòng thuê:</strong> {contract.roomId}</p>
+        <p><strong className="text-gray-600">📅 Ngày bắt đầu:</strong> {contract.startDate}</p>
+        <p><strong className="text-gray-600">📅 Ngày kết thúc:</strong> {contract.endDate}</p>
+        <p><strong className="text-gray-600">💰 Tiền cọc:</strong> {contract.deposit.toLocaleString()}₫</p>
+        <div>
+          <strong className="text-gray-600">📜 Điều khoản:</strong>
+          <p className="whitespace-pre-line mt-1">{contract.terms}</p>
+        </div>
       </div>
 
-      <button onClick={exportToPDF} style={{ marginTop: 20 }}>
-        Xuất file PDF
-      </button>
+      <div className="text-center mt-6">
+        <button
+          onClick={exportToPDF}
+          className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg shadow transition-all"
+        >
+          📤 Xuất file PDF
+        </button>
+      </div>
     </div>
   );
 };

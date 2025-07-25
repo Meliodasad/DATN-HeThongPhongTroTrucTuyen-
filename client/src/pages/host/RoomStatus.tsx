@@ -1,5 +1,5 @@
 // 📁 src/pages/host/RoomStatus.tsx
-// Trang quản lý trạng thái phòng của chủ nhà
+// Quản lý trạng thái phòng
 import { useEffect, useState } from "react";
 import { hostService } from "../../services/hostService";
 
@@ -39,42 +39,49 @@ const RoomStatus = () => {
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <h2>Quản lý trạng thái phòng</h2>
-      <p>Đánh dấu phòng đang trống, đã cho thuê, đang sửa chữa,...</p>
+    <div className="p-6 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold text-indigo-600 mb-2 text-center">
+        🏠 Quản lý trạng thái phòng
+      </h2>
+      <p className="text-center text-gray-500 mb-6">
+        Đánh dấu phòng đang trống, đã cho thuê hoặc đang sửa chữa
+      </p>
+
       {loading ? (
-        <p>Đang tải danh sách phòng...</p>
+        <p className="text-center text-gray-500">Đang tải danh sách phòng...</p>
       ) : (
-        <table style={{ width: "100%", marginTop: 20 }}>
-          <thead>
-            <tr>
-              <th>Tên phòng</th>
-              <th>Trạng thái</th>
-              <th>Thay đổi trạng thái</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rooms.map((room) => (
-              <tr key={room.id}>
-                <td>{room.name}</td>
-                <td>{room.status}</td>
-                <td>
-                  <select
-                    value={room.status}
-                    onChange={(e) =>
-                      handleStatusChange(room.id, e.target.value)
-                    }
-                  >
-                    <option value="Trống">Trống</option>
-                    <option value="Đã cho thuê">Đã cho thuê</option>
-                    <option value="Đang sửa chữa">Đang sửa chữa</option>
-                    
-                  </select>
-                </td>
+        <div className="overflow-x-auto shadow-md rounded-lg">
+          <table className="min-w-full bg-white border border-gray-200 text-sm">
+            <thead className="bg-indigo-100 text-indigo-700">
+              <tr>
+                <th className="p-3 text-left">📛 Tên phòng</th>
+                <th className="p-3 text-left">📌 Trạng thái hiện tại</th>
+                <th className="p-3 text-left">⚙️ Thay đổi trạng thái</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {rooms.map((room) => (
+                <tr key={room.id} className="border-t hover:bg-gray-50">
+                  <td className="p-3 font-medium">{room.name}</td>
+                  <td className="p-3 text-gray-600">{room.status}</td>
+                  <td className="p-3">
+                    <select
+                      value={room.status}
+                      onChange={(e) =>
+                        handleStatusChange(room.id, e.target.value)
+                      }
+                      className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="Trống">Trống</option>
+                      <option value="Đã cho thuê">Đã cho thuê</option>
+                      <option value="Đang sửa chữa">Đang sửa chữa</option>
+                    </select>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );

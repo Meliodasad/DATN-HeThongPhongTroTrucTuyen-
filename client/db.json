@@ -42,6 +42,14 @@
       "email": "atenant@example.com",
       "desiredRoomId": 101,
       "status": "đã duyệt"
+    },
+    {
+      "id": "3",
+      "tenantName": "Trần Thị C",
+      "phone": "1234567890",
+      "email": "tranthic@gmail.com",
+      "desiredRoomId": 103,
+      "status": "chờ duyệt"
     }
   ],
   "tenants": [
@@ -73,49 +81,6 @@
       "endDate": "2026-06-01",
       "deposit": 800000,
       "terms": "Không nuôi thú cưng."
-    }
-  ],
-  "invoices": [
-    {
-      "id": "1",
-      "contractId": 1,
-      "month": "2024-06",
-      "amount": 2500000,
-      "status": "chưa thanh toán"
-    },
-    {
-      "id": "2",
-      "contractId": 1,
-      "month": "2024-07",
-      "amount": 2500000,
-      "status": "đã thanh toán"
-    }
-  ],
-  "statistics": [
-    {
-      "id": "1",
-      "month": "2024-07",
-      "totalRevenue": 2500000,
-      "occupiedRooms": 1,
-      "emptyRooms": 1,
-      "waterFee": 150000,
-      "electricityFee": 200000
-    }
-  ],
-  "payments": [
-    {
-      "id": "1",
-      "invoiceId": 2,
-      "method": "Momo",
-      "paymentTime": "2024-07-10T10:00:00Z"
-    }
-  ],
-  "notifications": [
-    {
-      "id": "1",
-      "channel": "Zalo",
-      "message": "Hóa đơn tháng 7 đã được tạo",
-      "sentAt": "2024-07-01T08:00:00Z"
     }
   ]
 }

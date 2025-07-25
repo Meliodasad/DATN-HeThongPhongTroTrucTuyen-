@@ -1,3 +1,5 @@
+// 📁 src/pages/host/ContractList.tsx
+// TRANG DANH SÁCH HỢP ĐỒNG
 import { useEffect, useState } from "react";
 import { hostService } from "../../services/hostService";
 import { useNavigate } from "react-router-dom";
@@ -38,71 +40,91 @@ const ContractList = () => {
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <h2 style={{ marginBottom: 10 }}>Danh sách hợp đồng thuê phòng</h2>
+    <div className="max-w-6xl mx-auto p-6">
+      <h2 className="text-2xl font-bold text-indigo-600 mb-4 text-center">
+        📋 Danh sách hợp đồng thuê phòng
+      </h2>
 
-      <div style={{ marginBottom: 20 }}>
-        <label>Lọc theo ID phòng:</label>{" "}
+      <div className="flex flex-wrap items-center gap-4 mb-6">
+        <label className="font-medium text-gray-700">
+          🔍 Lọc theo ID phòng:
+        </label>
         <input
           type="number"
           placeholder="Nhập mã phòng..."
           value={filterRoomId}
           onChange={(e) => setFilterRoomId(e.target.value)}
-          style={{ padding: 5 }}
+          className="px-3 py-1 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
-        <button onClick={() => setFilterRoomId("")} style={{ marginLeft: 10 }}>
+        <button
+          onClick={() => setFilterRoomId("")}
+          className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400 text-sm"
+        >
           Xóa lọc
         </button>
       </div>
 
       {loading ? (
-        <p>Đang tải...</p>
+        <p className="text-gray-500">Đang tải...</p>
       ) : contracts.length === 0 ? (
-        <p>Không có hợp đồng nào.</p>
+        <p className="text-red-500 font-semibold text-center">
+          Không có hợp đồng nào.
+        </p>
       ) : (
-        <table border={1} cellPadding={10}>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Người thuê</th>
-              <th>SDT</th>
-              <th>Phòng</th>
-              <th>Ngày bắt đầu</th>
-              <th>Ngày kết thúc</th>
-              <th>Tiền cọc</th>
-              <th>Điều khoản</th>
-              <th>Hành động</th>
-            </tr>
-          </thead>
-          <tbody>
-            {contracts.map((contract) => (
-              <tr key={contract.id}>
-                <td>{contract.id}</td>
-                <td>{contract.tenantName}</td>
-                <td>{contract.phone}</td>
-                <td>{contract.roomId}</td>
-                <td>{contract.startDate}</td>
-                <td>{contract.endDate}</td>
-                <td>{contract.deposit.toLocaleString()}₫</td>
-                <td>{contract.terms}</td>
-                <td>
-                  <button
-                    onClick={() => navigate(`/host/contracts/${contract.id}`)}
-                    style={{ marginRight: 5 }}
-                  >
-                    Xem chi tiết
-                  </button>
-                  <button
-                    style={{ color: "red" }}
-                    onClick={() => handleDelete(contract.id)}
-                  >
-                    Xóa
-                  </button>
-                </td>
+        <div className="overflow-x-auto rounded shadow">
+          <table className="w-full border border-gray-300 bg-white text-sm">
+            <thead className="bg-indigo-100 text-indigo-800">
+              <tr>
+                <th className="p-3 text-left">ID</th>
+                <th className="p-3 text-left">Người thuê</th>
+                <th className="p-3 text-left">SĐT</th>
+                <th className="p-3 text-left">Phòng</th>
+                <th className="p-3 text-left">Bắt đầu</th>
+                <th className="p-3 text-left">Kết thúc</th>
+                <th className="p-3 text-left">Tiền cọc</th>
+                <th className="p-3 text-left">Điều khoản</th>
+                <th className="p-3 text-left">Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {contracts.map((contract) => (
+                <tr
+                  key={contract.id}
+                  className="border-t hover:bg-gray-50 transition"
+                >
+                  <td className="p-3">{contract.id}</td>
+                  <td className="p-3">{contract.tenantName}</td>
+                  <td className="p-3">{contract.phone}</td>
+                  <td className="p-3">{contract.roomId}</td>
+                  <td className="p-3">{contract.startDate}</td>
+                  <td className="p-3">{contract.endDate}</td>
+                  <td className="p-3 text-green-600 font-medium">
+                    {contract.deposit.toLocaleString()}₫
+                  </td>
+                  <td className="p-3 whitespace-pre-wrap max-w-xs">
+                    {contract.terms}
+                  </td>
+                  <td className="p-3 space-x-2">
+                    <button
+                      onClick={() =>
+                        navigate(`/host/contracts/${contract.id}`)
+                      }
+                      className="bg-indigo-500 hover:bg-indigo-600 text-white px-3 py-1 rounded text-xs"
+                    >
+                      Xem chi tiết
+                    </button>
+                    <button
+                      onClick={() => handleDelete(contract.id)}
+                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs"
+                    >
+                      Xóa
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </div>
   );
