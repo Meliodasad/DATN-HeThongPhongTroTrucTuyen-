@@ -1,6 +1,5 @@
 // 📁 src/pages/host/Profile.tsx
 // Trang thông tin cá nhân của chủ nhà
-// 📁 src/pages/host/Profile.tsx
 import { useEffect, useState } from "react";
 import { hostService } from "../../services/hostService";
 import UpdateProfile from "./UpdateProfile"; // 👈 Import component modal
