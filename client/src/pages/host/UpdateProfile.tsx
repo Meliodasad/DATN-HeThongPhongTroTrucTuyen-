@@ -1,6 +1,5 @@
 // 📁 src/pages/host/UpdateProfile.tsx
 // Trang cập nhật thông tin cá nhân của chủ nhà
-// 📁 src/pages/host/UpdateProfile.tsx
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Thêm dòng này
 import { hostService } from "../../services/hostService";

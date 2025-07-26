@@ -1,3 +1,4 @@
+// 📁 client/src/App.tsx
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Profile from "../src/pages/host/Profile";
 import RoomStatus from "./pages/host/RoomStatus";
