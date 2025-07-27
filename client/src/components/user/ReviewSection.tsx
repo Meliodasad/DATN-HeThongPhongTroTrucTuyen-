@@ -1,56 +1,65 @@
 import { useEffect, useState } from 'react';
-import '../../css/ReviewSection.css'
+import '../../css/ReviewSection.css';
 
 type Review = {
+  id?: string;
+  roomId: string;
   user: string;
   rating: number;
   comment: string;
   date: string;
 };
 
-const getReviews = (postId: string): Review[] => {
-  const stored = localStorage.getItem('reviews');
-  const all = stored ? JSON.parse(stored) : {};
-  return all[postId] || [];
-};
-
-const saveReview = (postId: string, review: Review) => {
-  const stored = localStorage.getItem('reviews');
-  const all = stored ? JSON.parse(stored) : {};
-  const updated = {
-    ...all,
-    [postId]: [...(all[postId] || []), review],
-  };
-  localStorage.setItem('reviews', JSON.stringify(updated));
-};
-
-const ReviewSection = ({ postId }: { postId: string }) => {
+const ReviewSection = ({ roomId }: { roomId: string }) => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setReviews(getReviews(postId));
-  }, [postId]);
+    fetch(`http://localhost:3000/reviews?roomId=${roomId}`)
+      .then(res => res.json())
+      .then(data => setReviews(data))
+      .catch(err => console.error('Lỗi khi tải đánh giá:', err));
+  }, [roomId]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!comment) return alert('Vui lòng nhập nội dung đánh giá');
+
     const newReview: Review = {
-      user: 'Người dùng ẩn danh',
+      roomId,
+      user: 'Ẩn danh',
       rating,
       comment,
-      date: new Date().toLocaleDateString('vi-VN'),
+      date: new Date().toISOString().split('T')[0], 
     };
-    saveReview(postId, newReview);
-    setReviews(prev => [...prev, newReview]);
-    setRating(5);
-    setComment('');
+
+    setLoading(true);
+    try {
+      const res = await fetch(`http://localhost:3000/reviews`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newReview),
+      });
+
+      if (!res.ok) throw new Error('Gửi đánh giá thất bại');
+
+      const saved = await res.json();
+      setReviews(prev => [...prev, saved]);
+      setComment('');
+      setRating(5);
+    } catch (error) {
+      alert('Có lỗi khi gửi đánh giá');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="review-section">
       <h3>Đánh giá trọ</h3>
+
       <form onSubmit={handleSubmit} className="review-form">
         <div className="star-rating">
           {[1, 2, 3, 4, 5].map(star => (
@@ -73,12 +82,15 @@ const ReviewSection = ({ postId }: { postId: string }) => {
           value={comment}
           onChange={e => setComment(e.target.value)}
         />
-        <button type="submit">Gửi đánh giá</button>
+
+        <button type="submit" disabled={loading}>
+          {loading ? 'Đang gửi...' : 'Gửi đánh giá'}
+        </button>
       </form>
 
       <div className="review-list">
         {reviews.map((r, i) => (
-          <div key={i} className="review-item">
+          <div key={r.id || i} className="review-item">
             <p>
               <strong>{r.user}</strong>{' '}
               <span style={{ color: '#FFD700' }}>

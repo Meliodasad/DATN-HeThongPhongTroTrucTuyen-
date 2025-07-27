@@ -1,12 +1,52 @@
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import posts from '../../data/db';
-import '../../css/UserProfile.css'
+import '../../css/UserProfile.css';
+
+interface User {
+  id: string;
+  name: string;
+  avatar: string;
+  phone: string;
+  zalo: string;
+  joinedDate: string;
+  status: string;
+}
+
+interface Room {
+  id: string;
+  title: string;
+  price: string;
+  area: string;
+  address: string;
+  images: string[];
+  ownerId: string;
+  owner?: User;
+}
 
 const UserProfile = () => {
   const { userId } = useParams();
+  const [user, setUser] = useState<User | null>(null);
+  const [userRooms, setUserRooms] = useState<Room[]>([]);
 
-  const userPosts = posts.filter(p => p.author.id === userId);
-  const user = userPosts[0]?.author;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [userRes, roomsRes] = await Promise.all([
+          fetch(`http://localhost:3000/users/${userId}`),
+          fetch(`http://localhost:3000/rooms?ownerId=${userId}`)
+        ]);
+        const userData = await userRes.json();
+        const roomsData = await roomsRes.json();
+
+        setUser(userData);
+        setUserRooms(roomsData);
+      } catch (error) {
+        console.error('Lỗi khi lấy dữ liệu:', error);
+      }
+    };
+
+    if (userId) fetchData();
+  }, [userId]);
 
   if (!user) return <div className="user-profile-container">Người dùng không tồn tại.</div>;
 
@@ -30,17 +70,17 @@ const UserProfile = () => {
         Chỉnh sửa thông tin
       </Link>
 
-      {userPosts.length > 0 && (
+      {userRooms.length > 0 && (
         <div className="user-posts">
-          <h3>Bài đăng của {user.name}</h3>
+          <h3>Phòng trọ của {user.name}</h3>
           <div className="post-list">
-            {userPosts.map(post => (
-              <div key={post.id} className="post-card1">
-                <img src={post.images[0]} alt="thumbnail" />
+            {userRooms.map(room => (
+              <div key={room.id} className="post-card1">
+                <img src={room.images?.[0]} alt="thumbnail" />
                 <div className="post-info1">
-                  <h4>{post.title}</h4>
-                  <p>{post.price} • {post.area}</p>
-                  <p>{post.address}</p>
+                  <h4>{room.title}</h4>
+                  <p>{room.price} • {room.area}</p>
+                  <p>{room.address}</p>
                 </div>
               </div>
             ))}

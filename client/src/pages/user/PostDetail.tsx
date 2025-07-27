@@ -1,79 +1,137 @@
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import ImageGallery from 'react-image-gallery';
-import db from '../../data/db';
-import '../../css/PostDetail.css';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import ReportForm from '../../components/user/ReportForm';
+import '../../css/PostDetail.css';
 import ReviewSection from '../../components/user/ReviewSection';
+import ReportForm from '../../components/user/ReportForm';
+
+interface Room {
+  id: string;
+  hostId: string;
+  roomTitle: string;
+  price: number;
+  area: number;
+  location: string;
+  description: string;
+  images: string[];
+  roomType: string;
+  status: string;
+  utilities: string[];
+  terms: string;
+  approvalStatus: string;
+  approvalDate?: string;
+  createdAt: string;
+}
+
+interface User {
+  id: string;
+  fullName: string;
+  avatar: string;
+  phone: string;
+  zalo?: string;
+  status: string;
+  createdAt: string;
+}
 
 const PostDetail = () => {
-  const { id } = useParams();
-  const post = db.posts.find(p => p.id === id);
+  const { id } = useParams<{ id: string }>();
+  const [room, setRoom] = useState<Room | null>(null);
+  const [host, setHost] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!post) return <div className="post-detail-container">Bài đăng không tồn tại.</div>;
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const roomRes = await fetch(`http://localhost:3000/rooms/${id}`);
+        if (!roomRes.ok) throw new Error('Không tìm thấy phòng');
+        const roomData: Room = await roomRes.json();
+        setRoom(roomData);
 
-  const localUsers = localStorage.getItem('users');
-  const users = localUsers ? JSON.parse(localUsers) : db.users;
+        const hostRes = await fetch(`http://localhost:3000/users/${roomData.hostId}`);
+        if (!hostRes.ok) throw new Error('Không tìm thấy người đăng');
+        const hostData: User = await hostRes.json();
+        setHost(hostData);
 
-  const author = users.find((u: any) => u.id === post.authorId);
+        setError(null);
+      } catch (err: any) {
+        setError(err.message || 'Lỗi khi tải dữ liệu');
+        setRoom(null);
+        setHost(null);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  if (!author) return <div className="post-detail-container">Người đăng không tồn tại.</div>;
+    if (id) fetchData();
+  }, [id]);
 
-  const images = post.images.map(img => ({
+  if (loading) return <div className="post-detail-container">Đang tải dữ liệu...</div>;
+  if (error) return <div className="post-detail-container">Lỗi: {error}</div>;
+  if (!room || !host) return <div className="post-detail-container">Không có dữ liệu.</div>;
+
+  const images = room.images.map(img => ({
     original: img,
     thumbnail: img,
   }));
+
+  const [district, province] = room.location ? room.location.split(',').map(s => s.trim()) : ['', ''];
 
   return (
     <div className="post-detail-container">
       <ImageGallery items={images} showPlayButton={false} showFullscreenButton={false} />
 
-      <Link to={`/booking/${post.id}`} className="booking">
-        Đặt phòng
-      </Link>
+      <Link to={`/booking/${room.id}`} className="booking">Đặt phòng</Link>
 
       <div className="post-info">
-        <h1 className="title">{post.title}</h1>
+        <h1 className="title">{room.roomTitle}</h1>
 
         <div className="meta">
-          <span className="price">{post.price}</span>
+          <span className="price">{room.price.toLocaleString('vi-VN')} đ</span>
           <span className="dot">•</span>
-          <span>{post.area}</span>
+          <span>{room.area} m²</span>
           <span className="dot">•</span>
-          <span>{post.address}</span>
+          <span>{room.location}</span>
         </div>
 
         <div className="info-table">
-          <div className="info-row"><span><strong>Quận huyện:</strong></span><span>{post.district}</span></div>
-          <div className="info-row"><span><strong>Tỉnh thành:</strong></span><span>{post.province}</span></div>
-          <div className="info-row"><span><strong>Địa chỉ:</strong></span><span>{post.fullAddress}</span></div>
-          <div className="info-row"><span><strong>Mã tin:</strong></span><span>#{post.id.padStart(6, '0')}</span></div>
-          <div className="info-row"><span><strong>Ngày đăng:</strong></span><span>{post.postedDate}</span></div>
-          <div className="info-row"><span><strong>Ngày hết hạn:</strong></span><span>{post.expiredDate}</span></div>
+          <div className="info-row"><span><strong>Quận huyện:</strong></span><span>{district}</span></div>
+          <div className="info-row"><span><strong>Tỉnh thành:</strong></span><span>{province}</span></div>
+          <div className="info-row"><span><strong>Địa chỉ:</strong></span><span>{room.location}</span></div>
+          <div className="info-row"><span><strong>Mã phòng:</strong></span><span>#{room.id.padStart(6, '0')}</span></div>
+          <div className="info-row"><span><strong>Ngày đăng:</strong></span><span>{new Date(room.createdAt).toLocaleDateString()}</span></div>
+          <div className="info-row"><span><strong>Ngày duyệt:</strong></span><span>{room.approvalDate ? new Date(room.approvalDate).toLocaleDateString() : 'Chưa duyệt'}</span></div>
+          <div className="info-row"><span><strong>Trạng thái:</strong></span><span>{room.status}</span></div>
+          <div className="info-row"><span><strong>Loại phòng:</strong></span><span>{room.roomType}</span></div>
+          <div className="info-row"><span><strong>Tiện ích:</strong></span><span>{room.utilities.length ? room.utilities.join(', ') : 'Không có'}</span></div>
+          <div className="info-row"><span><strong>Điều khoản:</strong></span><span>{room.terms || 'Không có'}</span></div>
         </div>
 
         <div className="description">
           <h3>Thông tin mô tả</h3>
-          <p>{post.description}</p>
+          <p>{room.description}</p>
         </div>
       </div>
 
-      <Link to={`/user/${author.id}`} className="contact-header">
-        <img src={author.avatar} alt="avatar" className="avatar" />
+      <Link to={`/user/${host.id}`} className="contact-header">
+        <img src={host.avatar} alt="avatar" className="avatar" />
         <div>
-          <h3>{author.name}</h3>
-          <p className="sub-info">{author.status} • Tham gia từ: {author.joinedDate}</p>
+          <h3>{host.fullName}</h3>
+          <p className="sub-info">{host.status} • Tham gia từ: {new Date(host.createdAt).toLocaleDateString()}</p>
         </div>
       </Link>
 
       <div className="contact-info">
-        <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${author.phone}`}>{author.phone}</a></p>
-        <p><strong>💬 Zalo:</strong> <a href={author.zalo} target="_blank" rel="noopener noreferrer">Nhắn Zalo</a></p>
+        <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${host.phone}`}>{host.phone}</a></p>
+        {host.zalo && (
+          <p><strong>💬 Zalo:</strong> <a href={host.zalo} target="_blank" rel="noopener noreferrer">Nhắn Zalo</a></p>
+        )}
       </div>
 
-      <ReviewSection postId={post.id} />
-
-      <ReportForm postId={post.id} />
+      <ReviewSection roomId={room.id} />
+      <ReportForm roomId={room.id} />
     </div>
   );
 };

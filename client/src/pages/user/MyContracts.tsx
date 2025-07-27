@@ -1,30 +1,67 @@
-import React from 'react';
-import db from '../../data/db';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../../css/MyContracts.css';
 
 interface Contract {
   id: string;
   tenantId: string;
-  postId: string;
+  roomId: string;
   startDate: string;
-  endDate: string;
+  endDate?: string;
   status: 'pending' | 'accepted' | 'rejected' | 'ended';
+}
+
+interface Room {
+  id: string;
+  roomTitle: string;
 }
 
 interface MyContractsProps {
   tenantId: string;
 }
 
-const MyContracts = ({ tenantId }: MyContractsProps) => {
-  const storedContracts = localStorage.getItem('contracts');
-  const allContracts: Contract[] = storedContracts ? JSON.parse(storedContracts) : [];
-  const contracts = allContracts.filter((c) => c.tenantId === tenantId);
+const MyContracts: React.FC<MyContractsProps> = ({ tenantId }) => {
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const getPostTitle = (postId: string) => {
-    const post = db.posts.find((p) => p.id === postId);
-    return post ? post.title : 'Không tìm thấy phòng';
+  useEffect(() => {
+    const fetchContracts = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/contracts?tenantId=${tenantId}`);
+        const data = await res.json();
+        setContracts(data);
+      } catch (err) {
+        console.error('Lỗi khi lấy contracts:', err);
+      }
+    };
+
+    const fetchRooms = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/rooms`);
+        const data = await res.json();
+        setRooms(data);
+      } catch (err) {
+        console.error('Lỗi khi lấy rooms:', err);
+      }
+    };
+
+    Promise.all([fetchContracts(), fetchRooms()]).finally(() => setLoading(false));
+  }, [tenantId]);
+
+  const getRoomTitle = (roomId: string) => {
+    const room = rooms.find((r) => r.id === roomId);
+    return room ? room.roomTitle : 'Không tìm thấy phòng';
   };
+
+  const formatDate = (dateStr: string | undefined) => {
+    if (!dateStr) return 'Chưa có';
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return dateStr; // fallback nếu chuỗi ngày không hợp lệ
+    return date.toLocaleDateString();
+  };
+
+  if (loading) return <p>Đang tải dữ liệu...</p>;
 
   return (
     <div className="contracts-container">
@@ -34,9 +71,9 @@ const MyContracts = ({ tenantId }: MyContractsProps) => {
       ) : (
         contracts.map((contract) => (
           <div key={contract.id} className="contract-card">
-            <p><strong>Phòng:</strong> {getPostTitle(contract.postId)}</p>
-            <p><strong>Ngày bắt đầu:</strong> {contract.startDate}</p>
-            <p><strong>Ngày kết thúc:</strong> {contract.endDate || 'Chưa có'}</p>
+            <p><strong>Phòng:</strong> {getRoomTitle(contract.roomId)}</p>
+            <p><strong>Ngày bắt đầu:</strong> {formatDate(contract.startDate)}</p>
+            <p><strong>Ngày kết thúc:</strong> {formatDate(contract.endDate)}</p>
             <p>
               <strong>Trạng thái:</strong>{' '}
               <span className={`status ${contract.status}`}>

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import db from '../../data/db';
 import '../../css/BookingRequests.css';
 
 interface Booking {
@@ -7,86 +6,99 @@ interface Booking {
   roomId: string;
   tenantId: string;
   bookingDate: string;
-  endDate: string;
-  note: string;
+  endDate?: string;
+  note?: string;
   status: 'pending' | 'accepted' | 'rejected';
-  name: string;
-  phone: string;
-  email: string;
-  address: string;
+  name?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
 }
 
-interface Contract {
+interface Room {
   id: string;
-  tenantId: string;
-  postId: string;
-  startDate: string;
-  endDate: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  roomTitle: string;
+  location: string;
 }
 
-const BookingRequests = () => {
+const BookingRequests: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [rooms, setRooms] = useState<Room[]>([]);
 
+  // Load bookings and rooms from API
   useEffect(() => {
-    const allBookings: Booking[] = JSON.parse(localStorage.getItem('bookings') || '[]');
-    const pending = allBookings.filter(b => b.status === 'pending');
-    setBookings(pending);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const bookingRes = await fetch('http://localhost:3000/bookings');
+        const bookingData: Booking[] = await bookingRes.json();
+        // Lọc lấy các booking có status pending
+        const pendingBookings = bookingData.filter(b => b.status === 'pending');
+        setBookings(pendingBookings);
 
-  const handleAccept = (booking: Booking) => {
-    const stored = localStorage.getItem('bookings');
-    const allBookings: Booking[] = stored ? JSON.parse(stored) : [];
-
-    const updatedBookings = allBookings.map(b =>
-      b.id === booking.id ? { ...b, status: 'accepted' } : b
-    );
-    localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-
-    const pendingBookings = updatedBookings.filter(b => b.status === 'pending') as Booking[];
-    setBookings(pendingBookings);
-
-    const newContract: Contract = {
-      id: 'c' + Date.now(),
-      tenantId: booking.tenantId,
-      postId: booking.roomId,
-      startDate: booking.bookingDate,
-      endDate: booking.endDate || '',
-      status: 'accepted',
+        const roomsRes = await fetch('http://localhost:3000/rooms');
+        const roomsData: Room[] = await roomsRes.json();
+        setRooms(roomsData);
+      } catch (error) {
+        console.error('Lỗi khi tải dữ liệu booking hoặc phòng:', error);
+      }
     };
 
-    const storedContracts = localStorage.getItem('contracts');
-    const contracts: Contract[] = storedContracts ? JSON.parse(storedContracts) : [];
+    fetchData();
+  }, []);
 
-    const exists = contracts.some(
-      c => c.tenantId === booking.tenantId && c.postId === booking.roomId
-    );
+  // Hàm lấy thông tin phòng theo id
+  const getRoomInfo = (roomId: string) => {
+    const room = rooms.find(r => r.id === roomId);
+    return room ? `${room.roomTitle} - ${room.location}` : 'Không tìm thấy phòng';
+  };
 
-    if (!exists) {
-      contracts.push(newContract);
-      localStorage.setItem('contracts', JSON.stringify(contracts));
-      alert(' Đã chấp nhận yêu cầu và tạo hợp đồng!');
-    } else {
-      alert(' Hợp đồng đã tồn tại cho yêu cầu này.');
+  // Chấp nhận booking: update status và tạo hợp đồng (nếu có)
+  const handleAccept = async (booking: Booking) => {
+    try {
+      // Cập nhật trạng thái booking
+      await fetch(`http://localhost:3000/bookings/${booking.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'accepted' }),
+      });
+
+      // Tạo hợp đồng mới
+      const newContract = {
+        id: 'c' + Date.now(),
+        tenantId: booking.tenantId,
+        roomId: booking.roomId,
+        startDate: booking.bookingDate,
+        endDate: booking.endDate || '',
+        status: 'accepted',
+      };
+
+      await fetch('http://localhost:3000/contracts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newContract),
+      });
+
+      // Cập nhật lại danh sách bookings ở trạng thái pending
+      setBookings(prev => prev.filter(b => b.id !== booking.id));
+    } catch (error) {
+      console.error('Lỗi khi chấp nhận booking:', error);
+      alert('Có lỗi xảy ra khi duyệt yêu cầu đặt phòng.');
     }
   };
 
-  const handleReject = (bookingId: string) => {
-    const stored = localStorage.getItem('bookings');
-    const allBookings: Booking[] = stored ? JSON.parse(stored) : [];
-
-    const updatedBookings = allBookings.map(b =>
-      b.id === bookingId ? { ...b, status: 'rejected' } : b
-    );
-    localStorage.setItem('bookings', JSON.stringify(updatedBookings));
-
-    const pendingBookings = updatedBookings.filter(b => b.status === 'pending') as Booking[];
-    setBookings(pendingBookings);
-  };
-
-  const getRoomInfo = (roomId: string) => {
-    const post = db.posts.find(p => p.id === roomId);
-    return post ? `${post.title} - ${post.address}` : 'Không tìm thấy phòng';
+  // Từ chối booking: update status
+  const handleReject = async (bookingId: string) => {
+    try {
+      await fetch(`http://localhost:3000/bookings/${bookingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'rejected' }),
+      });
+      setBookings(prev => prev.filter(b => b.id !== bookingId));
+    } catch (error) {
+      console.error('Lỗi khi từ chối booking:', error);
+      alert('Có lỗi xảy ra khi từ chối yêu cầu đặt phòng.');
+    }
   };
 
   return (
@@ -100,10 +112,10 @@ const BookingRequests = () => {
             <li key={b.id} className="booking-item">
               <div><strong>Phòng:</strong> {getRoomInfo(b.roomId)}</div>
               <div><strong>Ngày bắt đầu:</strong> {new Date(b.bookingDate).toLocaleDateString()}</div>
-              <div><strong>Ngày kết thúc:</strong> {new Date(b.endDate).toLocaleDateString()}</div>
-              <div><strong>Người thuê:</strong> {b.name}</div>
-              <div><strong>Email:</strong> {b.email}</div>
-              <div><strong>Ghi chú:</strong> {b.note}</div>
+              {b.endDate && <div><strong>Ngày kết thúc:</strong> {new Date(b.endDate).toLocaleDateString()}</div>}
+              <div><strong>Người thuê:</strong> {b.name || 'Không rõ'}</div>
+              <div><strong>Email:</strong> {b.email || 'Không rõ'}</div>
+              <div><strong>Ghi chú:</strong> {b.note || 'Không có'}</div>
               <button onClick={() => handleAccept(b)}>Chấp nhận</button>
               <button onClick={() => handleReject(b.id)}>Từ chối</button>
             </li>

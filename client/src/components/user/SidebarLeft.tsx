@@ -1,14 +1,19 @@
 import React from 'react';
 import '../../css/SidebarLeft.css';
+import db from '../../data/db.json';
 
 const SidebarLeft = () => {
+  const roomCount = db.rooms.length;
+
   return (
     <div className="sidebar-left-container">
       <h2 className="sidebar-left-title">
         Kênh thông tin Phòng Trọ số 1 Việt Nam
       </h2>
 
-      <p className="sidebar-left-subtitle">Có 1.456 tin đăng cho thuê</p>
+      <p className="sidebar-left-subtitle">
+        Có {roomCount.toLocaleString()} tin đăng cho thuê
+      </p>
 
       <p className="sidebar-left-bold-text">TỈNH THÀNH</p>
 

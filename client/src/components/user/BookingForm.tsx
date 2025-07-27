@@ -7,16 +7,15 @@ const BookingForm = () => {
   const navigate = useNavigate();
 
   const [bookingDate, setBookingDate] = useState('');
-  const [endDate, setEndDate] = useState(''); 
+  const [endDate, setEndDate] = useState('');
   const [note, setNote] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState('');
 
-  const currentUserId = 'u1';
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const currentUserId = 'u1'; 
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const newBooking = {
@@ -24,22 +23,34 @@ const BookingForm = () => {
       roomId: roomId || '',
       tenantId: currentUserId,
       bookingDate,
-      endDate, 
+      endDate,
       note,
       name,
       phone,
       email,
       address,
-      status: 'pending',
+      status: 'pending'
     };
 
-    const existing = JSON.parse(localStorage.getItem('bookings') || '[]');
-    const updated = [...existing, newBooking];
+    try {
+      const res = await fetch('http://localhost:3000/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newBooking)
+      });
 
-    localStorage.setItem('bookings', JSON.stringify(updated));
+      if (!res.ok) {
+        throw new Error('Gửi booking thất bại');
+      }
 
-    alert('Gửi yêu cầu thuê thành công!');
-    navigate('/my-bookings');
+      alert('Gửi yêu cầu thuê thành công!');
+      navigate('/my-bookings');
+    } catch (error) {
+      console.error('Lỗi gửi booking:', error);
+      alert('Có lỗi khi gửi yêu cầu thuê.');
+    }
   };
 
   return (

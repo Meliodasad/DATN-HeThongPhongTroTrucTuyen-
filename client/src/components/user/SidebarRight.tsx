@@ -1,15 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import db from '../../data/db';
-import type { Post } from '../../data/db';
 import '../../css/SidebarRight.css';
 
-const posts: Post[] = db.posts;
+interface Room {
+  id: string;
+  title: string;
+  price: string;
+  images: string[];
+  postedDate: string;
+}
 
 const SidebarRight = () => {
+  const [rooms, setRooms] = useState<Room[]>([]);
+
+  useEffect(() => {
+    const fetchRooms = async () => {
+      try {
+        const response = await fetch('http://localhost:3000/rooms');
+        const data = await response.json();
+        setRooms(data.slice().reverse().slice(0, 5)); // Lấy 5 bài mới nhất
+      } catch (error) {
+        console.error('Lỗi khi tải tin mới:', error);
+      }
+    };
+
+    fetchRooms();
+  }, []);
+
   return (
     <div className="sidebar-container">
-
       <div className="sidebar-section">
         <h4>Xem khoảng giá</h4>
         <div className="price-area">
@@ -45,24 +64,23 @@ const SidebarRight = () => {
       </div>
 
       <p className="latest-posts-title">Tin mới đăng</p>
-      {posts.map(post => (
+      {rooms.map((room) => (
         <Link
-          key={post.id}
-          to={`/posts/${post.id}`}
+          key={room.id}
+          to={`/posts/${room.id}`}
           className="post-item"
         >
           <img
-            src={post.images[0]}
-            alt={post.title}
+            src={room.images?.[0]}
+            alt={room.title}
           />
           <div className="post-info">
-            <div>{post.title}</div>
-            <div>{post.price}</div>
-            <div>{post.postedDate}</div>
+            <div>{room.title}</div>
+            <div>{room.price}</div>
+            <div>{room.postedDate}</div>
           </div>
         </Link>
       ))}
-
     </div>
   );
 };

@@ -2,52 +2,57 @@ import React, { useState, useEffect, FormEvent } from 'react';
 import '../../css/ReportForm.css';
 
 interface Report {
-  id: string;
-  postId: string;
+  id?: string;
+  roomId: string;
   type: string;
   message: string;
   createdAt: string;
 }
 
 interface ReportFormProps {
-  postId: string;
+  roomId: string;
 }
 
-const ReportForm: React.FC<ReportFormProps> = ({ postId }) => {
-  const [type, setType] = useState<string>('');
-  const [message, setMessage] = useState<string>('');
+const ReportForm: React.FC<ReportFormProps> = ({ roomId }) => {
+  const [type, setType] = useState('');
+  const [message, setMessage] = useState('');
   const [reports, setReports] = useState<Report[]>([]);
 
   useEffect(() => {
-    const stored = localStorage.getItem('reports');
-    if (stored) {
-      const parsed: Report[] = JSON.parse(stored);
-      setReports(parsed.filter(r => r.postId === postId));
-    }
-  }, [postId]);
+    fetch(`http://localhost:3000/reports?roomId=${roomId}`)
+      .then(res => res.json())
+      .then(data => setReports(data))
+      .catch(err => console.error('Lỗi khi lấy danh sách phản ánh:', err));
+  }, [roomId]);
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!type || !message) return;
 
     const newReport: Report = {
-      id: Date.now().toString(),
-      postId,
+      roomId,
       type,
       message,
       createdAt: new Date().toISOString(),
     };
 
-    const allReports = [...reports, newReport];
-    setReports(allReports);
-    localStorage.setItem('reports', JSON.stringify([
-      ...(JSON.parse(localStorage.getItem('reports') || '[]')),
-      newReport
-    ]));
+    try {
+      const response = await fetch('http://localhost:3000/reports', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newReport),
+      });
 
-    alert('✅ Phản ánh đã được gửi!');
-    setType('');
-    setMessage('');
+      const saved = await response.json();
+      setReports([...reports, saved]);
+
+      alert('✅ Phản ánh đã được gửi!');
+      setType('');
+      setMessage('');
+    } catch (err) {
+      console.error('Lỗi khi gửi phản ánh:', err);
+      alert('❌ Gửi phản ánh thất bại.');
+    }
   };
 
   return (
@@ -85,7 +90,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ postId }) => {
           <ul>
             {reports.map(r => (
               <li key={r.id}>
-                <strong>{r.type}</strong> - {r.message} <br />
+                <strong>{r.type}</strong> - {r.message}<br />
                 <small>🕒 {new Date(r.createdAt).toLocaleString()}</small>
               </li>
             ))}

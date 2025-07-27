@@ -1,20 +1,42 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import posts from '../../data/db';
-import '../../css/EditProfile.css'
+import '../../css/EditProfile.css';
+
+interface User {
+  id: string;
+  name: string;
+  phone: string;
+  zalo: string;
+  avatar: string;
+}
 
 const EditProfile = () => {
-  const { userId } = useParams();
-  const postWithUser = posts.find(p => p.author.id === userId);
-  const user = postWithUser?.author;
+  const { userId } = useParams<{ userId: string }>();
+  const [user, setUser] = useState<User | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    zalo: '',
+    avatar: '',
+  });
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
-    phone: user?.phone || '',
-    zalo: user?.zalo || '',
-    avatar: user?.avatar || '',
-  });
+  useEffect(() => {
+    fetch(`http://localhost:3000/users/${userId}`)
+      .then(res => res.json())
+      .then((data: User) => {
+        setUser(data);
+        setFormData({
+          name: data.name,
+          phone: data.phone,
+          zalo: data.zalo,
+          avatar: data.avatar,
+        });
+      })
+      .catch(err => {
+        console.error("Không thể load user:", err);
+      });
+  }, [userId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,12 +45,27 @@ const EditProfile = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Thông tin cập nhật:", formData);
-    alert('Cập nhật thành công');
-    navigate(`/user/${userId}`);
+    if (!user) return;
+
+    fetch(`http://localhost:3000/users/${user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ...user, ...formData }),
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Cập nhật thất bại");
+        alert('Cập nhật thành công');
+        navigate(`/user/${userId}`);
+      })
+      .catch(err => {
+        console.error("Lỗi khi cập nhật:", err);
+        alert("Có lỗi xảy ra khi cập nhật.");
+      });
   };
 
-  if (!user) return <div>Không tìm thấy người dùng.</div>;
+  if (!user) return <div>Đang tải thông tin người dùng...</div>;
 
   return (
     <div className="edit-profile-container">
