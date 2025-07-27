@@ -56,8 +56,8 @@ const loadBookings = async () => {
     // Nếu không phải response thành công (status != 200–299)
     if (!bookingsRes.ok) {
       const errorText = await bookingsRes.text();
-      console.error("❌ API trả về lỗi (không phải JSON):", errorText);
-      throw new Error(`API lỗi: ${bookingsRes.status}`);
+      console.error("❌ http://localhost:5000 trả về lỗi (không phải JSON):", errorText);
+      throw new Error(`http://localhost:5000 lỗi: ${bookingsRes.status}`);
     }
 
     // Thử parse JSON

@@ -2,14 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
-  TrendingDown,
   Users, 
   Building, 
   DollarSign,
   Calendar,
   Download,
   Eye,
-  Filter
 } from 'lucide-react';
 import { useToastContext } from '../contexts/ToastContext';
 
@@ -62,10 +60,10 @@ const ReportsPage: React.FC = () => {
       
       // Fetch data from multiple endpoints
       const [usersRes, roomsRes, paymentsRes, contractsRes] = await Promise.all([
-        fetch('/api/users'),
-        fetch('/api/rooms'),
-        fetch('/api/payments'),
-        fetch('/api/contracts')
+        fetch('http://localhost:5000/users'),
+        fetch('http://localhost:5000/rooms'),
+        fetch('http://localhost:5000/payments'),
+        fetch('http://localhost:5000/contracts')
       ]);
 
       const [users, rooms, payments, contracts] = await Promise.all([

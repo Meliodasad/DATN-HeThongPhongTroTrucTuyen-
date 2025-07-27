@@ -42,10 +42,10 @@ const DashboardPage: React.FC = () => {
       
       // Fetch data from multiple endpoints
       const [usersRes, roomsRes, bookingsRes, paymentsRes] = await Promise.all([
-        fetch('/api/users'),
-        fetch('/api/rooms'),
-        fetch('/api/bookings'),
-        fetch('/api/payments')
+        fetch('/http://localhost:5000/users'),
+        fetch('/http://localhost:5000/rooms'),
+        fetch('/http://localhost:5000/bookings'),
+        fetch('/http://localhost:5000/payments')
       ]);
 
       const [users, rooms, bookings, payments] = await Promise.all([

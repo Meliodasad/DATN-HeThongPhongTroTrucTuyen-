@@ -324,9 +324,9 @@ const ContractsPage: React.FC = () => {
       
       // Fetch contracts, rooms, and users
       const [contractsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('/api/contracts'),
-        fetch('/api/rooms'),
-        fetch('/api/users')
+        fetch('http://localhost:5000/contracts'),
+        fetch('http://localhost:5000/rooms'),
+        fetch('http://localhost:5000/users')
       ]);
 
       const [contractsData, roomsData, usersData] = await Promise.all([
@@ -370,7 +370,7 @@ const ContractsPage: React.FC = () => {
 
   const handleUpdateStatus = async (contractId: string, status: 'active' | 'expired' | 'terminated') => {
     try {
-      const response = await fetch(`/api/contracts/${contractId}`, {
+      const response = await fetch(`http://localhost:5000/contracts/${contractId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

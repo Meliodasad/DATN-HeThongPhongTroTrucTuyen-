@@ -56,10 +56,10 @@ const PaymentsPage: React.FC = () => {
       
       // Fetch payments, contracts, rooms, and users
       const [paymentsRes, contractsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('/api/payments'),
-        fetch('/api/contracts'),
-        fetch('/api/rooms'),
-        fetch('/api/users')
+        fetch('http://localhost:5000/payments'),
+        fetch('http://localhost:5000/contracts'),
+        fetch('http://localhost:5000/rooms'),
+        fetch('http://localhost:5000/users')
       ]);
 
       const [paymentsData, contractsData, roomsData, usersData] = await Promise.all([
@@ -106,7 +106,7 @@ const PaymentsPage: React.FC = () => {
 
   const handleUpdateStatus = async (paymentId: string, status: 'completed' | 'pending' | 'failed') => {
     try {
-      const response = await fetch(`/api/payments/${paymentId}`, {
+      const response = await fetch(`/http://localhost:5000/payments/${paymentId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
