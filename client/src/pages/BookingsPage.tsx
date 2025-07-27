@@ -51,32 +51,23 @@ const BookingsPage: React.FC = () => {
 
 const loadBookings = async () => {
   try {
-    const bookingsRes = await fetch("http://localhost:5000/bookings");
+    const res = await fetch('http://localhost:5000/bookings');
 
-    // Nếu không phải response thành công (status != 200–299)
-    if (!bookingsRes.ok) {
-      const errorText = await bookingsRes.text();
-      console.error("❌ http://localhost:5000 trả về lỗi (không phải JSON):", errorText);
-      throw new Error(`http://localhost:5000 lỗi: ${bookingsRes.status}`);
+    // Kiểm tra nếu phản hồi không thành công
+    if (!res.ok) {
+      const text = await res.text();
+      console.error('Server error:', text);
+      throw new Error('Failed to fetch bookings');
     }
 
-    // Thử parse JSON
-    let bookingsData;
-    try {
-      bookingsData = await bookingsRes.json();
-    } catch (jsonError) {
-      const text = await bookingsRes.text();
-      console.error("❌ Không thể parse JSON. Dữ liệu trả về:", text);
-      throw new Error("Phản hồi không phải JSON hợp lệ");
-    }
-
-    setBookings(bookingsData);
-    setFilteredBookings(bookingsData);
+    const data = await res.json();
+    console.log('Fetched bookings:', data);
+    // setState hoặc return data ở đây
   } catch (error) {
-    console.error("❌ Lỗi khi tải bookings:", error);
-    toast.error("Không thể tải danh sách đặt phòng. Vui lòng thử lại sau.");
+    console.error('Error loading bookings:', error);
   }
 };
+
 
 
 

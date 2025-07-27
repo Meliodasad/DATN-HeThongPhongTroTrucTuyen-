@@ -326,9 +326,9 @@ const BookingsPage: React.FC = () => {
       
       // Fetch bookings, rooms, and users
       const [bookingsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('/api/bookings'),
-        fetch('/api/rooms'),
-        fetch('/api/users')
+        fetch('http://localhost:5000/bookings'),
+        fetch('http://localhost:5000/rooms'),
+        fetch('http://localhost:5000/users')
       ]);
 
       const [bookingsData, roomsData, usersData] = await Promise.all([
