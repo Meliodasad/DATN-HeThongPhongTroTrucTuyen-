@@ -60,3 +60,25 @@ export interface UpdateRoomData extends Partial<CreateRoomData> {
   status?: Room['status'];
   approvalStatus?: Room['approvalStatus'];
 }
+interface Booking {
+  id: string;
+  roomId: string;
+  tenantId: string;
+  bookingDate: string;
+  note: string;
+  bookingStatus: "pending" | "confirmed" | "cancelled";
+  approvalStatus: "approved" | "rejected" | "waiting"; // 👈 Thêm dòng này
+  createdAt: string;
+  room: {
+    roomTitle: string;
+    location: string;
+    price: number;
+    images: string[];
+  };
+  tenant: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    avatar?: string;
+  };
+}

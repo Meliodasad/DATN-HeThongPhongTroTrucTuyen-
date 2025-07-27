@@ -31,7 +31,7 @@
       "idNumber": "079098765432",
       "address": "456 Lê Lợi, Quận 3, TP.HCM",
       "role": "host",
-      "status": "pending",
+      "status": "active",
       "createdAt": "2024-02-01T14:20:00Z",
       "avatar": "https://images.pexels.com/photos/697509/pexels-photo-697509.jpeg?auto=compress&cs=tinysrgb&w=150"
     },
@@ -89,7 +89,7 @@
       "dob": "",
       "role": "host",
       "avatar": "",
-      "status": "active",
+      "status": "inactive",
       "createdAt": "2025-07-26T03:16:21.221Z"
     },
     {
@@ -212,8 +212,9 @@
       "utilities": [],
       "terms": "",
       "status": "available",
-      "approvalStatus": "pending",
-      "createdAt": "2025-07-26T14:32:47.846Z"
+      "approvalStatus": "approved",
+      "createdAt": "2025-07-26T14:32:47.846Z",
+      "approvalDate": "2025-07-27T17:01:37.910Z"
     }
   ],
   "bookings": [
@@ -224,6 +225,7 @@
       "bookingDate": "2024-02-05T10:00:00Z",
       "note": "Muốn xem phòng vào cuối tuần",
       "bookingStatus": "cancelled",
+      "approvalStatus": "waiting",
       "createdAt": "2024-02-05T10:00:00Z"
     },
     {
@@ -233,6 +235,7 @@
       "bookingDate": "2024-02-15T14:30:00Z",
       "note": "Cần thuê gấp trong tuần này",
       "bookingStatus": "confirmed",
+      "approvalStatus": "waiting",
       "createdAt": "2024-02-15T14:30:00Z"
     },
     {
@@ -241,7 +244,8 @@
       "tenantId": "3",
       "bookingDate": "2024-02-05T10:00:00Z",
       "note": "Muốn xem phòng vào cuối tuần",
-      "bookingStatus": "pending",
+      "bookingStatus": "confirmed",
+      "approvalStatus": "waiting",
       "createdAt": "2024-02-05T10:00:00Z"
     },
     {
@@ -251,6 +255,7 @@
       "bookingDate": "2024-02-05T10:00:00Z",
       "note": "Muốn xem phòng vào cuối tuần",
       "bookingStatus": "pending",
+      "approvalStatus": "waiting",
       "createdAt": "2024-02-05T10:00:00Z"
     }
   ],
