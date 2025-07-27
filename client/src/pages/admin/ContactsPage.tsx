@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-
 import { 
   Phone, 
   Mail, 
@@ -7,7 +6,8 @@ import {
   Clock, 
   User, 
   Calendar,
-  Search,  Eye,
+  Search,  
+  Eye,
   Trash2,
   Send,
   CheckCircle,
@@ -20,100 +20,33 @@ import {
   Globe,
   Facebook,
   Twitter,
-  Instagram
+  Instagram,
+  Home
 } from 'lucide-react';
-import { useToastContext } from '../../../contexts/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
+import { messageService } from '../../services/messageService';
+import type { Message, MessageStats } from '../../types/message';
 
-interface ContactMessage {
-  id: number;
-  name: string;
-  email: string;
-  phone?: string;
-  subject: string;
-  message: string;
-  type: 'support' | 'complaint' | 'suggestion' | 'general';
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  status: 'new' | 'in-progress' | 'resolved' | 'closed';
-  createdAt: string;
-  updatedAt: string;
-  assignedTo?: string;
-  response?: string;
-  responseAt?: string;
-}
-
-interface FAQ {
-  id: number;
-  question: string;
-  answer: string;
-  category: string;
-  views: number;
-  helpful: number;
-}
-
-const ContactSupport: React.FC = () => {
-  const [messages, setMessages] = useState<ContactMessage[]>([]);
-  const [faqs, setFaqs] = useState<FAQ[]>([]);
+const ContactsPage: React.FC = () => {
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [stats, setStats] = useState<MessageStats>({
+    total: 0,
+    unread: 0,
+    today: 0,
+    thisWeek: 0
+  });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<ContactMessage['status'] | 'all'>('all');
-  const [typeFilter, setTypeFilter] = useState<ContactMessage['type'] | 'all'>('all');
-  const [priorityFilter, setPriorityFilter] = useState<ContactMessage['priority'] | 'all'>('all');
-  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
+  const [readFilter, setReadFilter] = useState<'all' | 'read' | 'unread'>('all');
+  const [selectedMessage, setSelectedMessage] = useState<Message | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [responseText, setResponseText] = useState('');
   const [activeTab, setActiveTab] = useState<'messages' | 'faqs' | 'info'>('messages');
 
   const { success, error } = useToastContext();
 
-  // Mock data
-  const mockMessages: ContactMessage[] = [
-    {
-      id: 1,
-      name: 'Nguyễn Văn A',
-      email: 'nguyenvana@email.com',
-      phone: '0901234567',
-      subject: 'Không thể đăng nhập vào tài khoản',
-      message: 'Tôi đã thử đăng nhập nhiều lần nhưng hệ thống báo lỗi. Xin hãy hỗ trợ tôi.',
-      type: 'support',
-      priority: 'high',
-      status: 'new',
-      createdAt: '2024-01-20',
-      updatedAt: '2024-01-20'
-    },
-    {
-      id: 2,
-      name: 'Trần Thị B',
-      email: 'tranthib@email.com',
-      phone: '0912345678',
-      subject: 'Phòng trọ không đúng như mô tả',
-      message: 'Phòng tôi thuê không giống như hình ảnh và mô tả trên website. Tôi muốn khiếu nại.',
-      type: 'complaint',
-      priority: 'urgent',
-      status: 'in-progress',
-      createdAt: '2024-01-19',
-      updatedAt: '2024-01-20',
-      assignedTo: 'Admin Support',
-      response: 'Chúng tôi đã tiếp nhận khiếu nại và sẽ kiểm tra trong 24h.',
-      responseAt: '2024-01-20'
-    },
-    {
-      id: 3,
-      name: 'Lê Văn C',
-      email: 'levanc@email.com',
-      subject: 'Đề xuất cải thiện giao diện',
-      message: 'Tôi nghĩ giao diện tìm kiếm có thể được cải thiện để dễ sử dụng hơn.',
-      type: 'suggestion',
-      priority: 'low',
-      status: 'resolved',
-      createdAt: '2024-01-18',
-      updatedAt: '2024-01-19',
-      assignedTo: 'Product Team',
-      response: 'Cảm ơn góp ý của bạn. Chúng tôi sẽ cân nhắc trong bản cập nhật tiếp theo.',
-      responseAt: '2024-01-19'
-    }
-  ];
-
-  const mockFAQs: FAQ[] = [
+  // Mock FAQs data
+  const faqs = [
     {
       id: 1,
       question: 'Làm thế nào để đăng ký tài khoản?',
@@ -133,7 +66,7 @@ const ContactSupport: React.FC = () => {
     {
       id: 3,
       question: 'Làm thế nào để đăng tin cho thuê phòng?',
-      answer: 'Sau khi đăng nhập, vào mục "Đăng tin", điền đầy đủ thông tin phòng trọ, upload hình ảnh và submit để admin duyệt.',
+      answer: 'Sau khi đăng nhập với tài khoản Host, vào mục "Quản lý phòng", click "Thêm phòng mới", điền đầy đủ thông tin phòng trọ, upload hình ảnh và submit để admin duyệt.',
       category: 'Đăng tin',
       views: 2100,
       helpful: 1800
@@ -141,10 +74,18 @@ const ContactSupport: React.FC = () => {
     {
       id: 4,
       question: 'Phí dịch vụ là bao nhiều?',
-      answer: 'Hiện tại dịch vụ hoàn toàn miễn phí cho người tìm phòng. Chủ trọ chỉ trả phí khi có giao dịch thành công.',
+      answer: 'Hiện tại dịch vụ hoàn toàn miễn phí cho người tìm phòng. Chủ trọ chỉ trả phí hoa hồng khi có giao dịch thành công.',
       category: 'Thanh toán',
       views: 1560,
       helpful: 1200
+    },
+    {
+      id: 5,
+      question: 'Làm thế nào để liên hệ với chủ trọ?',
+      answer: 'Tại trang chi tiết phòng, bạn có thể click nút "Liên hệ" để gửi tin nhắn trực tiếp cho chủ trọ hoặc sử dụng số điện thoại được hiển thị.',
+      category: 'Liên hệ',
+      views: 1890,
+      helpful: 1650
     }
   ];
 
@@ -155,119 +96,103 @@ const ContactSupport: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setMessages(mockMessages);
-      setFaqs(mockFAQs);
+      const [messagesData, statsData] = await Promise.all([
+        messageService.getMessages(),
+        messageService.getMessageStats()
+      ]);
+      setMessages(messagesData);
+      setStats(statsData);
     } catch (err) {
-        console.error(err);
-      error('Lỗi', 'Không thể tải dữ liệu');
+      console.error(err);
+      error('Lỗi', 'Không thể tải dữ liệu tin nhắn');
     } finally {
       setLoading(false);
     }
   };
 
   const filteredMessages = messages.filter(message => {
-    const matchesSearch = message.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         message.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         message.subject.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || message.status === statusFilter;
-    const matchesType = typeFilter === 'all' || message.type === typeFilter;
-    const matchesPriority = priorityFilter === 'all' || message.priority === priorityFilter;
+    const matchesSearch = message.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         message.sender.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         message.receiver.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesRead = readFilter === 'all' || 
+                       (readFilter === 'read' && message.isRead) ||
+                       (readFilter === 'unread' && !message.isRead);
     
-    return matchesSearch && matchesStatus && matchesType && matchesPriority;
+    return matchesSearch && matchesRead;
   });
 
-  const handleViewDetail = (message: ContactMessage) => {
+  const handleViewDetail = (message: Message) => {
     setSelectedMessage(message);
-    setResponseText(message.response || '');
+    setResponseText('');
     setIsDetailModalOpen(true);
+    
+    // Mark as read if unread
+    if (!message.isRead) {
+      handleMarkAsRead(message.id);
+    }
+  };
+
+  const handleMarkAsRead = async (messageId: string) => {
+    try {
+      await messageService.markAsRead(messageId);
+      setMessages(prev => prev.map(m => 
+        m.id === messageId ? { ...m, isRead: true } : m
+      ));
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSendResponse = async () => {
     if (!selectedMessage || !responseText.trim()) return;
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      const updatedMessage = {
-        ...selectedMessage,
-        response: responseText,
-        responseAt: new Date().toISOString().split('T')[0],
-        status: 'resolved' as const,
-        updatedAt: new Date().toISOString().split('T')[0]
+      // Create a response message
+      const responseMessage = {
+        hostId: selectedMessage.receiverId,
+        tenantId: selectedMessage.senderId,
+        senderId: selectedMessage.receiverId, // Admin responds as the receiver
+        message: responseText,
+        time: new Date().toISOString(),
+        isRead: false
       };
 
-      setMessages(prev => prev.map(m => m.id === selectedMessage.id ? updatedMessage : m));
-      setSelectedMessage(updatedMessage);
+      await messageService.sendMessage(responseMessage);
       success('Thành công', 'Đã gửi phản hồi');
+      setResponseText('');
+      setIsDetailModalOpen(false);
+      await loadData();
     } catch (err) {
-        console.error(err);
+      console.error(err);
       error('Lỗi', 'Không thể gửi phản hồi');
     }
   };
 
-  const handleDeleteMessage = async (id: number) => {
+  const handleDeleteMessage = async (id: string) => {
     if (!confirm('Bạn có chắc chắn muốn xóa tin nhắn này?')) return;
 
     try {
-      setMessages(prev => prev.filter(m => m.id !== id));
+      await messageService.deleteMessage(id);
       success('Thành công', 'Đã xóa tin nhắn');
+      await loadData();
     } catch (err) {
-        console.error(err);
+      console.error(err);
       error('Lỗi', 'Không thể xóa tin nhắn');
     }
   };
 
-  const getStatusColor = (status: ContactMessage['status']) => {
-    switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800';
-      case 'in-progress': return 'bg-yellow-100 text-yellow-800';
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'closed': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   };
 
-  const getStatusText = (status: ContactMessage['status']) => {
-    switch (status) {
-      case 'new': return 'Mới';
-      case 'in-progress': return 'Đang xử lý';
-      case 'resolved': return 'Đã giải quyết';
-      case 'closed': return 'Đã đóng';
-      default: return 'Không xác định';
-    }
-  };
-
-  const getPriorityColor = (priority: ContactMessage['priority']) => {
-    switch (priority) {
-      case 'low': return 'bg-green-100 text-green-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'urgent': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getPriorityText = (priority: ContactMessage['priority']) => {
-    switch (priority) {
-      case 'low': return 'Thấp';
-      case 'medium': return 'Trung bình';
-      case 'high': return 'Cao';
-      case 'urgent': return 'Khẩn cấp';
-      default: return 'Không xác định';
-    }
-  };
-
-  const getTypeText = (type: ContactMessage['type']) => {
-    switch (type) {
-      case 'support': return 'Hỗ trợ';
-      case 'complaint': return 'Khiếu nại';
-      case 'suggestion': return 'Góp ý';
-      case 'general': return 'Chung';
-      default: return 'Không xác định';
-    }
+  const getMessagePreview = (message: string) => {
+    return message.length > 100 ? message.substring(0, 100) + '...' : message;
   };
 
   if (loading) {
@@ -296,31 +221,7 @@ const ContactSupport: React.FC = () => {
             <MessageSquare className="w-8 h-8 text-blue-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng tin nhắn</p>
-              <p className="text-2xl font-bold text-gray-900">{messages.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
-            <Clock className="w-8 h-8 text-yellow-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Chờ xử lý</p>
-              <p className="text-2xl font-bold text-yellow-600">
-                {messages.filter(m => m.status === 'new' || m.status === 'in-progress').length}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
-            <CheckCircle className="w-8 h-8 text-green-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Đã giải quyết</p>
-              <p className="text-2xl font-bold text-green-600">
-                {messages.filter(m => m.status === 'resolved').length}
-              </p>
+              <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
             </div>
           </div>
         </div>
@@ -329,10 +230,28 @@ const ContactSupport: React.FC = () => {
           <div className="flex items-center">
             <AlertCircle className="w-8 h-8 text-red-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Khẩn cấp</p>
-              <p className="text-2xl font-bold text-red-600">
-                {messages.filter(m => m.priority === 'urgent').length}
-              </p>
+              <p className="text-sm font-medium text-gray-600">Chưa đọc</p>
+              <p className="text-2xl font-bold text-red-600">{stats.unread}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <Clock className="w-8 h-8 text-yellow-600" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Hôm nay</p>
+              <p className="text-2xl font-bold text-yellow-600">{stats.today}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <CheckCircle className="w-8 h-8 text-green-600" />
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Tuần này</p>
+              <p className="text-2xl font-bold text-green-600">{stats.thisWeek}</p>
             </div>
           </div>
         </div>
@@ -383,12 +302,12 @@ const ContactSupport: React.FC = () => {
           {activeTab === 'messages' && (
             <div className="space-y-6">
               {/* Search and Filter */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="relative">
+              <div className="flex flex-col md:flex-row items-center gap-4">
+                <div className="relative flex-1 w-full">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
                   <input
                     type="text"
-                    placeholder="Tìm kiếm tin nhắn..."
+                    placeholder="Tìm kiếm tin nhắn, người gửi..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -396,39 +315,13 @@ const ContactSupport: React.FC = () => {
                 </div>
                 
                 <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as ContactMessage['status'] | 'all')}
+                  value={readFilter}
+                  onChange={(e) => setReadFilter(e.target.value as 'all' | 'read' | 'unread')}
                   className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="all">Tất cả trạng thái</option>
-                  <option value="new">Mới</option>
-                  <option value="in-progress">Đang xử lý</option>
-                  <option value="resolved">Đã giải quyết</option>
-                  <option value="closed">Đã đóng</option>
-                </select>
-
-                <select
-                  value={typeFilter}
-                  onChange={(e) => setTypeFilter(e.target.value as ContactMessage['type'] | 'all')}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Tất cả loại</option>
-                  <option value="support">Hỗ trợ</option>
-                  <option value="complaint">Khiếu nại</option>
-                  <option value="suggestion">Góp ý</option>
-                  <option value="general">Chung</option>
-                </select>
-
-                <select
-                  value={priorityFilter}
-                  onChange={(e) => setPriorityFilter(e.target.value as ContactMessage['priority'] | 'all')}
-                  className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="all">Tất cả mức độ</option>
-                  <option value="low">Thấp</option>
-                  <option value="medium">Trung bình</option>
-                  <option value="high">Cao</option>
-                  <option value="urgent">Khẩn cấp</option>
+                  <option value="all">Tất cả tin nhắn</option>
+                  <option value="unread">Chưa đọc</option>
+                  <option value="read">Đã đọc</option>
                 </select>
               </div>
 
@@ -441,19 +334,16 @@ const ContactSupport: React.FC = () => {
                         Người gửi
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Tiêu đề
+                        Người nhận
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Loại
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Mức độ
+                        Nội dung
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Trạng thái
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Ngày tạo
+                        Thời gian
                       </th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Thao tác
@@ -462,52 +352,76 @@ const ContactSupport: React.FC = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {filteredMessages.map((message) => (
-                      <tr key={message.id} className="hover:bg-gray-50">
+                      <tr key={message.id} className={`hover:bg-gray-50 ${!message.isRead ? 'bg-blue-50' : ''}`}>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
-                            <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                              <User className="w-4 h-4 text-gray-500" />
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                              {message.sender.avatar ? (
+                                <img 
+                                  src={message.sender.avatar} 
+                                  alt={message.sender.fullName}
+                                  className="w-10 h-10 rounded-full object-cover"
+                                />
+                              ) : (
+                                <User className="w-5 h-5 text-gray-500" />
+                              )}
                             </div>
                             <div className="ml-3">
-                              <div className="text-sm font-medium text-gray-900">{message.name}</div>
-                              <div className="text-sm text-gray-500">{message.email}</div>
+                              <div className="text-sm font-medium text-gray-900">{message.sender.fullName}</div>
+                              <div className="text-sm text-gray-500">{message.sender.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                              {message.receiver.avatar ? (
+                                <img 
+                                  src={message.receiver.avatar} 
+                                  alt={message.receiver.fullName}
+                                  className="w-8 h-8 rounded-full object-cover"
+                                />
+                              ) : (
+                                <User className="w-4 h-4 text-gray-500" />
+                              )}
+                            </div>
+                            <div className="ml-2">
+                              <div className="text-sm font-medium text-gray-900">{message.receiver.fullName}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="text-sm text-gray-900 max-w-xs truncate">{message.subject}</div>
+                          <div className="text-sm text-gray-900 max-w-xs">
+                            <p className="line-clamp-2">{getMessagePreview(message.message)}</p>
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="text-sm text-gray-900">{getTypeText(message.type)}</span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(message.priority)}`}>
-                            {getPriorityText(message.priority)}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(message.status)}`}>
-                            {getStatusText(message.status)}
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                            message.isRead 
+                              ? 'bg-green-100 text-green-800' 
+                              : 'bg-red-100 text-red-800'
+                          }`}>
+                            {message.isRead ? 'Đã đọc' : 'Chưa đọc'}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center text-sm text-gray-500">
                             <Calendar className="w-4 h-4 mr-1" />
-                            {message.createdAt}
+                            {formatDate(message.time)}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-2">
                             <button 
                               onClick={() => handleViewDetail(message)}
-                              className="text-blue-600 hover:text-blue-900" 
+                              className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
                               title="Xem chi tiết"
                             >
                               <Eye className="w-4 h-4" />
                             </button>
                             <button 
                               onClick={() => handleDeleteMessage(message.id)}
-                              className="text-red-600 hover:text-red-900"
+                              className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                               title="Xóa tin nhắn"
                             >
                               <Trash2 className="w-4 h-4" />
@@ -521,9 +435,10 @@ const ContactSupport: React.FC = () => {
               </div>
 
               {filteredMessages.length === 0 && (
-                <div className="text-center py-8">
-                  <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p className="text-gray-500">Không tìm thấy tin nhắn nào</p>
+                <div className="text-center py-12">
+                  <MessageSquare className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg font-medium">Không tìm thấy tin nhắn nào</p>
+                  <p className="text-gray-400 text-sm mt-1">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
                 </div>
               )}
             </div>
@@ -534,7 +449,7 @@ const ContactSupport: React.FC = () => {
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-gray-900">Câu hỏi thường gặp</h3>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                   Thêm FAQ mới
                 </button>
               </div>
@@ -586,21 +501,21 @@ const ContactSupport: React.FC = () => {
                       <Mail className="w-5 h-5 text-blue-600" />
                       <div>
                         <p className="font-medium text-gray-900">Email</p>
-                        <p className="text-gray-600">support@phongtro.com</p>
+                        <p className="text-gray-600">support@rentalhub.com</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <MapPin className="w-5 h-5 text-blue-600" />
                       <div>
                         <p className="font-medium text-gray-900">Địa chỉ</p>
-                        <p className="text-gray-600">123 Nguyễn Huệ, Q1, TP.HCM</p>
+                        <p className="text-gray-600">123 Nguyễn Huệ, Quận 1, TP.HCM</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Globe className="w-5 h-5 text-blue-600" />
                       <div>
                         <p className="font-medium text-gray-900">Website</p>
-                        <p className="text-gray-600">www.phongtro.com</p>
+                        <p className="text-gray-600">www.rentalhub.com</p>
                       </div>
                     </div>
                   </div>
@@ -636,15 +551,15 @@ const ContactSupport: React.FC = () => {
               <div className="bg-gray-50 rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-6">Mạng xã hội</h3>
                 <div className="flex items-center gap-4">
-                  <a href="#" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                  <a href="#" className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                     <Facebook className="w-4 h-4" />
                     Facebook
                   </a>
-                  <a href="#" className="flex items-center gap-2 bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-500">
+                  <a href="#" className="flex items-center gap-2 bg-blue-400 text-white px-4 py-2 rounded-lg hover:bg-blue-500 transition-colors">
                     <Twitter className="w-4 h-4" />
                     Twitter
                   </a>
-                  <a href="#" className="flex items-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700">
+                  <a href="#" className="flex items-center gap-2 bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition-colors">
                     <Instagram className="w-4 h-4" />
                     Instagram
                   </a>
@@ -655,15 +570,15 @@ const ContactSupport: React.FC = () => {
               <div className="bg-gray-50 rounded-lg p-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-6">Thao tác nhanh</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-3 rounded-lg hover:bg-gray-50">
+                  <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors">
                     <Download className="w-4 h-4 text-gray-600" />
                     <span>Tải báo cáo</span>
                   </button>
-                  <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-3 rounded-lg hover:bg-gray-50">
+                  <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors">
                     <FileText className="w-4 h-4 text-gray-600" />
                     <span>Hướng dẫn sử dụng</span>
                   </button>
-                  <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-3 rounded-lg hover:bg-gray-50">
+                  <button className="flex items-center gap-2 bg-white border border-gray-300 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors">
                     <MessageSquare className="w-4 h-4 text-gray-600" />
                     <span>Chat trực tiếp</span>
                   </button>
@@ -682,9 +597,9 @@ const ContactSupport: React.FC = () => {
               <h3 className="text-xl font-semibold text-gray-900">Chi tiết tin nhắn</h3>
               <button
                 onClick={() => setIsDetailModalOpen(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-<User className="w-6 h-6" />
+                <User className="w-6 h-6" />
               </button>
             </div>
 
@@ -694,81 +609,81 @@ const ContactSupport: React.FC = () => {
                 <div className="bg-gray-50 rounded-lg p-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-4">Thông tin người gửi</h4>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-sm text-gray-600">Tên:</span>
-                          <p className="font-medium">{selectedMessage.name}</p>
+                      <h4 className="font-medium text-gray-900 mb-4">Người gửi</h4>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                          {selectedMessage.sender.avatar ? (
+                            <img 
+                              src={selectedMessage.sender.avatar} 
+                              alt={selectedMessage.sender.fullName}
+                              className="w-12 h-12 rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-6 h-6 text-gray-500" />
+                          )}
                         </div>
                         <div>
-                          <span className="text-sm text-gray-600">Email:</span>
-                          <p className="font-medium">{selectedMessage.email}</p>
+                          <p className="font-medium text-gray-900">{selectedMessage.sender.fullName}</p>
+                          <p className="text-sm text-gray-500">{selectedMessage.sender.email}</p>
+                          {selectedMessage.sender.phone && (
+                            <p className="text-sm text-gray-500">{selectedMessage.sender.phone}</p>
+                          )}
                         </div>
-                        {selectedMessage.phone && (
-                          <div>
-                            <span className="text-sm text-gray-600">Điện thoại:</span>
-                            <p className="font-medium">{selectedMessage.phone}</p>
-                          </div>
-                        )}
                       </div>
                     </div>
                     <div>
-                      <h4 className="font-medium text-gray-900 mb-4">Thông tin tin nhắn</h4>
-                      <div className="space-y-2">
-                        <div>
-                          <span className="text-sm text-gray-600">Loại:</span>
-                          <p className="font-medium">{getTypeText(selectedMessage.type)}</p>
+                      <h4 className="font-medium text-gray-900 mb-4">Người nhận</h4>
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
+                          {selectedMessage.receiver.avatar ? (
+                            <img 
+                              src={selectedMessage.receiver.avatar} 
+                              alt={selectedMessage.receiver.fullName}
+                              className="w-12 h-12 rounded-full object-cover"
+                            />
+                          ) : (
+                            <User className="w-6 h-6 text-gray-500" />
+                          )}
                         </div>
                         <div>
-                          <span className="text-sm text-gray-600">Mức độ:</span>
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 ${getPriorityColor(selectedMessage.priority)}`}>
-                            {getPriorityText(selectedMessage.priority)}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-sm text-gray-600">Trạng thái:</span>
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ml-2 ${getStatusColor(selectedMessage.status)}`}>
-                            {getStatusText(selectedMessage.status)}
-                          </span>
-                        </div>
-                        <div>
-                          <span className="text-sm text-gray-600">Ngày tạo:</span>
-                          <p className="font-medium">{selectedMessage.createdAt}</p>
+                          <p className="font-medium text-gray-900">{selectedMessage.receiver.fullName}</p>
+                          <p className="text-sm text-gray-500">{selectedMessage.receiver.email}</p>
+                          {selectedMessage.receiver.phone && (
+                            <p className="text-sm text-gray-500">{selectedMessage.receiver.phone}</p>
+                          )}
                         </div>
                       </div>
                     </div>
                   </div>
+                  
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-600">Thời gian: {formatDate(selectedMessage.time)}</span>
+                      </div>
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        selectedMessage.isRead 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {selectedMessage.isRead ? 'Đã đọc' : 'Chưa đọc'}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Subject and Message */}
+                {/* Message Content */}
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Tiêu đề</h4>
-                  <p className="text-lg text-gray-900 mb-4">{selectedMessage.subject}</p>
-                  
-                  <h4 className="font-medium text-gray-900 mb-2">Nội dung</h4>
+                  <h4 className="font-medium text-gray-900 mb-2">Nội dung tin nhắn</h4>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{selectedMessage.message}</p>
                   </div>
                 </div>
 
-                {/* Existing Response */}
-                {selectedMessage.response && (
-                  <div>
-                    <h4 className="font-medium text-gray-900 mb-2">Phản hồi hiện tại</h4>
-                    <div className="bg-blue-50 rounded-lg p-4">
-                      <p className="text-blue-900">{selectedMessage.response}</p>
-                      <p className="text-sm text-blue-600 mt-2">
-                        Phản hồi bởi: {selectedMessage.assignedTo || 'Admin'} - {selectedMessage.responseAt}
-                      </p>
-                    </div>
-                  </div>
-                )}
-
                 {/* Response Form */}
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">
-                    {selectedMessage.response ? 'Cập nhật phản hồi' : 'Thêm phản hồi'}
-                  </h4>
+                  <h4 className="font-medium text-gray-900 mb-2">Phản hồi tin nhắn</h4>
                   <textarea
                     value={responseText}
                     onChange={(e) => setResponseText(e.target.value)}
@@ -779,14 +694,15 @@ const ContactSupport: React.FC = () => {
                   <div className="flex gap-2 mt-4">
                     <button
                       onClick={handleSendResponse}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2"
+                      disabled={!responseText.trim()}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
                     >
                       <Send className="w-4 h-4" />
                       Gửi phản hồi
                     </button>
                     <button
                       onClick={() => setIsDetailModalOpen(false)}
-                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
                     >
                       Đóng
                     </button>
@@ -801,4 +717,4 @@ const ContactSupport: React.FC = () => {
   );
 };
 
-export default ContactSupport;
+export default ContactsPage;

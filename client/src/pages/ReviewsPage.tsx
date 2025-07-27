@@ -1,8 +1,8 @@
 import React from 'react';
-import ReviewManagement from './admin/components/ReviewManagement';
+import CommentsPage from './admin/CommentsPage';
 
 const ReviewsPage: React.FC = () => {
-  return <ReviewManagement />;
+  return <CommentsPage />;
 };
 
 export default ReviewsPage;
