@@ -1,5 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
-import posts from '../../data/postsData';
+import posts from '../../data/db';
 import '../../css/UserProfile.css'
 
 const UserProfile = () => {

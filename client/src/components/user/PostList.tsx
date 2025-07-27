@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom';
 import PostCard from './PostCard';
-import posts from '../../data/postsData';
-
+import db from '../../data/db';
+import type { Post } from '../../data/db';
 
 const PostList = () => {
+  const posts: Post[] = db.posts;
+
   return (
     <div className="grid">
       {posts.map((post) => (

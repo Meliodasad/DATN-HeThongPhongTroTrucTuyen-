@@ -1,16 +1,23 @@
 import { Link, useParams } from 'react-router-dom';
 import ImageGallery from 'react-image-gallery';
+import db from '../../data/db';
+import '../../css/PostDetail.css';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import posts from '../../data/postsData';
-import '../../css/PostDetail.css'
 import ReportForm from '../../components/user/ReportForm';
-
+import ReviewSection from '../../components/user/ReviewSection';
 
 const PostDetail = () => {
   const { id } = useParams();
-  const post = posts.find(p => p.id === id);
+  const post = db.posts.find(p => p.id === id);
 
   if (!post) return <div className="post-detail-container">Bài đăng không tồn tại.</div>;
+
+  const localUsers = localStorage.getItem('users');
+  const users = localUsers ? JSON.parse(localUsers) : db.users;
+
+  const author = users.find((u: any) => u.id === post.authorId);
+
+  if (!author) return <div className="post-detail-container">Người đăng không tồn tại.</div>;
 
   const images = post.images.map(img => ({
     original: img,
@@ -20,6 +27,10 @@ const PostDetail = () => {
   return (
     <div className="post-detail-container">
       <ImageGallery items={images} showPlayButton={false} showFullscreenButton={false} />
+
+      <Link to={`/booking/${post.id}`} className="booking">
+        Đặt phòng
+      </Link>
 
       <div className="post-info">
         <h1 className="title">{post.title}</h1>
@@ -47,31 +58,23 @@ const PostDetail = () => {
         </div>
       </div>
 
-      <div className="contact-box">
-        <Link to={`/user/${post.author.id}`} className="contact-header">
-          <img src={post.author.avatar} alt="avatar" className="avatar" />
-          <div>
-            <h3>{post.author.name}</h3>
-            <p className="sub-info">{post.author.status} • Tham gia từ: {post.author.joinedDate}</p>
-          </div>
-        </Link>
-
-        <div className="contact-info">
-          <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${post.author.phone}`}>{post.author.phone}</a></p>
-          <p><strong>💬 Zalo:</strong> <a href={post.author.zalo} target="_blank" rel="noopener noreferrer">Nhắn Zalo</a></p>
+      <Link to={`/user/${author.id}`} className="contact-header">
+        <img src={author.avatar} alt="avatar" className="avatar" />
+        <div>
+          <h3>{author.name}</h3>
+          <p className="sub-info">{author.status} • Tham gia từ: {author.joinedDate}</p>
         </div>
+      </Link>
 
-        <div className="contact-actions">
-          <button className="action-button"> Lưu tin</button>
-          <button className="action-button"> Chia sẻ</button>
-          <button className="action-button"> Báo cáo</button>
-        </div>
-
-        <ReportForm postId={post.id} />
+      <div className="contact-info">
+        <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${author.phone}`}>{author.phone}</a></p>
+        <p><strong>💬 Zalo:</strong> <a href={author.zalo} target="_blank" rel="noopener noreferrer">Nhắn Zalo</a></p>
       </div>
 
-    </div>
+      <ReviewSection postId={post.id} />
 
+      <ReportForm postId={post.id} />
+    </div>
   );
 };
 

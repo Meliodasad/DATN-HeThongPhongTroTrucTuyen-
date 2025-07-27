@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import posts from '../../data/postsData';
+import posts from '../../data/db';
 import '../../css/EditProfile.css'
 
 const EditProfile = () => {

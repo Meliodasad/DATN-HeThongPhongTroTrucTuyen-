@@ -1,7 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import db from '../../data/db';
+import type { Post } from '../../data/db';
 import '../../css/SidebarRight.css';
-import posts from '../../data/postsData';
+
+const posts: Post[] = db.posts;
 
 const SidebarRight = () => {
   return (

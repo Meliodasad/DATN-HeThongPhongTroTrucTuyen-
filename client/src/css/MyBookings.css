@@ -1,0 +1,77 @@
+.my-bookings-container {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 24px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+}
+
+.my-bookings-container h2 {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.booking-list {
+  list-style: none;
+  padding: 0;
+}
+
+.booking-item {
+  padding: 16px;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  background: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  line-height: 1.6;
+}
+
+.booking-item .status {
+  font-weight: bold;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-left: 4px;
+  text-transform: capitalize;
+}
+
+.booking-item.pending .status {
+  background-color: #ffecb3;
+  color: #ff9800;
+}
+
+.booking-item.accepted .status {
+  background-color: #c8e6c9;
+  color: #2e7d32;
+}
+
+.booking-item.rejected .status {
+  background-color: #ffcdd2;
+  color: #c62828;
+}
+.actions {
+  margin-top: 12px;
+}
+
+.actions button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  font-size: 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  transition: background-color 0.3s ease;
+}
+
+.actions button:hover {
+  background-color: #0056b3;
+}
+
+.actions button:last-child {
+  background-color: #dc3545;
+}
+
+.actions button:last-child:hover {
+  background-color: #b02a37;
+}
