@@ -10,7 +10,6 @@ import {
   MapPin,
   Phone,
   Mail,
-  Edit,
   Trash2,
   X,
   Save
@@ -44,7 +43,7 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   booking: Booking | null;
-  mode: 'view' | 'edit';
+  mode: 'view' ;
   onSave: () => void;
 }
 
@@ -415,11 +414,7 @@ const BookingsPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleEditBooking = (booking: Booking) => {
-    setSelectedBooking(booking);
-    setModalMode('edit');
-    setIsModalOpen(true);
-  };
+
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -688,13 +683,7 @@ const BookingsPage: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => handleEditBooking(booking)}
-                        className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50" 
-                        title="Chỉnh sửa"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
+     
                       <button 
                         onClick={() => handleDeleteBooking(booking.id)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"

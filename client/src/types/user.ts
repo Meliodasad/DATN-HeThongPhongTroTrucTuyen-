@@ -1,4 +1,5 @@
 export interface User {
+  
   id: string;
   fullName: string;
   email: string;
@@ -13,6 +14,7 @@ export interface User {
   avatar?: string;
   otpCode?: string;
 }
+
 
 export interface UserStats {
   total: number;

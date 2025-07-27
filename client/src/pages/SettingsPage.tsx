@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {  
   User, 
-  Bell, 
   Shield, 
   Database,
-  Mail,
 
   Palette,
   Save,
@@ -58,48 +56,71 @@ const SettingsPage: React.FC = () => {
   };
 
   const handleSaveProfile = async () => {
-    try {
-      // API call to update profile
-      success('Thành công', 'Cập nhật thông tin cá nhân thành công');
-    } catch (err) {
-      error('Lỗi', 'Không thể cập nhật thông tin');
-    }
-  };
+  try {
+    const response = await fetch(`http://localhost:5000/users/${user?.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        address: formData.address,
+        avatar: formData.avatar,
+      }),
+    });
 
-  const handleSaveNotifications = async () => {
-    try {
-      // API call to update notification settings
-      success('Thành công', 'Cập nhật cài đặt thông báo thành công');
-    } catch (err) {
-      error('Lỗi', 'Không thể cập nhật cài đặt thông báo');
-    }
-  };
+    if (!response.ok) throw new Error('Cập nhật thất bại');
+
+    success('Thành công', 'Cập nhật thông tin cá nhân thành công');
+  } catch (err) {
+    console.error(err);
+    error('Lỗi', 'Không thể cập nhật thông tin');
+  }
+};
+
+ 
 
   const handleChangePassword = async () => {
-    if (formData.newPassword !== formData.confirmPassword) {
-      error('Lỗi', 'Mật khẩu xác nhận không khớp');
-      return;
-    }
+  if (formData.newPassword !== formData.confirmPassword) {
+    error('Lỗi', 'Mật khẩu xác nhận không khớp');
+    return;
+  }
 
-    try {
-      // API call to change password
-      success('Thành công', 'Đổi mật khẩu thành công');
-      setFormData(prev => ({
-        ...prev,
-        currentPassword: '',
-        newPassword: '',
-        confirmPassword: ''
-      }));
-    } catch (err) {
-      error('Lỗi', 'Không thể đổi mật khẩu');
-    }
-  };
+  try {
+    const response = await fetch(`http://localhost:5000/users/${user?.id}/change-password`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword,
+      }),
+    });
+
+    if (!response.ok) throw new Error('Đổi mật khẩu thất bại');
+
+    success('Thành công', 'Đổi mật khẩu thành công');
+    setFormData(prev => ({
+      ...prev,
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    }));
+  } catch (err) {
+    console.error(err);
+    error('Lỗi', 'Không thể đổi mật khẩu');
+  }
+};
 
   const handleSaveSystem = async () => {
     try {
       // API call to update system settings
       success('Thành công', 'Cập nhật cài đặt hệ thống thành công');
     } catch (err) {
+      console.error(err);
       error('Lỗi', 'Không thể cập nhật cài đặt hệ thống');
     }
   };
@@ -109,13 +130,13 @@ const SettingsPage: React.FC = () => {
       // API call to update appearance settings
       success('Thành công', 'Cập nhật giao diện thành công');
     } catch (err) {
+      console.error(err);
       error('Lỗi', 'Không thể cập nhật giao diện');
     }
   };
 
   const tabs = [
     { id: 'profile', label: 'Thông tin cá nhân', icon: User },
-    { id: 'notifications', label: 'Thông báo', icon: Bell },
     { id: 'security', label: 'Bảo mật', icon: Shield },
     { id: 'system', label: 'Hệ thống', icon: Database },
     { id: 'appearance', label: 'Giao diện', icon: Palette }
@@ -245,105 +266,7 @@ const SettingsPage: React.FC = () => {
             </div>
           )}
 
-          {/* Notifications Tab */}
-          {activeTab === 'notifications' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Cài đặt thông báo</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium text-gray-900">Thông báo email</p>
-                        <p className="text-sm text-gray-600">Nhận thông báo qua email</p>
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.emailNotifications}
-                        onChange={(e) => handleInputChange('emailNotifications', e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Bell className="w-5 h-5 text-gray-400" />
-                      <div>
-                        <p className="font-medium text-gray-900">Thông báo đẩy</p>
-                        <p className="text-sm text-gray-600">Nhận thông báo đẩy trên trình duyệt</p>
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.pushNotifications}
-                        onChange={(e) => handleInputChange('pushNotifications', e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 bg-green-100 rounded flex items-center justify-center">
-                        <span className="text-xs text-green-600 font-bold">SMS</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Thông báo SMS</p>
-                        <p className="text-sm text-gray-600">Nhận thông báo qua tin nhắn</p>
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.smsNotifications}
-                        onChange={(e) => handleInputChange('smsNotifications', e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-5 h-5 bg-purple-100 rounded flex items-center justify-center">
-                        <span className="text-xs text-purple-600 font-bold">📧</span>
-                      </div>
-                      <div>
-                        <p className="font-medium text-gray-900">Email marketing</p>
-                        <p className="text-sm text-gray-600">Nhận email về khuyến mãi và tin tức</p>
-                      </div>
-                    </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={formData.marketingEmails}
-                        onChange={(e) => handleInputChange('marketingEmails', e.target.checked)}
-                        className="sr-only peer"
-                      />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSaveNotifications}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
-                >
-                  <Save className="w-4 h-4" />
-                  Lưu cài đặt
-                </button>
-              </div>
-            </div>
-          )}
+   
 
           {/* Security Tab */}
           {activeTab === 'security' && (
@@ -407,21 +330,21 @@ const SettingsPage: React.FC = () => {
               </div>
 
               <div className="border-t pt-6">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Xác thực hai yếu tố</h3>
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium text-gray-900">Bật xác thực hai yếu tố</p>
-                    <p className="text-sm text-gray-600">Tăng cường bảo mật cho tài khoản của bạn</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={formData.twoFactorAuth}
-                      onChange={(e) => handleInputChange('twoFactorAuth', e.target.checked)}
-                      className="sr-only peer"
-                    />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                  </label>
+              
+                 <label className="relative inline-flex items-center cursor-pointer">
+  <input
+    type="checkbox"
+    checked={formData.twoFactorAuth}
+    onChange={(e) => handleInputChange('twoFactorAuth', e.target.checked)}
+    className="sr-only peer"
+  />
+  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white 
+    after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full 
+    after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
+  />
+</label>
+
                 </div>
               </div>
             </div>
@@ -434,29 +357,6 @@ const SettingsPage: React.FC = () => {
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Cài đặt hệ thống</h3>
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Tên website
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.siteName}
-                        onChange={(e) => handleInputChange('siteName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Mô tả website
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.siteDescription}
-                        onChange={(e) => handleInputChange('siteDescription', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
                   </div>
 
                   <div className="space-y-4">
@@ -477,19 +377,40 @@ const SettingsPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium text-gray-900">Cho phép đăng ký</p>
-                        <p className="text-sm text-gray-600">Người dùng mới có thể tự đăng ký tài khoản</p>
-                      </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={formData.allowRegistration}
-                          onChange={(e) => handleInputChange('allowRegistration', e.target.checked)}
-                          className="sr-only peer"
-                        />
-                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                 
+                   <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Định dạng ngày
                       </label>
+                      <select
+                        value={formData.dateFormat}
+                        onChange={(e) => handleInputChange('dateFormat', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+                        <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                        <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Đơn vị tiền tệ
+                      </label>
+                      <select
+                        value={formData.currency}
+                        onChange={(e) => handleInputChange('currency', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="VND">VND (₫)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                      </select>
+                    </div>
+
+
+
+                
                     </div>
                   </div>
                 </div>
@@ -543,35 +464,7 @@ const SettingsPage: React.FC = () => {
                       </select>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Định dạng ngày
-                      </label>
-                      <select
-                        value={formData.dateFormat}
-                        onChange={(e) => handleInputChange('dateFormat', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="dd/mm/yyyy">DD/MM/YYYY</option>
-                        <option value="mm/dd/yyyy">MM/DD/YYYY</option>
-                        <option value="yyyy-mm-dd">YYYY-MM-DD</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Đơn vị tiền tệ
-                      </label>
-                      <select
-                        value={formData.currency}
-                        onChange={(e) => handleInputChange('currency', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="VND">VND (₫)</option>
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                      </select>
-                    </div>
+                 
                   </div>
                 </div>
               </div>

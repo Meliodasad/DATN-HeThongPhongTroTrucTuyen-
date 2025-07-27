@@ -239,7 +239,6 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h3 className="text-xl font-semibold text-gray-900">
-            {isCreateMode && 'Thêm phòng trọ mới'}
             {isEditMode && 'Chỉnh sửa phòng trọ'}
             {isViewMode && 'Chi tiết phòng trọ'}
           </h3>
@@ -720,17 +719,9 @@ const RoomsPage: React.FC = () => {
     });
   }, [rooms, filters]);
 
-  const handleCreateRoom = () => {
-    setSelectedRoomId(null);
-    setModalMode('create');
-    setIsModalOpen(true);
-  };
 
-  const handleEditRoom = (roomId: string) => {
-    setSelectedRoomId(roomId);
-    setModalMode('edit');
-    setIsModalOpen(true);
-  };
+
+ 
 
   const handleViewRoom = (roomId: string) => {
     setSelectedRoomId(roomId);
@@ -839,13 +830,7 @@ const RoomsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Quản lý phòng trọ</h1>
           <p className="text-gray-600">Quản lý thông tin và trạng thái phòng trọ</p>
         </div>
-        <button 
-          onClick={handleCreateRoom}
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Thêm phòng trọ
-        </button>
+
       </div>
 
       {/* Stats Cards */}
@@ -1081,13 +1066,7 @@ const RoomsPage: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => handleEditRoom(room.id)}
-                        className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50" 
-                        title="Chỉnh sửa"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
+                  
                       <button 
                         onClick={() => handleDeleteRoom(room.id)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
