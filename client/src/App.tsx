@@ -11,6 +11,9 @@ import MyBookingsPage from './pages/user/MyBookingsPage';
 import MyContracts from './pages/user/MyContracts';
 import BookingRequests from './pages/user/BookingRequests';
 import ContractDetail from './pages/user/ContractDetail';
+import RegisterPage from './pages/user/RegisterPage';
+import LoginPage from './pages/user/LoginPage';
+
 
 function App() {
   return (
@@ -31,6 +34,8 @@ function App() {
           <Route path="/my-contracts" element={<MyContracts tenantId="u1" />} />
           <Route path="/booking-requests" element={<BookingRequests />} />
           <Route path="/contracts/:id" element={<ContractDetail />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
       </main>
       <Footer />

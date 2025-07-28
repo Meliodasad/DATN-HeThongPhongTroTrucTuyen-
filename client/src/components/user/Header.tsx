@@ -1,5 +1,6 @@
 import React from 'react';
 import '../../css/Header.css'
+import { Link } from 'react-router-dom';
 
 const Header = () => {
   return (
@@ -20,8 +21,8 @@ const Header = () => {
 
         <div className="header-actions">
           <button className="btn">Tin đã lưu</button>
-          <button className="btn">Đăng ký</button>
-          <button className="btn">Đăng nhập</button>
+          <Link to="/register" className="btn">Đăng ký</Link>
+          <Link to="/login" className="btn">Đăng nhập</Link>
           <button className="btn highlight">Đăng tin</button>
         </div>
       </div>
