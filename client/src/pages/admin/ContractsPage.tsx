@@ -16,7 +16,7 @@ import {
   Mail,
   Home
 } from 'lucide-react';
-import { useToastContext } from '../contexts/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 
 interface Contract {
   id: string;

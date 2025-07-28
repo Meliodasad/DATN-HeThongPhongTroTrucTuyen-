@@ -9,7 +9,7 @@ import {
   UserPlus,
   Home
 } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface DashboardStats {
   totalUsers: number;

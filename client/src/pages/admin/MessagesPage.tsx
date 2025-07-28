@@ -8,9 +8,9 @@ import {
   Send,
   Calendar,
 } from 'lucide-react';
-import { useToastContext } from '../contexts/ToastContext';
-import { messageService } from '../services/messageService';
-import type { Message, MessageStats } from '../types/message';
+import { useToastContext } from '../../contexts/ToastContext';
+import { messageService } from '../../services/messageService';
+import type { Message, MessageStats } from '../../types/message';
 
 const MessagesPage: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);

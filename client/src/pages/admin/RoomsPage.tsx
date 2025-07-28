@@ -36,7 +36,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
   const [saving, setSaving] = useState(false);
   const [customUtility, setCustomUtility] = useState('');
   const [showCustomUtilityInput, setShowCustomUtilityInput] = useState(false);
-  const [formData, setFormData] = useState<CreateRoomData>({
+  const [formData, setFormData] = useState<CreateRoomData & { status?: Room['status']; approvalStatus?: Room['approvalStatus'] }>({
     hostId: '2', // Default host
     roomTitle: '',
     price: 0,
@@ -46,7 +46,9 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
     images: [],
     roomType: 'single',
     utilities: [],
-    terms: ''
+    terms: '',
+    status: 'available',
+    approvalStatus: 'pending'
   });
 
   const { success, error } = useToastContext();
@@ -78,7 +80,9 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
         images: roomData.images,
         roomType: roomData.roomType,
         utilities: roomData.utilities,
-        terms: roomData.terms
+        terms: roomData.terms,
+        status: roomData.status,
+        approvalStatus: roomData.approvalStatus
       });
     } catch (err) {
       console.error(err);
@@ -100,7 +104,9 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
       images: [],
       roomType: 'single',
       utilities: [],
-      terms: ''
+      terms: '',
+      status: 'available',
+      approvalStatus: 'pending'
     });
   };
 
@@ -112,10 +118,10 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
       setSaving(true);
       
       if (mode === 'create') {
-        await roomService.createRoom(formData);
+        await roomService.createRoom(formData as CreateRoomData);
         success('Thành công', 'Tạo phòng trọ mới thành công');
       } else if (mode === 'edit' && roomId) {
-        const updateData: UpdateRoomData = { ...formData };
+        const updateData: UpdateRoomData & { status?: Room['status']; approvalStatus?: Room['approvalStatus'] } = { ...formData };
         await roomService.updateRoom(roomId, updateData);
         success('Thành công', 'Cập nhật thông tin thành công');
       }
@@ -130,7 +136,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
     }
   };
 
-  const handleInputChange = (field: keyof CreateRoomData, value: any) => {
+  const handleInputChange = (field: keyof (CreateRoomData & { status?: Room['status']; approvalStatus?: Room['approvalStatus'] }), value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -174,6 +180,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
       utilities: prev.utilities.filter(u => u !== utilityToRemove) 
     }));
   };
+  
   const getRoomTypeText = (type: Room['roomType']) => {
     switch (type) {
       case 'single': return 'Phòng đơn';
@@ -197,6 +204,24 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
       case 'available': return 'bg-green-100 text-green-800';
       case 'rented': return 'bg-blue-100 text-blue-800';
       case 'maintenance': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getApprovalText = (status: Room['approvalStatus']) => {
+    switch (status) {
+      case 'approved': return 'Đã duyệt';
+      case 'pending': return 'Chờ duyệt';
+      case 'rejected': return 'Từ chối';
+      default: return 'Không xác định';
+    }
+  };
+
+  const getApprovalColor = (status: Room['approvalStatus']) => {
+    switch (status) {
+      case 'approved': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -239,6 +264,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h3 className="text-xl font-semibold text-gray-900">
+            {isCreateMode && 'Tạo phòng trọ mới'}
             {isEditMode && 'Chỉnh sửa phòng trọ'}
             {isViewMode && 'Chi tiết phòng trọ'}
           </h3>
@@ -561,29 +587,49 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, mode, on
                 )}
               </div>
 
-              {/* Status and Approval (View mode only) */}
-              {isViewMode && room && (
+              {/* Status and Approval */}
+              {(isEditMode || isViewMode) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Trạng thái
+                      Trạng thái phòng
                     </label>
-                    <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(room.status)}`}>
-                      {getStatusText(room.status)}
-                    </span>
+                    {isViewMode ? (
+                      <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(room?.status || 'available')}`}>
+                        {getStatusText(room?.status || 'available')}
+                      </span>
+                    ) : (
+                      <select
+                        value={formData.status}
+                        onChange={(e) => handleInputChange('status', e.target.value as Room['status'])}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="available">Còn trống</option>
+                        <option value="rented">Đã thuê</option>
+                        <option value="maintenance">Bảo trì</option>
+                      </select>
+                    )}
                   </div>
+                  
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Trạng thái duyệt
                     </label>
-                    <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${
-                      room.approvalStatus === 'approved' ? 'bg-green-100 text-green-800' :
-                      room.approvalStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
-                    }`}>
-                      {room.approvalStatus === 'approved' ? 'Đã duyệt' :
-                       room.approvalStatus === 'pending' ? 'Chờ duyệt' : 'Từ chối'}
-                    </span>
+                    {isViewMode ? (
+                      <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getApprovalColor(room?.approvalStatus || 'pending')}`}>
+                        {getApprovalText(room?.approvalStatus || 'pending')}
+                      </span>
+                    ) : (
+                      <select
+                        value={formData.approvalStatus}
+                        onChange={(e) => handleInputChange('approvalStatus', e.target.value as Room['approvalStatus'])}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="pending">Chờ duyệt</option>
+                        <option value="approved">Đã duyệt</option>
+                        <option value="rejected">Từ chối</option>
+                      </select>
+                    )}
                   </div>
                 </div>
               )}
@@ -719,13 +765,15 @@ const RoomsPage: React.FC = () => {
     });
   }, [rooms, filters]);
 
-
-
- 
-
   const handleViewRoom = (roomId: string) => {
     setSelectedRoomId(roomId);
     setModalMode('view');
+    setIsModalOpen(true);
+  };
+
+  const handleEditRoom = (roomId: string) => {
+    setSelectedRoomId(roomId);
+    setModalMode('edit');
     setIsModalOpen(true);
   };
 
@@ -830,7 +878,6 @@ const RoomsPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Quản lý phòng trọ</h1>
           <p className="text-gray-600">Quản lý thông tin và trạng thái phòng trọ</p>
         </div>
-
       </div>
 
       {/* Stats Cards */}
@@ -1066,7 +1113,13 @@ const RoomsPage: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                  
+                      <button 
+                        onClick={() => handleEditRoom(room.id)}
+                        className="text-orange-600 hover:text-orange-900 p-1 rounded hover:bg-orange-50" 
+                        title="Chỉnh sửa"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
                       <button 
                         onClick={() => handleDeleteRoom(room.id)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"

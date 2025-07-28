@@ -9,7 +9,7 @@ import {
   Download,
   Eye,
 } from 'lucide-react';
-import { useToastContext } from '../contexts/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 
 interface ReportData {
   userStats: {

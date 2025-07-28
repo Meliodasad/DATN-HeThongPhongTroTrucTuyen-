@@ -12,7 +12,7 @@ import {
   Search,
   Download
 } from 'lucide-react';
-import { useToastContext } from '../contexts/ToastContext';
+import { useToastContext } from '../../contexts/ToastContext';
 
 interface Payment {
   id: string;
@@ -106,7 +106,7 @@ const PaymentsPage: React.FC = () => {
 
   const handleUpdateStatus = async (paymentId: string, status: 'completed' | 'pending' | 'failed') => {
     try {
-      const response = await fetch(`/http://localhost:5000/payments/${paymentId}`, {
+      const response = await fetch(`http://localhost:5000/payments/${paymentId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

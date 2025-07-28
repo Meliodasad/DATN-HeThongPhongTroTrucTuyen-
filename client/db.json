@@ -1,8 +1,8 @@
 {
   "users": [
     {
-      "fullName": "Nguyễn Văn Admin",
-      "email": "admin@rental32132hub.com",
+      "fullName": "Nguyễn Văn Admjmin",
+      "email": "admin@rentalhub.com",
       "phone": "",
       "address": "",
       "avatar": "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150",
@@ -117,18 +117,15 @@
       "createdAt": "2025-07-26T04:33:55.011Z"
     },
     {
-      "id": "1753538444384",
-      "fullName": "tung",
+      "fullName": "tungjj",
       "email": "admin@gmail.com",
-      "password": "123123",
-      "phone": "0121231321",
-      "role": "admin",
-      "status": "inactive",
-      "createdAt": "2025-07-26T14:00:44.384Z",
+      "phone": "",
       "address": "",
+      "avatar": "",
+      "id": "1753538444384",
       "idNumber": "",
       "dob": "",
-      "avatar": ""
+      "role": "admin"
     },
     {
       "id": "1753538526903",
@@ -143,6 +140,16 @@
       "avatar": "",
       "status": "active",
       "createdAt": "2025-07-26T14:02:06.903Z"
+    },
+    {
+      "id": "1753716589698",
+      "fullName": "ttt",
+      "email": "admin1@gmail.com",
+      "password": "123123",
+      "phone": "0321312232",
+      "role": "admin",
+      "status": "active",
+      "createdAt": "2025-07-28T15:29:49.698Z"
     }
   ],
   "rooms": [
@@ -212,7 +219,7 @@
       "utilities": [],
       "terms": "",
       "status": "available",
-      "approvalStatus": "approved",
+      "approvalStatus": "rejected",
       "createdAt": "2025-07-26T14:32:47.846Z",
       "approvalDate": "2025-07-27T17:01:37.910Z"
     }
@@ -254,7 +261,7 @@
       "tenantId": "3",
       "bookingDate": "2024-02-05T10:00:00Z",
       "note": "Muốn xem phòng vào cuối tuần",
-      "bookingStatus": "pending",
+      "bookingStatus": "confirmed",
       "approvalStatus": "waiting",
       "createdAt": "2024-02-05T10:00:00Z"
     }
@@ -306,7 +313,7 @@
       "startDate": "2024-06-15T00:00:00Z",
       "terms": "Thanh toán mỗi 2 tháng, không hoàn tiền khi huỷ sớm",
       "note": "Chuyển khoản ngân hàng",
-      "contractStatus": "active",
+      "contractStatus": "terminated",
       "createdAt": "2024-06-10T09:00:00Z"
     },
     {
@@ -351,7 +358,7 @@
       "contractId": "1",
       "amount": 16000000,
       "paymentDate": "2024-02-25T00:00:00Z",
-      "paymentStatus": "pending",
+      "paymentStatus": "completed",
       "extraNote": "Tiền cọc 2 tháng đầu",
       "createdAt": "2024-02-25T14:20:00Z"
     },
@@ -383,7 +390,7 @@
       "senderId": "2",
       "message": "Chào em, phòng hiện tại còn trống, em có thể đến xem",
       "time": "2024-02-05T08:45:00Z",
-      "isRead": false
+      "isRead": true
     },
     {
       "id": "3",

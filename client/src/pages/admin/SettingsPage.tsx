@@ -9,8 +9,8 @@ import {
   Eye,
   EyeOff
 } from 'lucide-react';
-import { useToastContext } from '../contexts/ToastContext';
-import { useAuth } from '../contexts/AuthContext';
+import { useToastContext } from '../../contexts/ToastContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();

@@ -6,17 +6,17 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import Layout from './components/layout/Layout';
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/RegisterPage';
-import DashboardPage from './pages/DashboardPage';
+import DashboardPage from './pages/admin/DashboardPage';
 import UsersPage from './pages/admin/UsersPage';
 import RoomsPage from './pages/admin/RoomsPage';
-import BookingsPage from './pages/admin/BookingsPage';
-import ContractsPage from './pages/ContractsPage';
-import PaymentsPage from './pages/PaymentsPage';
-import ReviewsPage from './pages/ReviewsPage';
-import MessagesPage from './pages/MessagesPage';
+import BookingsPage from './pages/admin/BookingModal';
+import ContractsPage from './pages/admin/ContractsPage';
+import PaymentsPage from './pages/admin/PaymentsPage';
+import ReviewsPage from './pages/admin/ReviewsPage';
+import MessagesPage from './pages/admin/MessagesPage';
 import ContactsPage from './pages/admin/ContactsPage';
-import ReportsPage from './pages/ReportsPage';
-import SettingsPage from './pages/SettingsPage';
+import ReportsPage from './pages/admin/ReportsPage';
+import SettingsPage from './pages/admin/SettingsPage';
 
 function App() {
   return (

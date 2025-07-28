@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Users, 
+  UserPlus, 
   Search, 
-  Eye,  
+  Eye, 
+  Edit, 
   Trash2, 
   User, 
   Calendar,
@@ -99,7 +101,6 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
       avatar: ''
     });
   };
-  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -184,6 +185,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h3 className="text-xl font-semibold text-gray-900">
+            {isCreateMode && 'Thêm người dùng mới'}
             {isEditMode && 'Chỉnh sửa người dùng'}
             {isViewMode && 'Chi tiết người dùng'}
           </h3>
@@ -535,6 +537,17 @@ const UsersPage: React.FC = () => {
     });
   }, [users, filters]);
 
+  const handleCreateUser = () => {
+    setSelectedUserId(null);
+    setModalMode('create');
+    setIsModalOpen(true);
+  };
+
+  const handleEditUser = (userId: string) => {
+    setSelectedUserId(userId);
+    setModalMode('edit');
+    setIsModalOpen(true);
+  };
 
   const handleViewUser = (userId: string) => {
     setSelectedUserId(userId);
@@ -638,7 +651,13 @@ const UsersPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Quản lý người dùng</h1>
           <p className="text-gray-600">Quản lý tài khoản và thông tin người dùng</p>
         </div>
-     
+        <button
+          onClick={handleCreateUser}
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors"
+        >
+          <UserPlus className="w-4 h-4" />
+          Thêm người dùng
+        </button>
       </div>
 
       {/* Stats Cards */}
@@ -804,7 +823,6 @@ const UsersPage: React.FC = () => {
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status)}`}>
                       {getStatusText(user.status)}
                     </span>
-                    
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
@@ -820,6 +838,13 @@ const UsersPage: React.FC = () => {
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleEditUser(user.id)}
+                        className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
+                        title="Chỉnh sửa"
+                      >
+                        <Edit className="w-4 h-4" />
                       </button>
                       {user.status === 'pending' && (
                         <button 
