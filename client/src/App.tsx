@@ -1,36 +1,38 @@
-// 📁 client/src/App.tsx
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Profile from "../src/pages/host/Profile";
-import RoomStatus from "./pages/host/RoomStatus";
-import RentalRequests from "./pages/host/RentalRequest";
-import CreateContract from "./pages/host/CreateContract";
-import ContractList from "./pages/host/ContractList";
-import ContractDetail from "./pages/host/ContractDetail";
+// client/src/App.tsx
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Dashboard from "./pages/host/Dashboard";
+import Profile from "./pages/host/Profile";
 import UpdateProfile from "./pages/host/UpdateProfile";
 import CreateRoom from "./pages/host/CreateRoom";
-import RoomList from "./pages/host/RoomList";
 import UpdateRoom from "./pages/host/UpdateRoom";
+import CreateContract from "./pages/host/CreateContract";
+import ContractDetail from "./pages/host/ContractDetail";
+import RoomStatus from "./pages/host/RoomStatus";
+import RentalRequest from "./pages/host/RentalRequest";
+import ContractList from "./pages/host/ContractList";
+import RoomList from "./pages/host/RoomList";
 import HomepageLayout from "./components/HomePageLayout";
 
 function App() {
   return (
     <Router>
-      <main style={{ padding: "1rem" }}>
-        <Routes>
-          <Route path="/" element={<HomepageLayout />}>
-            <Route path="/host/profile" element={<Profile />} />                                        {/*thông tin cá nhân */}
-            <Route path="/host/update-profile" element={<UpdateProfile />} />                            {/* . Cập nhật thông tin cá nhân */} 
-            <Route path="/host/room-status" element={<RoomStatus />} />                                 {/* . Quản lý trạng thái phòng */} 
-            <Route path="/host/rental-requests" element={<RentalRequests />} />                         {/*. Duyệt yêu cầu thuê phòng */}
-            <Route path="/host/create-room" element={<CreateRoom />} />                              {/* Tạo phòng mới */}
-            <Route path="/host/room-list" element={<RoomList />} />                                 {/* Danh sách phòng trọ */}
-            <Route path="/host/update-room/:id" element={<UpdateRoom />} />                            {/* Sửa thông tin phòng */}  
-            <Route path="/host/create-contract" element={<CreateContract />} />                         {/*. Tạo hợp đồng thuê */}
-            <Route path="/host/contracts" element={<ContractList />} />                                   {/*. Xem lịch sử hợp đồng */}
-            <Route path="/host/contracts/:id" element={<ContractDetail/>}/>                                {/*Xem chi tiết hợp đồng*/}
-          </Route>
-        </Routes>
-      </main>
+      <Routes>
+        <Route path="/" element={<HomepageLayout />}>
+          <Route index element={<Navigate to="/host/dashboard" replace />} />
+          <Route path="/host/dashboard" element={<Dashboard />} />
+          <Route path="/host/profile" element={<Profile />} />
+          <Route path="/host/update-profile" element={<UpdateProfile />} />
+          <Route path="/host/room-list" element={<RoomList />} />
+          <Route path="/host/create-room" element={<CreateRoom />} />
+          <Route path="/host/update-room/:id" element={<UpdateRoom />} />
+          <Route path="/host/room-status" element={<RoomStatus />} />
+          <Route path="/host/rental-request" element={<RentalRequest />} />
+          <Route path="/host/create-contract" element={<CreateContract />} />
+          <Route path="/host/contracts" element={<ContractList />} />
+          <Route path="/host/contracts/:id" element={<ContractDetail />} />
+          <Route path="/host/logout" element={<div className="p-6"><h1>Đăng xuất (chưa hoàn thành)</h1></div>} />
+        </Route>
+      </Routes>
     </Router>
   );
 }

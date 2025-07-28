@@ -1,10 +1,14 @@
 // 📁 src/pages/host/UpdateProfile.tsx
 // Trang cập nhật thông tin cá nhân của chủ nhà
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Thêm dòng này
+import { useNavigate } from "react-router-dom";
 import { hostService } from "../../services/hostService";
 
-const UpdateProfile = ({ closeModal }: { closeModal?: () => void }) => {
+interface UpdateProfileProps {
+  closeModal?: () => void;
+}
+
+const UpdateProfile = ({ closeModal }: UpdateProfileProps) => {
   const [profile, setProfile] = useState({
     name: "",
     phone: "",
@@ -13,100 +17,128 @@ const UpdateProfile = ({ closeModal }: { closeModal?: () => void }) => {
     address: ""
   });
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate(); // Thêm dòng này
+  const [initialLoading, setInitialLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setLoading(true);
+    setInitialLoading(true);
     hostService.getProfile()
       .then((res) => setProfile(res.data))
-      .finally(() => setLoading(false));
+      .catch(() => alert("❌ Không thể tải thông tin profile!"))
+      .finally(() => setInitialLoading(false));
   }, []);
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
     setLoading(true);
-    hostService.updateProfile(profile)
-      .then(() => {
-        alert("✅ Cập nhật thành công!");
-        if (closeModal) {
-          closeModal();
-        } else {
-          navigate("/host/profile"); // Nếu không có closeModal thì chuyển hướng
-        }
-      })
-      .catch(() => alert("❌ Cập nhật thất bại!"))
-      .finally(() => setLoading(false));
+    try {
+      await hostService.updateProfile(profile);
+      alert("✅ Cập nhật thành công!");
+      if (closeModal) {
+        closeModal();
+      } else {
+        navigate("/host/profile");
+      }
+    } catch (error) {
+      alert("❌ Cập nhật thất bại!");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Đang tải thông tin...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 bg-white rounded-xl shadow-lg w-full max-w-lg">
-      <h2 className="text-xl font-bold mb-4 text-center text-indigo-600">
+    <div className="p-6 bg-white rounded-xl shadow-lg w-full max-w-lg mx-auto">
+      <h2 className="text-xl font-bold mb-6 text-center text-blue-600">
         🧑‍💼 Cập nhật thông tin
       </h2>
 
-      <div className="flex flex-col gap-4">
-        <label>
-          <span className="text-sm text-gray-700 font-medium">Họ tên:</span>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Họ tên:
+          </label>
           <input
             type="text"
             value={profile.name}
             onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-            className="w-full p-2 border rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-        </label>
+        </div>
 
-        <label>
-          <span className="text-sm text-gray-700 font-medium">Số điện thoại:</span>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Số điện thoại:
+          </label>
           <input
             type="text"
             value={profile.phone}
             onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
-            className="w-full p-2 border rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-        </label>
+        </div>
 
-        <label>
-          <span className="text-sm text-gray-700 font-medium">Email:</span>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Email:
+          </label>
           <input
             type="email"
             value={profile.email}
             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-            className="w-full p-2 border rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-        </label>
+        </div>
 
-        <label>
-          <span className="text-sm text-gray-700 font-medium">Ảnh đại diện (URL):</span>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Ảnh đại diện (URL):
+          </label>
           <input
             type="text"
             value={profile.avatar}
             onChange={(e) => setProfile({ ...profile, avatar: e.target.value })}
-            className="w-full p-2 border rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-        </label>
+        </div>
 
         {profile.avatar && (
-          <img
-            src={profile.avatar}
-            alt="avatar"
-            className="w-20 h-20 mx-auto rounded-full object-cover border"
-          />
+          <div className="flex justify-center">
+            <img
+              src={profile.avatar}
+              alt="avatar"
+              className="w-20 h-20 rounded-full object-cover border-2 border-gray-200"
+            />
+          </div>
         )}
 
-        <label>
-          <span className="text-sm text-gray-700 font-medium">Địa chỉ:</span>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Địa chỉ:
+          </label>
           <input
             type="text"
             value={profile.address}
             onChange={(e) => setProfile({ ...profile, address: e.target.value })}
-            className="w-full p-2 border rounded-md"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
-        </label>
+        </div>
 
-        <div className="flex justify-between mt-4">
+        <div className="flex justify-between space-x-4 mt-6">
           {closeModal && (
             <button
               onClick={closeModal}
-              className="px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400"
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
             >
               ❌ Hủy
             </button>
@@ -114,7 +146,7 @@ const UpdateProfile = ({ closeModal }: { closeModal?: () => void }) => {
           <button
             onClick={handleUpdate}
             disabled={loading}
-            className="px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
           >
             {loading ? "🔄 Đang lưu..." : "💾 Lưu"}
           </button>

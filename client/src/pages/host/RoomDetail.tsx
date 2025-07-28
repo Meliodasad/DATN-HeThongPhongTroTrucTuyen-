@@ -1,50 +1,119 @@
 // Chi tiết phòng
 // ../client/src/pages/host/RoomDetail.tsx
-import { X } from "lucide-react";
+import { X, MapPin, Users, Zap, DollarSign } from "lucide-react";
 
 interface Props {
   room: any;
   onClose: () => void;
 }
 
-export default function RoomDetailModal({ room, onClose }: Props) {
+export default function RoomDetail({ room, onClose }: Props) {
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
-      <div className="bg-white w-full max-w-3xl rounded-xl p-6 relative shadow-xl">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-600 hover:text-black">
-          <X size={24} />
-        </button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+      <div className="bg-white w-full max-w-4xl rounded-xl shadow-xl max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">Chi tiết phòng</h2>
+          <button 
+            onClick={onClose} 
+            className="p-2 hover:bg-gray-100 rounded-lg transition"
+          >
+            <X size={20} className="text-gray-500" />
+          </button>
+        </div>
 
-        <div className="flex flex-col md:flex-row gap-6">
-          <img src={room.image} alt="Phòng" className="w-full md:w-1/2 h-64 object-cover rounded-lg" />
-
-          <div className="flex-1 space-y-2">
-            <h2 className="text-xl font-bold">{room.code}</h2>
-            <p className="text-gray-600">{room.description}</p>
-            <p><strong>Giá:</strong> {room.price.toLocaleString()}đ/tháng</p>
-            <p><strong>Diện tích:</strong> {room.area} m²</p>
-            <p><strong>Vị trí:</strong> {room.location}</p>
-            <p><strong>Tiền cọc:</strong> {room.deposit}</p>
-            <p><strong>Điện nước:</strong> {room.electricity}đ/kWh</p>
-
-            <div className="mt-4">
-              <h3 className="font-semibold">Tiện nghi</h3>
-              <ul className="grid grid-cols-2 gap-1 list-disc list-inside text-gray-700">
-                {room.utilities?.split(",").map((u: string, idx: number) => (
-                  <li key={idx}>{u.trim()}</li>
-                ))}
-              </ul>
+        <div className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Image */}
+            <div>
+              <img 
+                src={room.image || "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&dpr=1"} 
+                alt="Phòng" 
+                className="w-full h-64 lg:h-80 object-cover rounded-lg shadow-sm" 
+              />
             </div>
 
-            {room.tenant && (
-              <div className="mt-4 p-3 bg-gray-100 rounded-lg flex items-center gap-3">
-                <img src={room.tenant.avatar} className="w-10 h-10 rounded-full" />
-                <div>
-                  <p className="font-medium">{room.tenant.name}</p>
-                  <p className="text-sm text-gray-500">{room.tenant.phone}</p>
+            {/* Details */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{room.code}</h3>
+                <p className="text-gray-600">{room.description}</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                  <div>
+                    <p className="text-sm text-gray-500">Giá thuê</p>
+                    <p className="font-semibold text-green-600">
+                      {room.price?.toLocaleString()}đ/tháng
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                  <div>
+                    <p className="text-sm text-gray-500">Diện tích</p>
+                    <p className="font-semibold">{room.area} m²</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Users className="w-5 h-5 text-purple-600" />
+                  <div>
+                    <p className="text-sm text-gray-500">Số người</p>
+                    <p className="font-semibold">Tối đa {room.maxPeople} người</p>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Zap className="w-5 h-5 text-yellow-600" />
+                  <div>
+                    <p className="text-sm text-gray-500">Điện</p>
+                    <p className="font-semibold">{room.electricity}đ/kWh</p>
+                  </div>
                 </div>
               </div>
-            )}
+
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Địa chỉ</p>
+                <p className="font-medium">{room.location}</p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500 mb-2">Tiền cọc</p>
+                <p className="font-medium text-orange-600">{room.deposit}</p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold text-gray-900 mb-3">Tiện nghi</h4>
+                <div className="grid grid-cols-2 gap-2">
+                  {room.utilities?.split(",").map((utility: string, idx: number) => (
+                    <div key={idx} className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <span className="text-sm text-gray-700">{utility.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {room.tenant && (
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <h4 className="font-semibold text-gray-900 mb-3">Người thuê hiện tại</h4>
+                  <div className="flex items-center space-x-3">
+                    <img 
+                      src={room.tenant.avatar} 
+                      alt={room.tenant.name}
+                      className="w-12 h-12 rounded-full object-cover" 
+                    />
+                    <div>
+                      <p className="font-medium text-gray-900">{room.tenant.name}</p>
+                      <p className="text-sm text-gray-500">{room.tenant.phone}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>

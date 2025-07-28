@@ -1,9 +1,9 @@
 // 📁 src/pages/host/Profile.tsx
-// Trang thông tin cá nhân của chủ nhà
 import { useEffect, useState } from "react";
 import { hostService } from "../../services/hostService";
-import UpdateProfile from "./UpdateProfile"; // 👈 Import component modal
-import Modal from "../../components/Modal"; // 👈 Modal bạn cần có sẵn (hoặc tạo modal riêng)
+import { User, Phone, Mail, MapPin, Edit } from "lucide-react";
+import Modal from "../../components/Modal"; // Modal tự tạo
+import UpdateProfile from "./UpdateProfile"; // Form cập nhật thông tin
 
 const Profile = () => {
   const [profile, setProfile] = useState({
@@ -13,54 +13,113 @@ const Profile = () => {
     avatar: "",
     address: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
     hostService
       .getProfile()
       .then((res) => setProfile(res.data))
       .finally(() => setLoading(false));
   }, []);
 
+  const refreshProfile = () => {
+    hostService.getProfile().then((res) => setProfile(res.data));
+  };
+
   if (loading) {
-    return <p className="text-center mt-10">Đang tải thông tin...</p>;
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Đang tải thông tin...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow-md mt-6">
-      <h2 className="text-2xl font-bold text-indigo-700 text-center mb-6">
-        Thông tin cá nhân
-      </h2>
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-8">
+          <div className="flex items-center space-x-6">
+            <img
+              src={profile.avatar}
+              alt="Avatar"
+              className="w-24 h-24 rounded-full border-4 border-white object-cover shadow-lg"
+            />
+            <div className="text-white">
+              <h1 className="text-2xl font-bold mb-2">{profile.name}</h1>
+              <p className="text-blue-100">Chủ nhà</p>
+            </div>
+          </div>
+        </div>
 
-      <div className="flex justify-center mb-6">
-        <img
-          src={profile.avatar}
-          alt="Avatar"
-          className="w-24 h-24 rounded-full border-4 border-indigo-500 object-cover"
-        />
+        {/* Content */}
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-semibold text-gray-900">
+              Thông tin cá nhân
+            </h2>
+            <button
+              onClick={() => setIsEditing(true)}
+              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+            >
+              <Edit size={16} />
+              <span>Chỉnh sửa</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                <User className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-500">Họ tên</p>
+                  <p className="font-medium text-gray-900">{profile.name}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                <Phone className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-500">Số điện thoại</p>
+                  <p className="font-medium text-gray-900">{profile.phone}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                <Mail className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium text-gray-900">{profile.email}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg">
+                <MapPin className="w-5 h-5 text-gray-500" />
+                <div>
+                  <p className="text-sm text-gray-500">Địa chỉ</p>
+                  <p className="font-medium text-gray-900">{profile.address}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-4 text-gray-700 text-base">
-        <p><strong>👤 Họ tên:</strong> {profile.name}</p>
-        <p><strong>📞 Số điện thoại:</strong> {profile.phone}</p>
-        <p><strong>✉️ Email:</strong> {profile.email}</p>
-        <p><strong>📍 Địa chỉ:</strong> {profile.address}</p>
-      </div>
-
-      <div className="text-center mt-8">
-        <button
-          onClick={() => setOpenModal(true)}
-          className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition"
-        >
-          ✏️ Chỉnh sửa thông tin
-        </button>
-      </div>
-
-      {openModal && (
-        <Modal onClose={() => setOpenModal(false)}>
-          <UpdateProfile closeModal={() => setOpenModal(false)} />
+      {/* Modal cập nhật */}
+      {isEditing && (
+        <Modal onClose={() => setIsEditing(false)}>
+          <UpdateProfile
+            closeModal={() => {
+              setIsEditing(false);
+              refreshProfile(); // sau khi cập nhật thì load lại
+            }}
+          />
         </Modal>
       )}
     </div>

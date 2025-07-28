@@ -29,36 +29,43 @@
   "rentalRequests": [
     {
       "id": "1",
-      "tenantName": "Lê Thị B",
-      "phone": "0987654321",
-      "email": "btenant@example.com",
-      "desiredRoomId": 102,
-      "status": "đã duyệt"
+      "tenantName": "Nguyễn Văn A",
+      "phone": "0909123456",
+      "email": "vana@example.com",
+      "desiredRoomId": "101",
+      "status": "chờ duyệt",
+      "message": "Tôi muốn thuê phòng này, có thể xem phòng được không?",
+      "submittedAt": "2025-07-28T08:30:00Z"
     },
     {
       "id": "2",
-      "tenantName": "Nguyễn Văn A",
-      "phone": "0123456789",
-      "email": "atenant@example.com",
-      "desiredRoomId": 101,
-      "status": "đã duyệt"
+      "tenantName": "Trần Thị B",
+      "phone": "0912345678",
+      "email": "tranb@example.com",
+      "desiredRoomId": "102",
+      "status": "đã duyệt",
+      "message": "Xin chào, tôi quan tâm đến phòng 102.",
+      "submittedAt": "2025-07-27T15:45:00Z"
     },
     {
       "id": "3",
-      "tenantName": "Trần Thị C",
-      "phone": "1234567890",
-      "email": "tranthic@gmail.com",
-      "desiredRoomId": 103,
-      "status": "chờ duyệt"
-    }
-  ],
-  "tenants": [
-    {
-      "id": "1",
-      "name": "Lê Thị B",
+      "tenantName": "Lê Văn C",
       "phone": "0987654321",
-      "roomId": 2,
-      "startDate": "2024-05-01"
+      "email": "levanc@example.com",
+      "desiredRoomId": "103",
+      "status": "từ chối",
+      "message": "Tôi cần phòng gần trường học.",
+      "submittedAt": "2025-07-25T10:00:00Z"
+    },
+    {
+      "id": "4",
+      "tenantName": "Phạm Thị D",
+      "phone": "0977778888",
+      "email": "phamtd@example.com",
+      "desiredRoomId": "104",
+      "status": "đã duyệt",
+      "message": "Có thể sắp xếp xem phòng vào cuối tuần không?",
+      "submittedAt": "2025-07-28T09:15:00Z"
     }
   ],
   "contracts": [
@@ -81,11 +88,21 @@
       "endDate": "2026-06-01",
       "deposit": 800000,
       "terms": "Không nuôi thú cưng."
+    },
+    {
+      "id": "c8f9",
+      "tenantName": "Phạm Thị D",
+      "phone": "0977778888",
+      "roomId": 104,
+      "startDate": "2025-07-28",
+      "endDate": "2026-07-28",
+      "deposit": 100000,
+      "terms": "kh nuôi chó nhé mày"
     }
   ],
   "rooms": [
     {
-      "id": 1,
+      "id": "1",
       "code": "P101",
       "area": 25,
       "price": 3000000,
@@ -100,38 +117,6 @@
         "name": "Nguyễn Văn A",
         "phone": "0909123456",
         "avatar": "https://i.pravatar.cc/100?img=1"
-      }
-    },
-    {
-      "id": 2,
-      "code": "P102",
-      "area": 20,
-      "price": 2500000,
-      "utilities": "Wifi, Tủ lạnh, Gác lửng",
-      "maxPeople": 2,
-      "image": "https://images.unsplash.com/photo-1588854337236-688a5f4f0a2b",
-      "description": "Phòng có gác, phù hợp cho 2 người, khu vực yên tĩnh.",
-      "location": "Tầng trệt, 12 Lê Lợi, Quận 1",
-      "deposit": "2 triệu",
-      "electricity": "4.000đ/kWh",
-      "tenant": null
-    },
-    {
-      "id": 3,
-      "code": "P103",
-      "area": 30,
-      "price": 4000000,
-      "utilities": "Máy lạnh, Wifi, Giường, Bàn học",
-      "maxPeople": 4,
-      "image": "https://images.unsplash.com/photo-1590073242678-1371e9c9f4b1",
-      "description": "Phòng rộng rãi, đầy đủ nội thất, ban công rộng.",
-      "location": "Lầu 2, 45 Phan Xích Long, Phú Nhuận",
-      "deposit": "1.5 tháng tiền phòng",
-      "electricity": "3.800đ/kWh",
-      "tenant": {
-        "name": "Trần Thị B",
-        "phone": "0909765432",
-        "avatar": "https://i.pravatar.cc/100?img=2"
       }
     }
   ]

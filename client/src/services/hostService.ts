@@ -40,4 +40,31 @@ export const hostService = {
   // Sửa thông tin phòng
   getRoomById: (id: number) => axios.get(`${API}/rooms/${id}`),
   updateRoom: (id: number, data: any) => axios.put(`${API}/rooms/${id}`, data),
+
+  // Statistics for dashboard
+  getStatistics: () => {
+    return Promise.all([
+      axios.get(`${API}/rooms`),
+      axios.get(`${API}/roomStatus`),
+      axios.get(`${API}/contracts`)
+    ]).then(([roomsRes, statusRes, contractsRes]) => {
+      const rooms = roomsRes.data;
+      const roomStatus = statusRes.data;
+      const contracts = contractsRes.data;
+      
+      const totalRooms = rooms.length;
+      const rentedRooms = roomStatus.filter((r: any) => r.status === "Đã cho thuê").length;
+      const availableRooms = roomStatus.filter((r: any) => r.status === "Trống").length;
+      const totalRevenue = rooms.reduce((sum: number, room: any) => sum + (room.price || 0), 0);
+
+      return {
+        data: {
+          totalRooms,
+          rentedRooms,
+          availableRooms,
+          totalRevenue
+        }
+      };
+    });
+  }
 };
