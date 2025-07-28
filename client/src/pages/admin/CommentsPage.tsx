@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import CommentManagement from './components/CommentManagement';
-
-const CommentsPage: React.FC = () => {
-  return <CommentManagement />;
-=======
 import React, { useState, useEffect } from 'react';
 import { X, User, Calendar, MessageSquare, Send, Trash2, Star, MapPin, Home } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
@@ -761,7 +754,6 @@ const CommentsPage: React.FC = () => {
       />
     </div>
   );
->>>>>>> origin/xuan-tung
 };
 
 export default CommentsPage;

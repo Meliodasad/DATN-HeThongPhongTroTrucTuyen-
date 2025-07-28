@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import ContactSupport from './components/ContactSupport';
-
-const ContactsPage: React.FC = () => {
-  return <ContactSupport />;
-=======
 import React, { useState, useEffect } from 'react';
 import { 
   Phone, 
@@ -722,7 +715,6 @@ const ContactsPage: React.FC = () => {
       )}
     </div>
   );
->>>>>>> origin/xuan-tung
 };
 
 export default ContactsPage;

@@ -1,15 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-<<<<<<< HEAD
-import UserManagement from '../admin/user/UserManagement';
-import UserModal from '../admin/user/UserModal';
-import UserTable from '../admin/user/UserTable';
-import SearchAndFilter from '../admin/user/SearchAndFilter';
-import { userService } from '../../services/userService';
-import type { UserFormData, UserStats } from '../../types/user';
-
-const UsersPage: React.FC = () => {
-  return <UserManagement />;
-=======
 import { 
   Users, 
   Search, 
@@ -489,22 +478,10 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
 // Main Users Page Component
 const UsersPage: React.FC = () => {
   const [users, setUsers] = useState<UserType[]>([]);
->>>>>>> origin/xuan-tung
   const [stats, setStats] = useState<UserStats>({
     total: 0,
     active: 0,
     inactive: 0,
-<<<<<<< HEAD
-    byRole: { 'Admin': 0, 'Chủ trọ': 0, 'Người dùng': 0 }
-  });
-  const [loading, setLoading] = useState(true);
-  const [modalLoading, setModalLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserType | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState<UserType['role'] | 'all'>('all');
-  const [statusFilter, setStatusFilter] = useState<UserType['status'] | 'all'>('all');
-=======
     pending: 0,
     admins: 0,
     hosts: 0,
@@ -520,7 +497,6 @@ const UsersPage: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('view');
->>>>>>> origin/xuan-tung
 
   const { success, error } = useToastContext();
 
@@ -532,11 +508,7 @@ const UsersPage: React.FC = () => {
     try {
       setLoading(true);
       const [usersData, statsData] = await Promise.all([
-<<<<<<< HEAD
-        userService.getUsers(),
-=======
         userService.getUsers(filters),
->>>>>>> origin/xuan-tung
         userService.getUserStats()
       ]);
       setUsers(usersData);
@@ -551,54 +523,6 @@ const UsersPage: React.FC = () => {
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-<<<<<<< HEAD
-      const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesRole = roleFilter === 'all' || user.role === roleFilter;
-      const matchesStatus = statusFilter === 'all' || user.status === statusFilter;
-      
-      return matchesSearch && matchesRole && matchesStatus;
-    });
-  }, [users, searchTerm, roleFilter, statusFilter]);
-
-  const handleAddUser = () => {
-    setEditingUser(null);
-    setIsModalOpen(true);
-  };
-
-  const handleEditUser = (user: UserType) => {
-    setEditingUser(user);
-    setIsModalOpen(true);
-  };
-
-  const handleSubmitUser = async (userData: UserFormData) => {
-    try {
-      setModalLoading(true);
-      
-      if (editingUser) {
-        await userService.updateUser(editingUser.id, userData);
-        success('Thành công', 'Cập nhật người dùng thành công');
-      } else {
-        await userService.createUser(userData);
-        success('Thành công', 'Thêm người dùng thành công');
-      }
-      
-      await loadData();
-      setIsModalOpen(false);
-    } catch (err) {
-      console.log(err);
-      error('Lỗi', 'Không thể thực hiện thao tác');
-    } finally {
-      setModalLoading(false);
-    }
-  };
-
-  const handleDeleteUser = async (id: number) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa người dùng này?')) return;
-
-    try {
-      await userService.deleteUser(id);
-=======
       const matchesSearch = !filters.searchTerm || 
         user.fullName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
@@ -623,7 +547,6 @@ const UsersPage: React.FC = () => {
 
     try {
       await userService.deleteUser(userId);
->>>>>>> origin/xuan-tung
       success('Thành công', 'Xóa người dùng thành công');
       await loadData();
     } catch (err) {
@@ -632,15 +555,9 @@ const UsersPage: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
-  const handleToggleStatus = async (id: number) => {
-    try {
-      await userService.toggleUserStatus(id);
-=======
   const handleUpdateStatus = async (userId: string, status: UserType['status']) => {
     try {
       await userService.updateUserStatus(userId, status);
->>>>>>> origin/xuan-tung
       success('Thành công', 'Cập nhật trạng thái thành công');
       await loadData();
     } catch (err) {
@@ -649,36 +566,6 @@ const UsersPage: React.FC = () => {
     }
   };
 
-<<<<<<< HEAD
-  return (
-    <>
-      <SearchAndFilter
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        roleFilter={roleFilter}
-        onRoleFilterChange={setRoleFilter}
-        statusFilter={statusFilter}
-        onStatusFilterChange={setStatusFilter}
-        onAddUser={handleAddUser}
-      />
-
-      <UserTable
-        users={filteredUsers}
-        onEdit={handleEditUser}
-        onDelete={handleDeleteUser}
-        onToggleStatus={handleToggleStatus}
-        loading={loading}
-      />
-
-      <UserModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleSubmitUser}
-        user={editingUser}
-        loading={modalLoading}
-      />
-    </>
-=======
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedUserId(null);
@@ -985,7 +872,6 @@ const UsersPage: React.FC = () => {
         onSave={handleSaveModal}
       />
     </div>
->>>>>>> origin/xuan-tung
   );
 };
 

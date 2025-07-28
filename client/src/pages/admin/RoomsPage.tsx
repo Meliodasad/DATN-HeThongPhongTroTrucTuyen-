@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import React from 'react';
-import RoomManagement from './host/RoomManagement';
-
-const RoomsPage: React.FC = () => {
-  return <RoomManagement />;
-=======
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
   Building, 
@@ -1108,7 +1101,6 @@ const RoomsPage: React.FC = () => {
       />
     </div>
   );
->>>>>>> origin/xuan-tung
 };
 
 export default RoomsPage;

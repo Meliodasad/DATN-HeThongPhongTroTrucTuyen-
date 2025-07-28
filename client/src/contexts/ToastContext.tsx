@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-import React, { createContext, useContext, ReactNode } from 'react';
-import { useToast } from '../hooks/useToast';
-import Toast from '../components/admin/Toast';
-=======
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
 
@@ -12,7 +7,6 @@ interface Toast {
   title: string;
   message: string;
 }
->>>>>>> origin/xuan-tung
 
 interface ToastContextType {
   success: (title: string, message: string) => void;
