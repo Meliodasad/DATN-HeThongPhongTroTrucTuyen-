@@ -210,7 +210,7 @@
       "id": "1753540367846",
       "hostId": "2",
       "roomTitle": "312312321",
-      "price": 32322,
+      "price": 3232232123,
       "area": 3232,
       "location": "hà nội",
       "description": "",
@@ -218,7 +218,7 @@
       "roomType": "single",
       "utilities": [],
       "terms": "",
-      "status": "available",
+      "status": "maintenance",
       "approvalStatus": "rejected",
       "createdAt": "2025-07-26T14:32:47.846Z",
       "approvalDate": "2025-07-27T17:01:37.910Z"
