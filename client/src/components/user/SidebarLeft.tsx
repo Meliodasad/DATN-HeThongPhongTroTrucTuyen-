@@ -1,6 +1,6 @@
 import React from 'react';
 import '../../css/SidebarLeft.css';
-import db from '../../data/db.json';
+import db from '../../../db.json';
 
 const SidebarLeft = () => {
   const roomCount = db.rooms.length;

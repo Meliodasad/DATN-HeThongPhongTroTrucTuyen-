@@ -11,8 +11,8 @@ import MyBookingsPage from './pages/user/MyBookingsPage';
 import MyContracts from './pages/user/MyContracts';
 import BookingRequests from './pages/user/BookingRequests';
 import ContractDetail from './pages/user/ContractDetail';
-import RegisterPage from './pages/user/RegisterPage';
-import LoginPage from './pages/user/LoginPage';
+import RegisterPage from './pages/user/auth/RegisterPage';
+import LoginPage from './pages/user/auth/LoginPage';
 
 
 function App() {
