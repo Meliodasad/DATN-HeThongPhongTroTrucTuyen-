@@ -9,7 +9,7 @@ import RegisterPage from './components/auth/RegisterPage';
 import DashboardPage from './pages/admin/DashboardPage';
 import UsersPage from './pages/admin/UsersPage';
 import RoomsPage from './pages/admin/RoomsPage';
-import BookingsPage from './pages/admin/BookingModal';
+import BookingsPage from './pages/admin/BookingPage';
 import ContractsPage from './pages/admin/ContractsPage';
 import PaymentsPage from './pages/admin/PaymentsPage';
 import ReviewsPage from './pages/admin/ReviewsPage';

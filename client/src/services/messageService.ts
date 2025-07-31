@@ -1,50 +1,74 @@
-import type { Message, MessageStats, MessageFilters } from '../types/message';
+import type { Message, MessageStats, MessageFilters, CreateMessageData } from '../types/message';
 
 class MessageService {
-private baseUrl = 'http://localhost:5000';
+  private baseUrl = 'http://localhost:5000';
 
   async getMessages(filters?: MessageFilters): Promise<Message[]> {
     try {
-      // Get messages with related data
-      const messagesResponse = await fetch(`${this.baseUrl}/messages`);
-      const messages = await messagesResponse.json();
+      // Fetch messages and users
+      const [messagesRes, usersRes] = await Promise.all([
+        fetch(`${this.baseUrl}/messages`),
+        fetch(`${this.baseUrl}/users`)
+      ]);
 
-      // Get users data
-      const usersResponse = await fetch(`${this.baseUrl}/users`);
-      const users = await usersResponse.json();
+      const [messagesData, usersData] = await Promise.all([
+        messagesRes.json(),
+        usersRes.json()
+      ]);
 
       // Combine data
-      const enrichedMessages = messages.map((message: any) => {
-        const sender = users.find((u: any) => u.id === message.senderId);
-        const receiver = message.hostId === message.senderId 
-          ? users.find((u: any) => u.id === message.tenantId)
-          : users.find((u: any) => u.id === message.hostId);
+      const enrichedMessages = messagesData.map((message: any) => {
+        // Find sender by userId matching senderId
+        const sender = usersData.find((u: any) => u.userId === message.senderId);
+        
+        // Find receiver by userId matching receiverId (if exists) or hostId/tenantId
+        let receiver = null;
+        if (message.receiverId) {
+          receiver = usersData.find((u: any) => u.userId === message.receiverId);
+        } else {
+          // If no receiverId, try to find by hostId or tenantId (whoever is not the sender)
+          if (message.senderId === message.hostId) {
+            receiver = usersData.find((u: any) => u.userId === message.tenantId);
+          } else {
+            receiver = usersData.find((u: any) => u.userId === message.hostId);
+          }
+        }
 
         return {
           ...message,
-          sender: sender || { fullName: 'Unknown', email: 'unknown@example.com' },
-          receiver: receiver || { fullName: 'Unknown', email: 'unknown@example.com' }
+          sender: sender || { 
+            fullName: 'Người dùng không tồn tại', 
+            email: 'unknown@example.com' 
+          },
+          receiver: receiver || { 
+            fullName: 'Người nhận không tồn tại', 
+            email: 'unknown@example.com' 
+          }
         };
       });
 
       // Apply filters
       let filteredMessages = enrichedMessages;
 
-      if (filters?.isRead !== undefined) {
-        filteredMessages = filteredMessages.filter((message: Message) => message.isRead === filters.isRead);
+      if (filters) {
+        if (filters.isRead !== undefined && filters.isRead !== 'all') {
+          filteredMessages = filteredMessages.filter((message: Message) => 
+            message.isRead === filters.isRead
+          );
+        }
+        if (filters.searchTerm) {
+          const searchLower = filters.searchTerm.toLowerCase();
+          filteredMessages = filteredMessages.filter((message: Message) => 
+            message.message.toLowerCase().includes(searchLower) ||
+            message.sender?.fullName.toLowerCase().includes(searchLower) ||
+            message.receiver?.fullName.toLowerCase().includes(searchLower)
+          );
+        }
       }
 
-      if (filters?.senderId) {
-        filteredMessages = filteredMessages.filter((message: Message) => message.senderId === filters.senderId);
-      }
-
-      if (filters?.receiverId) {
-        filteredMessages = filteredMessages.filter((message: Message) => 
-          message.hostId === filters.receiverId || message.tenantId === filters.receiverId
-        );
-      }
-
-      return filteredMessages.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+      return filteredMessages.sort((a: Message, b: Message) => 
+        new Date(b.time).getTime() - new Date(a.time).getTime()
+      );
     } catch (error) {
       console.error('Error fetching messages:', error);
       throw new Error('Không thể tải danh sách tin nhắn');
@@ -53,58 +77,48 @@ private baseUrl = 'http://localhost:5000';
 
   async getMessageById(id: string): Promise<Message> {
     try {
-      const messageResponse = await fetch(`${this.baseUrl}/messages/${id}`);
-      if (!messageResponse.ok) {
+      const messages = await this.getMessages();
+      const message = messages.find(m => m.id === id);
+      
+      if (!message) {
         throw new Error('Message not found');
       }
-      const message = await messageResponse.json();
 
-      // Get users data
-      const usersResponse = await fetch(`${this.baseUrl}/users`);
-      const users = await usersResponse.json();
-
-      const sender = users.find((u: any) => u.id === message.senderId);
-      const receiver = message.hostId === message.senderId 
-        ? users.find((u: any) => u.id === message.tenantId)
-        : users.find((u: any) => u.id === message.hostId);
-
-      return {
-        ...message,
-        sender: sender || { fullName: 'Unknown', email: 'unknown@example.com' },
-        receiver: receiver || { fullName: 'Unknown', email: 'unknown@example.com' }
-      };
+      return message;
     } catch (error) {
       console.error('Error fetching message:', error);
-      throw new Error('Không thể tải chi tiết tin nhắn');
+      throw new Error('Không thể tải thông tin tin nhắn');
     }
   }
 
-  async sendMessage(messageData: {
-    hostId: string;
-    tenantId: string;
-    senderId: string;
-    message: string;
-    time: string;
-    isRead: boolean;
-  }): Promise<Message> {
+  async sendMessage(messageData: CreateMessageData): Promise<Message> {
     try {
+      const newMessage = {
+        id: Date.now().toString(),
+        messageId: `MSG${Date.now()}`,
+        ...messageData,
+        receiverId: messageData.receiverId || (messageData.senderId === messageData.hostId ? messageData.tenantId : messageData.hostId),
+        time: messageData.time || new Date().toISOString(),
+        isRead: messageData.isRead || false
+      };
+
       const response = await fetch(`${this.baseUrl}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          id: Date.now().toString(),
-          ...messageData
-        }),
+        body: JSON.stringify(newMessage),
       });
 
       if (!response.ok) {
         throw new Error('Failed to send message');
       }
 
-      const newMessage = await response.json();
-      return await this.getMessageById(newMessage.id);
+      const createdMessage = await response.json();
+      
+      // Get enriched message data
+      const messages = await this.getMessages();
+      return messages.find(m => m.id === createdMessage.id) || createdMessage;
     } catch (error) {
       console.error('Error sending message:', error);
       throw new Error('Không thể gửi tin nhắn');
@@ -126,7 +140,7 @@ private baseUrl = 'http://localhost:5000';
       }
     } catch (error) {
       console.error('Error marking message as read:', error);
-      throw new Error('Không thể cập nhật trạng thái tin nhắn');
+      throw new Error('Không thể đánh dấu tin nhắn đã đọc');
     }
   }
 
@@ -153,7 +167,7 @@ private baseUrl = 'http://localhost:5000';
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-      const stats = {
+      const stats: MessageStats = {
         total: messages.length,
         unread: messages.filter(m => !m.isRead).length,
         today: messages.filter(m => new Date(m.time) >= today).length,
@@ -164,20 +178,6 @@ private baseUrl = 'http://localhost:5000';
     } catch (error) {
       console.error('Error fetching message stats:', error);
       throw new Error('Không thể tải thống kê tin nhắn');
-    }
-  }
-
-  async getConversation(hostId: string, tenantId: string): Promise<Message[]> {
-    try {
-      const messages = await this.getMessages();
-      
-      return messages.filter(message => 
-        (message.hostId === hostId && message.tenantId === tenantId) ||
-        (message.hostId === tenantId && message.tenantId === hostId)
-      ).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
-    } catch (error) {
-      console.error('Error fetching conversation:', error);
-      throw new Error('Không thể tải cuộc trò chuyện');
     }
   }
 }

@@ -1,5 +1,6 @@
 export interface Room {
   id: string;
+    roomId: string; // 👈 Thêm dòng này để dùng R001, R002...
   hostId: string;
   roomTitle: string;
   price: number;
@@ -7,7 +8,7 @@ export interface Room {
   location: string;
   description: string;
   images: string[];
-  roomType: 'single' | 'shared' | 'apartment';
+  roomType: 'single' | 'double' | 'apartment';
   status: 'available' | 'rented' | 'maintenance';
   utilities: string[];
   terms: string;

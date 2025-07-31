@@ -20,21 +20,18 @@ import { useToastContext } from '../../contexts/ToastContext';
 
 interface Contract {
   id: string;
+  contractId: string;
   roomId: string;
   tenantId: string;
-  hostId: string;
   contractDate: string;
   duration: number;
   rentPrice: number;
-  startDate: string;
   terms: string;
-  note: string;
-  contractStatus: 'active' | 'expired' | 'terminated';
-  createdAt: string;
   room: {
     roomTitle: string;
     location: string;
     area: number;
+    hostId: string;
   };
   tenant: {
     fullName: string;
@@ -50,6 +47,50 @@ interface Contract {
   };
 }
 
+// Helper functions for date validation and formatting
+const isValidDate = (dateString: string): boolean => {
+  if (!dateString) return false;
+  const date = new Date(dateString);
+  return !isNaN(date.getTime());
+};
+
+const safeFormatDate = (dateString: string): string => {
+  if (!isValidDate(dateString)) return 'Ngày không hợp lệ';
+  
+  try {
+    return new Date(dateString).toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    return 'Ngày không hợp lệ';
+  }
+};
+
+const safeCalculateEndDate = (contractDate: string, duration: number): Date | null => {
+  if (!isValidDate(contractDate) || !duration || duration <= 0) {
+    return null;
+  }
+  
+  try {
+    const start = new Date(contractDate);
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + duration);
+    
+    // Verify the result is still a valid date
+    if (isNaN(end.getTime())) {
+      return null;
+    }
+    
+    return end;
+  } catch (error) {
+    return null;
+  }
+};
+
 // Contract Detail Modal Component
 interface ContractDetailModalProps {
   isOpen: boolean;
@@ -59,13 +100,7 @@ interface ContractDetailModalProps {
 
 const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClose, contract }) => {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    return safeFormatDate(dateString);
   };
 
   const formatPrice = (price: number) => {
@@ -76,34 +111,15 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
   };
 
   const calculateEndDate = (startDate: string, duration: number) => {
-    const start = new Date(startDate);
-    const end = new Date(start);
-    end.setMonth(end.getMonth() + duration);
-    return end;
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'expired': return 'bg-yellow-100 text-yellow-800';
-      case 'terminated': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active': return 'Đang hiệu lực';
-      case 'expired': return 'Đã hết hạn';
-      case 'terminated': return 'Đã chấm dứt';
-      default: return 'Không xác định';
-    }
+    return safeCalculateEndDate(startDate, duration);
   };
 
   if (!isOpen || !contract) return null;
 
-  const endDate = calculateEndDate(contract.startDate, contract.duration);
-  const remainingDays = Math.ceil((endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+  const endDate = calculateEndDate(contract.contractDate, contract.duration);
+  const remainingDays = endDate ? Math.ceil((endDate.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
+  const isActive = remainingDays > 0;
+  const isExpiringSoon = remainingDays <= 30 && remainingDays > 0;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -126,11 +142,26 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
             <div className="bg-gray-50 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-lg font-medium text-gray-900">Thông tin hợp đồng</h4>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(contract.contractStatus)}`}>
-                  {getStatusText(contract.contractStatus)}
+                <span className={`px-3 py-1 text-sm font-medium rounded-full ${
+                  isActive 
+                    ? isExpiringSoon 
+                      ? 'bg-yellow-100 text-yellow-800' 
+                      : 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {isActive 
+                    ? isExpiringSoon 
+                      ? 'Sắp hết hạn' 
+                      : 'Đang hiệu lực'
+                    : 'Đã hết hạn'
+                  }
                 </span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-sm text-gray-600">Mã hợp đồng</p>
+                  <p className="font-medium text-gray-900">{contract.contractId}</p>
+                </div>
                 <div>
                   <p className="text-sm text-gray-600">Ngày ký hợp đồng</p>
                   <p className="font-medium text-gray-900">{formatDate(contract.contractDate)}</p>
@@ -140,12 +171,10 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
                   <p className="font-medium text-gray-900">{contract.duration} tháng</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">Ngày bắt đầu</p>
-                  <p className="font-medium text-gray-900">{formatDate(contract.startDate)}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Ngày kết thúc</p>
-                  <p className="font-medium text-gray-900">{formatDate(endDate.toISOString())}</p>
+                  <p className="text-sm text-gray-600">Ngày kết thúc dự kiến</p>
+                  <p className="font-medium text-gray-900">
+                    {endDate ? formatDate(endDate.toISOString()) : 'Không xác định'}
+                  </p>
                   {remainingDays > 0 && remainingDays <= 30 && (
                     <p className="text-sm text-orange-600 font-medium">Còn {remainingDays} ngày</p>
                   )}
@@ -250,16 +279,6 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
               </div>
             </div>
 
-            {/* Additional Notes */}
-            {contract.note && (
-              <div>
-                <h4 className="text-lg font-medium text-gray-900 mb-2">Ghi chú</h4>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">{contract.note}</p>
-                </div>
-              </div>
-            )}
-
             {/* Contract Timeline */}
             <div>
               <h4 className="text-lg font-medium text-gray-900 mb-4">Thời gian hợp đồng</h4>
@@ -272,17 +291,13 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
                   </div>
                   <div className="flex-1 h-0.5 bg-gray-300 mx-4"></div>
                   <div className="text-center">
-                    <div className="w-3 h-3 bg-green-500 rounded-full mx-auto mb-2"></div>
-                    <p className="font-medium text-gray-900">Bắt đầu</p>
-                    <p className="text-gray-600">{formatDate(contract.startDate)}</p>
-                  </div>
-                  <div className="flex-1 h-0.5 bg-gray-300 mx-4"></div>
-                  <div className="text-center">
                     <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${
                       remainingDays > 0 ? 'bg-yellow-500' : 'bg-red-500'
                     }`}></div>
-                    <p className="font-medium text-gray-900">Kết thúc</p>
-                    <p className="text-gray-600">{formatDate(endDate.toISOString())}</p>
+                    <p className="font-medium text-gray-900">Kết thúc dự kiến</p>
+                    <p className="text-gray-600">
+                      {endDate ? formatDate(endDate.toISOString()) : 'Không xác định'}
+                    </p>
                   </div>
                 </div>
               </div>
@@ -308,7 +323,6 @@ const ContractsPage: React.FC = () => {
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'expired' | 'terminated'>('all');
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
@@ -337,15 +351,17 @@ const ContractsPage: React.FC = () => {
 
       // Combine data
       const enrichedContracts = contractsData.map((contract: any) => {
-        const room = roomsData.find((r: any) => r.id === contract.roomId);
+        const room = roomsData.find((r: any) => r.roomId === contract.roomId);
         const tenant = usersData.find((u: any) => u.id === contract.tenantId);
-        const host = usersData.find((u: any) => u.id === contract.hostId);
+        
+        // Find host through room's hostId
+        const host = room ? usersData.find((u: any) => u.id === room.hostId) : null;
 
         return {
           ...contract,
-          room: room || { roomTitle: 'Unknown', location: 'Unknown', area: 0 },
-          tenant: tenant || { fullName: 'Unknown', email: 'unknown@example.com' },
-          host: host || { fullName: 'Unknown', email: 'unknown@example.com' }
+          room: room || { roomTitle: 'Phòng không tồn tại', location: 'Không xác định', area: 0 },
+          tenant: tenant || { fullName: 'Người dùng không tồn tại', email: 'unknown@example.com' },
+          host: host || { fullName: 'Chủ trọ không tồn tại', email: 'unknown@example.com' }
         };
       });
 
@@ -362,51 +378,11 @@ const ContractsPage: React.FC = () => {
     const matchesSearch = contract.room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          contract.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          contract.host.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contract.room.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || contract.contractStatus === statusFilter;
+                         contract.room.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         contract.contractId.toLowerCase().includes(searchTerm.toLowerCase());
     
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
-
-  const handleUpdateStatus = async (contractId: string, status: 'active' | 'expired' | 'terminated') => {
-    try {
-      const response = await fetch(`http://localhost:5000/contracts/${contractId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ contractStatus: status }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to update contract status');
-      }
-
-      success('Thành công', 'Cập nhật trạng thái hợp đồng thành công');
-      await loadContracts();
-    } catch (err) {
-      console.error(err);
-      error('Lỗi', 'Không thể cập nhật trạng thái hợp đồng');
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'expired': return 'bg-yellow-100 text-yellow-800';
-      case 'terminated': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case 'active': return 'Đang hiệu lực';
-      case 'expired': return 'Đã hết hạn';
-      case 'terminated': return 'Đã chấm dứt';
-      default: return 'Không xác định';
-    }
-  };
 
   const handleViewDetail = (contract: Contract) => {
     setSelectedContract(contract);
@@ -419,11 +395,17 @@ const ContractsPage: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
+    if (!isValidDate(dateString)) return 'Ngày không hợp lệ';
+    
+    try {
+      return new Date(dateString).toLocaleDateString('vi-VN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      });
+    } catch (error) {
+      return 'Ngày không hợp lệ';
+    }
   };
 
   const formatPrice = (price: number) => {
@@ -434,25 +416,35 @@ const ContractsPage: React.FC = () => {
   };
 
   const calculateEndDate = (startDate: string, duration: number) => {
-    const start = new Date(startDate);
-    const end = new Date(start);
-    end.setMonth(end.getMonth() + duration);
-    return end;
+    return safeCalculateEndDate(startDate, duration);
   };
 
   const isExpiringSoon = (startDate: string, duration: number) => {
     const endDate = calculateEndDate(startDate, duration);
+    if (!endDate) return false;
+    
     const now = new Date();
     const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
   };
 
+  const getContractStatus = (contractDate: string, duration: number) => {
+    const endDate = calculateEndDate(contractDate, duration);
+    if (!endDate) return 'unknown';
+    
+    const now = new Date();
+    const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilExpiry > 30) return 'active';
+    if (daysUntilExpiry > 0) return 'expiring';
+    return 'expired';
+  };
+
   const stats = {
     total: contracts.length,
-    active: contracts.filter(c => c.contractStatus === 'active').length,
-    expired: contracts.filter(c => c.contractStatus === 'expired').length,
-    terminated: contracts.filter(c => c.contractStatus === 'terminated').length,
-    expiringSoon: contracts.filter(c => c.contractStatus === 'active' && isExpiringSoon(c.startDate, c.duration)).length
+    active: contracts.filter(c => getContractStatus(c.contractDate, c.duration) === 'active').length,
+    expiring: contracts.filter(c => getContractStatus(c.contractDate, c.duration) === 'expiring').length,
+    expired: contracts.filter(c => getContractStatus(c.contractDate, c.duration) === 'expired').length,
   };
 
   if (loading) {
@@ -475,7 +467,7 @@ const ContractsPage: React.FC = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <FileText className="w-8 h-8 text-blue-600" />
@@ -501,17 +493,7 @@ const ContractsPage: React.FC = () => {
             <Clock className="w-8 h-8 text-orange-600" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Sắp hết hạn</p>
-              <p className="text-2xl font-bold text-orange-600">{stats.expiringSoon}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
-            <Calendar className="w-8 h-8 text-yellow-600" />
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Đã hết hạn</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.expired}</p>
+              <p className="text-2xl font-bold text-orange-600">{stats.expiring}</p>
             </div>
           </div>
         </div>
@@ -520,37 +502,24 @@ const ContractsPage: React.FC = () => {
           <div className="flex items-center">
             <XCircle className="w-8 h-8 text-red-600" />
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Đã chấm dứt</p>
-              <p className="text-2xl font-bold text-red-600">{stats.terminated}</p>
+              <p className="text-sm font-medium text-gray-600">Đã hết hạn</p>
+              <p className="text-2xl font-bold text-red-600">{stats.expired}</p>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Search and Filter */}
+      {/* Search */}
       <div className="bg-white p-4 rounded-lg shadow-sm border">
-        <div className="flex flex-col md:flex-row items-center gap-4">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo tên phòng, khách hàng, chủ trọ..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="all">Tất cả trạng thái</option>
-            <option value="active">Đang hiệu lực</option>
-            <option value="expired">Đã hết hạn</option>
-            <option value="terminated">Đã chấm dứt</option>
-          </select>
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo mã hợp đồng, tên phòng, khách hàng, chủ trọ..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
         </div>
       </div>
 
@@ -566,6 +535,9 @@ const ContractsPage: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Mã hợp đồng
+                </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Phòng trọ
                 </th>
@@ -591,11 +563,15 @@ const ContractsPage: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredContracts.map((contract) => {
-                const endDate = calculateEndDate(contract.startDate, contract.duration);
-                const expiringSoon = isExpiringSoon(contract.startDate, contract.duration);
+                const endDate = calculateEndDate(contract.contractDate, contract.duration);
+                const status = getContractStatus(contract.contractDate, contract.duration);
                 
                 return (
-                  <tr key={contract.id} className={`hover:bg-gray-50 ${expiringSoon ? 'bg-orange-50' : ''}`}>
+                  <tr key={contract.id} className={`hover:bg-gray-50 ${status === 'expiring' ? 'bg-orange-50' : ''}`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">{contract.contractId}</div>
+                      <div className="text-sm text-gray-500">{formatDate(contract.contractDate)}</div>
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-start gap-3">
                         <Building className="w-8 h-8 text-gray-400 mt-1" />
@@ -661,12 +637,12 @@ const ContractsPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {formatDate(contract.startDate)} - {formatDate(endDate.toISOString())}
+                        {formatDate(contract.contractDate)} - {endDate ? formatDate(endDate.toISOString()) : 'Không xác định'}
                       </div>
                       <div className="text-sm text-gray-500">
                         {contract.duration} tháng
                       </div>
-                      {expiringSoon && (
+                      {status === 'expiring' && (
                         <div className="text-xs text-orange-600 font-medium">
                           Sắp hết hạn
                         </div>
@@ -679,29 +655,26 @@ const ContractsPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(contract.contractStatus)}`}>
-                        {getStatusText(contract.contractStatus)}
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                        status === 'active' ? 'bg-green-100 text-green-800' :
+                        status === 'expiring' ? 'bg-yellow-100 text-yellow-800' :
+                        status === 'expired' ? 'bg-red-100 text-red-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {status === 'active' ? 'Đang hiệu lực' :
+                         status === 'expiring' ? 'Sắp hết hạn' :
+                         status === 'expired' ? 'Đã hết hạn' :
+                         'Không xác định'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center justify-end gap-2">
-                        {contract.contractStatus === 'active' && (
-                          <button 
-                            onClick={() => handleUpdateStatus(contract.id, 'terminated')}
-                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                            title="Chấm dứt hợp đồng"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        )}
-                        <button 
-                          onClick={() => handleViewDetail(contract)}
-                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
-                          title="Xem chi tiết"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </div>
+                      <button 
+                        onClick={() => handleViewDetail(contract)}
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
+                        title="Xem chi tiết"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
                     </td>
                   </tr>
                 );
@@ -714,7 +687,7 @@ const ContractsPage: React.FC = () => {
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-500 text-lg font-medium">Không tìm thấy hợp đồng nào</p>
-            <p className="text-gray-400 text-sm mt-1">Thử thay đổi bộ lọc hoặc từ khóa tìm kiếm</p>
+            <p className="text-gray-400 text-sm mt-1">Thử thay đổi từ khóa tìm kiếm</p>
           </div>
         )}
       </div>

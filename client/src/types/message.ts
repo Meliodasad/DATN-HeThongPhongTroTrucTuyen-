@@ -1,18 +1,21 @@
 export interface Message {
   id: string;
+  messageId: string;
   hostId: string;
   tenantId: string;
   senderId: string;
+  receiverId: string;
   message: string;
   time: string;
   isRead: boolean;
-  sender: {
+  // Populated data
+  sender?: {
     fullName: string;
     email: string;
     phone?: string;
     avatar?: string;
   };
-  receiver: {
+  receiver?: {
     fullName: string;
     email: string;
     phone?: string;
@@ -28,9 +31,18 @@ export interface MessageStats {
 }
 
 export interface MessageFilters {
-  isRead?: boolean;
-  senderId?: string;
-  receiverId?: string;
+  isRead?: boolean | 'all';
+  searchTerm?: string;
   dateFrom?: string;
   dateTo?: string;
+}
+
+export interface CreateMessageData {
+  hostId: string;
+  tenantId: string;
+  senderId: string;
+  receiverId?: string;
+  message: string;
+  time?: string;
+  isRead?: boolean;
 }

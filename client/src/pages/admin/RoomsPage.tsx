@@ -40,14 +40,12 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
 
   const loadRoom = async () => {
     if (!roomId) return;
-    
     try {
       setLoading(true);
       const roomData = await roomService.getRoomById(roomId);
       setRoom(roomData);
     } catch (err) {
       console.error(err);
-      error('Lỗi', 'Không thể tải thông tin phòng trọ');
     } finally {
       setLoading(false);
     }
@@ -56,7 +54,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
   const getRoomTypeText = (type: Room['roomType']) => {
     switch (type) {
       case 'single': return 'Phòng đơn';
-      case 'shared': return 'Phòng chia sẻ';
+      case 'double': return 'Phòng đôi';
       case 'apartment': return 'Căn hộ';
       default: return 'Không xác định';
     }
@@ -80,21 +78,21 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
     }
   };
 
-  const getApprovalText = (status: Room['approvalStatus']) => {
+  const getApprovalText = (status?: Room['approvalStatus']) => {
     switch (status) {
       case 'approved': return 'Đã duyệt';
       case 'pending': return 'Chờ duyệt';
       case 'rejected': return 'Từ chối';
-      default: return 'Không xác định';
+      default: return 'Chờ duyệt'; // Default to pending if not set
     }
   };
 
-  const getApprovalColor = (status: Room['approvalStatus']) => {
+  const getApprovalColor = (status?: Room['approvalStatus']) => {
     switch (status) {
       case 'approved': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-yellow-100 text-yellow-800'; // Default to pending style
     }
   };
 
@@ -106,6 +104,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Không có dữ liệu';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
@@ -264,8 +263,8 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Trạng thái duyệt
                   </label>
-                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getApprovalColor(room?.approvalStatus || 'pending')}`}>
-                    {getApprovalText(room?.approvalStatus || 'pending')}
+                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getApprovalColor(room?.approvalStatus)}`}>
+                    {getApprovalText(room?.approvalStatus)}
                   </span>
                 </div>
               </div>
@@ -302,14 +301,14 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
               )}
 
               {/* Created Date */}
-              {room && (
+              {room?.dateAdded && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Ngày tạo
                   </label>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
-                    <p className="text-gray-900">{formatDate(room.createdAt)}</p>
+                    <p className="text-gray-900">{formatDate(room.dateAdded)}</p>
                   </div>
                 </div>
               )}
@@ -385,9 +384,16 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ currentStatus, roomId, 
   );
 };
 
+// Helper function to get approval status for a room
+const getRoomApprovalStatus = (roomId: string, roomApprovals: any[]): Room['approvalStatus'] => {
+  const approval = roomApprovals.find(approval => approval.roomId === roomId);
+  return approval?.approvalStatus || 'pending';
+};
+
 // Main Rooms Page Component
 const RoomsPage: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomApprovals, setRoomApprovals] = useState<any[]>([]);
   const [stats, setStats] = useState<RoomStats>({
     total: 0,
     available: 0,
@@ -416,12 +422,14 @@ const RoomsPage: React.FC = () => {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [roomsData, statsData] = await Promise.all([
+      const [roomsData, statsData, approvalsData] = await Promise.all([
         roomService.getRooms(filters),
-        roomService.getRoomStats()
+        roomService.getRoomStats(),
+        roomService.getRoomApprovals() // This method needs to be implemented
       ]);
       setRooms(roomsData);
       setStats(statsData);
+      setRoomApprovals(approvalsData || []);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải dữ liệu phòng trọ');
@@ -430,8 +438,16 @@ const RoomsPage: React.FC = () => {
     }
   };
 
+  // Enhanced rooms with approval status
+  const roomsWithApproval = useMemo(() => {
+    return rooms.map(room => ({
+      ...room,
+      approvalStatus: getRoomApprovalStatus(room.roomId || room.id, roomApprovals)
+    }));
+  }, [rooms, roomApprovals]);
+
   const filteredRooms = useMemo(() => {
-    return rooms.filter(room => {
+    return roomsWithApproval.filter(room => {
       const matchesSearch = !filters.searchTerm || 
         room.roomTitle.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         room.location.toLowerCase().includes(filters.searchTerm.toLowerCase());
@@ -442,7 +458,7 @@ const RoomsPage: React.FC = () => {
       
       return matchesSearch && matchesType && matchesStatus && matchesApproval;
     });
-  }, [rooms, filters]);
+  }, [roomsWithApproval, filters]);
 
   const handleViewRoom = (roomId: string) => {
     setSelectedRoomId(roomId);
@@ -465,7 +481,24 @@ const RoomsPage: React.FC = () => {
   const handleUpdateApproval = async (roomId: string, status: Room['approvalStatus']) => {
     try {
       await roomService.updateApprovalStatus(roomId, status);
+      
+      // Update local state immediately
+      setRoomApprovals(prevApprovals => {
+        const existingIndex = prevApprovals.findIndex(approval => approval.roomId === roomId);
+        if (existingIndex >= 0) {
+          // Update existing approval
+          const updatedApprovals = [...prevApprovals];
+          updatedApprovals[existingIndex] = { ...updatedApprovals[existingIndex], approvalStatus: status };
+          return updatedApprovals;
+        } else {
+          // Add new approval
+          return [...prevApprovals, { roomId, approvalStatus: status, approvalDate: new Date().toISOString() }];
+        }
+      });
+      
       success('Thành công', `${status === 'approved' ? 'Duyệt' : 'Từ chối'} phòng trọ thành công`);
+      
+      // Reload data to ensure sync
       await loadData();
     } catch (err) {
       console.error(err);
@@ -476,7 +509,19 @@ const RoomsPage: React.FC = () => {
   const handleStatusChange = async (roomId: string, status: Room['status']) => {
     try {
       await roomService.updateRoom(roomId, { status });
+      
+      // Update local state immediately
+      setRooms(prevRooms => 
+        prevRooms.map(room => 
+          room.id === roomId || room.roomId === roomId
+            ? { ...room, status: status }
+            : room
+        )
+      );
+      
       success('Thành công', 'Cập nhật trạng thái phòng thành công');
+      
+      // Reload data to ensure sync
       await loadData();
     } catch (err) {
       console.error(err);
@@ -492,18 +537,27 @@ const RoomsPage: React.FC = () => {
   const getRoomTypeText = (type: Room['roomType']) => {
     switch (type) {
       case 'single': return 'Phòng đơn';
-      case 'shared': return 'Phòng chia sẻ';
+      case 'double': return 'Phòng đôi';
       case 'apartment': return 'Căn hộ';
       default: return 'Không xác định';
     }
   };
 
-  const getApprovalColor = (status: Room['approvalStatus']) => {
+  const getApprovalColor = (status?: Room['approvalStatus']) => {
     switch (status) {
       case 'approved': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      default: return 'bg-yellow-100 text-yellow-800'; // Default to pending style
+    }
+  };
+
+  const getApprovalText = (status?: Room['approvalStatus']) => {
+    switch (status) {
+      case 'approved': return 'Đã duyệt';
+      case 'pending': return 'Chờ duyệt';
+      case 'rejected': return 'Từ chối';
+      default: return 'Chờ duyệt'; // Default to pending if not set
     }
   };
 
@@ -515,6 +569,7 @@ const RoomsPage: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Không có dữ liệu';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'short',
@@ -606,7 +661,7 @@ const RoomsPage: React.FC = () => {
             >
               <option value="all">Tất cả loại phòng</option>
               <option value="single">Phòng đơn</option>
-              <option value="shared">Phòng chia sẻ</option>
+              <option value="double">Phòng đôi</option>
               <option value="apartment">Căn hộ</option>
             </select>
 
@@ -714,7 +769,7 @@ const RoomsPage: React.FC = () => {
                       </div>
                       <div className="ml-2">
                         <div className="text-sm font-medium text-gray-900">
-                          {room.host?.fullName || 'Unknown'}
+                          {room.hostId || 'Unknown'}
                         </div>
                       </div>
                     </div>
@@ -739,14 +794,13 @@ const RoomsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getApprovalColor(room.approvalStatus)}`}>
-                      {room.approvalStatus === 'approved' ? 'Đã duyệt' : 
-                       room.approvalStatus === 'pending' ? 'Chờ duyệt' : 'Từ chối'}
+                      {getApprovalText(room.approvalStatus)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
                       <Calendar className="w-4 h-4 mr-1" />
-                      {formatDate(room.createdAt)}
+                      {formatDate(room.dateAdded)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -754,14 +808,14 @@ const RoomsPage: React.FC = () => {
                       {room.approvalStatus === 'pending' && (
                         <>
                           <button 
-                            onClick={() => handleUpdateApproval(room.id, 'approved')}
+                            onClick={() => handleUpdateApproval(room.roomId || room.id, 'approved')}
                             className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
                             title="Duyệt phòng"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
                           <button 
-                            onClick={() => handleUpdateApproval(room.id, 'rejected')}
+                            onClick={() => handleUpdateApproval(room.roomId || room.id, 'rejected')}
                             className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                             title="Từ chối"
                           >

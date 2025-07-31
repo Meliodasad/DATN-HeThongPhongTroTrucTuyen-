@@ -1,220 +1,191 @@
-import type { CreateRoomData, Room, RoomFilters, RoomStats, UpdateRoomData } from "../types/room";
+// roomService.ts - Add method to get room approvals
 
+const API_BASE = 'http://localhost:5000';
 
+export const roomService = {
+  // ... existing methods ...
 
-class RoomService {
-private baseUrl = 'http://localhost:5000';
-
-  async getRooms(filters?: RoomFilters): Promise<Room[]> {
+  async getRoomApprovals() {
     try {
-      // Get rooms and users data
-      const [roomsResponse, usersResponse] = await Promise.all([
-        fetch(`${this.baseUrl}/rooms`),
-        fetch(`${this.baseUrl}/users`)
-      ]);
-
-      if (!roomsResponse.ok || !usersResponse.ok) {
-        throw new Error('Failed to fetch data');
-      }
-
-      let rooms = await roomsResponse.json();
-      const users = await usersResponse.json();
-
-      // Enrich rooms with host information
-      rooms = rooms.map((room: any) => {
-        const host = users.find((user: any) => user.id === room.hostId);
-        return {
-          ...room,
-          host: host ? {
-            fullName: host.fullName,
-            email: host.email,
-            phone: host.phone,
-            avatar: host.avatar
-          } : null
-        };
-      });
-
-      // Apply filters
-      if (filters) {
-        if (filters.roomType && filters.roomType !== 'all') {
-          rooms = rooms.filter((room: Room) => room.roomType === filters.roomType);
-        }
-        if (filters.status && filters.status !== 'all') {
-          rooms = rooms.filter((room: Room) => room.status === filters.status);
-        }
-        if (filters.approvalStatus && filters.approvalStatus !== 'all') {
-          rooms = rooms.filter((room: Room) => room.approvalStatus === filters.approvalStatus);
-        }
-        if (filters.hostId) {
-          rooms = rooms.filter((room: Room) => room.hostId === filters.hostId);
-        }
-        if (filters.priceMin !== undefined) {
-          rooms = rooms.filter((room: Room) => room.price >= filters.priceMin!);
-        }
-        if (filters.priceMax !== undefined) {
-          rooms = rooms.filter((room: Room) => room.price <= filters.priceMax!);
-        }
-        if (filters.location) {
-          rooms = rooms.filter((room: Room) => 
-            room.location.toLowerCase().includes(filters.location!.toLowerCase())
-          );
-        }
-        if (filters.searchTerm) {
-          const searchLower = filters.searchTerm.toLowerCase();
-          rooms = rooms.filter((room: Room) => 
-            room.roomTitle.toLowerCase().includes(searchLower) ||
-            room.location.toLowerCase().includes(searchLower) ||
-            room.description.toLowerCase().includes(searchLower)
-          );
-        }
-      }
-
-      return rooms.sort((a: Room, b: Room) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-    } catch (error) {
-      console.error('Error fetching rooms:', error);
-      throw new Error('Không thể tải danh sách phòng trọ');
-    }
-  }
-
-  async getRoomById(id: string): Promise<Room> {
-    try {
-      const [roomResponse, usersResponse] = await Promise.all([
-        fetch(`${this.baseUrl}/rooms/${id}`),
-        fetch(`${this.baseUrl}/users`)
-      ]);
-
-      if (!roomResponse.ok) {
-        throw new Error('Room not found');
-      }
-
-      const room = await roomResponse.json();
-      const users = await usersResponse.json();
-      const host = users.find((user: any) => user.id === room.hostId);
-
-      return {
-        ...room,
-        host: host ? {
-          fullName: host.fullName,
-          email: host.email,
-          phone: host.phone,
-          avatar: host.avatar
-        } : null
-      };
-    } catch (error) {
-      console.error('Error fetching room:', error);
-      throw new Error('Không thể tải thông tin phòng trọ');
-    }
-  }
-
-  async createRoom(roomData: CreateRoomData): Promise<Room> {
-    try {
-      const newRoom = {
-        id: Date.now().toString(),
-        ...roomData,
-        status: 'available' as const,
-        approvalStatus: 'pending' as const,
-        createdAt: new Date().toISOString()
-      };
-
-      const response = await fetch(`${this.baseUrl}/rooms`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newRoom),
-      });
-
+      const response = await fetch(`${API_BASE}/room_approvals`);
       if (!response.ok) {
-        throw new Error('Failed to create room');
+        throw new Error('Failed to fetch room approvals');
       }
-
       return await response.json();
     } catch (error) {
-      console.error('Error creating room:', error);
-      throw new Error('Không thể tạo phòng trọ mới');
+      console.error('Error fetching room approvals:', error);
+      return [];
     }
-  }
+  },
 
-  async updateRoom(id: string, roomData: UpdateRoomData): Promise<Room> {
+  async getRooms(filters: any = {}) {
     try {
-      const response = await fetch(`${this.baseUrl}/rooms/${id}`, {
+      let url = `${API_BASE}/rooms`;
+      const queryParams = new URLSearchParams();
+      
+      if (filters.roomType && filters.roomType !== 'all') {
+        queryParams.append('roomType', filters.roomType);
+      }
+      if (filters.status && filters.status !== 'all') {
+        queryParams.append('status', filters.status);
+      }
+      if (filters.searchTerm) {
+        queryParams.append('q', filters.searchTerm);
+      }
+      
+      if (queryParams.toString()) {
+        url += `?${queryParams.toString()}`;
+      }
+      
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch rooms');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching rooms:', error);
+      throw error;
+    }
+  },
+
+  async getRoomById(roomId: string) {
+    try {
+      const response = await fetch(`${API_BASE}/rooms/${roomId}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch room');
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching room:', error);
+      throw error;
+    }
+  },
+
+  async getRoomStats() {
+    try {
+      const rooms = await this.getRooms();
+      const approvals = await this.getRoomApprovals();
+      
+      const stats = {
+        total: rooms.length,
+        available: rooms.filter(room => room.status === 'available').length,
+        rented: rooms.filter(room => room.status === 'rented').length,
+        maintenance: rooms.filter(room => room.status === 'maintenance').length,
+        pending: 0,
+        approved: 0,
+        rejected: 0
+      };
+
+      // Count approval statuses
+      const approvalCounts = approvals.reduce((acc, approval) => {
+        acc[approval.approvalStatus] = (acc[approval.approvalStatus] || 0) + 1;
+        return acc;
+      }, {});
+
+      stats.pending = rooms.length - (approvalCounts.approved || 0) - (approvalCounts.rejected || 0);
+      stats.approved = approvalCounts.approved || 0;
+      stats.rejected = approvalCounts.rejected || 0;
+
+      return stats;
+    } catch (error) {
+      console.error('Error calculating room stats:', error);
+      return {
+        total: 0,
+        available: 0,
+        rented: 0,
+        maintenance: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0
+      };
+    }
+  },
+
+  async updateApprovalStatus(roomId: string, status: string) {
+    try {
+      // First check if approval exists
+      const approvals = await this.getRoomApprovals();
+      const existingApproval = approvals.find(approval => approval.roomId === roomId);
+      
+      if (existingApproval) {
+        // Update existing approval
+        const response = await fetch(`${API_BASE}/room_approvals/${existingApproval.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...existingApproval,
+            approvalStatus: status,
+            approvalDate: new Date().toISOString()
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to update approval status');
+        }
+        return await response.json();
+      } else {
+        // Create new approval
+        const response = await fetch(`${API_BASE}/room_approvals`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            approvalId: `A${Date.now()}`,
+            roomId: roomId,
+            approvalStatus: status,
+            approvalDate: new Date().toISOString(),
+            note: status === 'approved' ? 'Phòng đạt yêu cầu.' : 'Phòng không đạt yêu cầu.',
+            adminId: 'U001' // You might want to get this from auth context
+          }),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to create approval status');
+        }
+        return await response.json();
+      }
+    } catch (error) {
+      console.error('Error updating approval status:', error);
+      throw error;
+    }
+  },
+
+  async updateRoom(roomId: string, updates: any) {
+    try {
+      const response = await fetch(`${API_BASE}/rooms/${roomId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(roomData),
+        body: JSON.stringify(updates),
       });
-
+      
       if (!response.ok) {
         throw new Error('Failed to update room');
       }
-
       return await response.json();
     } catch (error) {
       console.error('Error updating room:', error);
-      throw new Error('Không thể cập nhật thông tin phòng trọ');
+      throw error;
     }
-  }
+  },
 
-  async deleteRoom(id: string): Promise<void> {
+  async deleteRoom(roomId: string) {
     try {
-      const response = await fetch(`${this.baseUrl}/rooms/${id}`, {
+      const response = await fetch(`${API_BASE}/rooms/${roomId}`, {
         method: 'DELETE',
       });
-
+      
       if (!response.ok) {
         throw new Error('Failed to delete room');
       }
+      return true;
     } catch (error) {
       console.error('Error deleting room:', error);
-      throw new Error('Không thể xóa phòng trọ');
+      throw error;
     }
   }
-
-  async getRoomStats(): Promise<RoomStats> {
-    try {
-      const rooms = await this.getRooms();
-      
-      const stats: RoomStats = {
-        total: rooms.length,
-        available: rooms.filter(r => r.status === 'available').length,
-        rented: rooms.filter(r => r.status === 'rented').length,
-        maintenance: rooms.filter(r => r.status === 'maintenance').length,
-        pending: rooms.filter(r => r.approvalStatus === 'pending').length,
-        approved: rooms.filter(r => r.approvalStatus === 'approved').length,
-        rejected: rooms.filter(r => r.approvalStatus === 'rejected').length,
-      };
-
-      return stats;
-    } catch (error) {
-      console.error('Error fetching room stats:', error);
-      throw new Error('Không thể tải thống kê phòng trọ');
-    }
-  }
-
-  async updateRoomStatus(id: string, status: Room['status']): Promise<void> {
-    try {
-      await this.updateRoom(id, { status });
-    } catch (error) {
-      console.error('Error updating room status:', error);
-      throw new Error('Không thể cập nhật trạng thái phòng trọ');
-    }
-  }
-
-  async updateApprovalStatus(id: string, approvalStatus: Room['approvalStatus']): Promise<void> {
-    try {
-      const updateData: UpdateRoomData = { 
-        approvalStatus,
-        ...(approvalStatus === 'approved' && { approvalDate: new Date().toISOString() })
-      };
-      await this.updateRoom(id, updateData);
-    } catch (error) {
-      console.error('Error updating approval status:', error);
-      throw new Error('Không thể cập nhật trạng thái duyệt');
-    }
-  }
-}
-
-export const roomService = new RoomService();
+};

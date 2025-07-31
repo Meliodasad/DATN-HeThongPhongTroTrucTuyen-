@@ -250,10 +250,7 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
               {/* Replies Section */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h5 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5" />
-                    Phản hồi ({review.replies?.length || 0})
-                  </h5>
+             
  
                 </div>
 
@@ -301,10 +298,7 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
                     ))
                   ) : (
                     <div className="text-center py-8 text-gray-500">
-                      <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-2" />
-                      <p>Chưa có phản hồi nào</p>
-                      <p className="text-sm">Hãy thêm phản hồi đầu tiên cho đánh giá này</p>
-                    </div>
+                </div>
                   )}
                 </div>
               </div>

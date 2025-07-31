@@ -1,23 +1,12 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { ReactNode } from 'react';
-import { useToastContext } from './ToastContext';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { toast } from "react-toastify";
 
 interface User {
   id: string;
   fullName: string;
   email: string;
-  role: 'admin' | 'host' | 'tenant' | 'guest';
-  status: 'active' | 'inactive' | 'pending';
-  avatar?: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (userData: RegisterData) => Promise<boolean>;
-  logout: () => void;
-  loading: boolean;
-  isAuthenticated: boolean;
+  phone?: string;
+  role: 'host' | 'tenant';
 }
 
 interface RegisterData {
@@ -28,11 +17,24 @@ interface RegisterData {
   role: 'host' | 'tenant';
 }
 
+interface LoginData {
+  email: string;
+  password: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  register: (userData: RegisterData) => Promise<{ userId: string } | null>;
+  login: (data: LoginData) => Promise<boolean>;
+  logout: () => void;
+}
+
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
+  if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
@@ -44,77 +46,14 @@ interface AuthProviderProps {
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const { success, error } = useToastContext();
+  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Check if user is logged in on app start
-    const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-      } catch (err) {
-        localStorage.removeItem('user');
-      }
-    }
-    setLoading(false);
-  }, []);
-
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const register = async (userData: RegisterData): Promise<{ userId: string } | null> => {
     try {
-      setLoading(true);
-      
-      // Fetch users from API
-const response = await fetch('http://localhost:5000/users');
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      
-      const users = await response.json();
-      
-      // Find user with matching email and password
-      const foundUser = users.find((u: any) => 
-        u.email === email && u.password === password
-      );
-      
-      if (!foundUser) {
-        error('Lỗi đăng nhập', 'Email hoặc mật khẩu không đúng');
-        return false;
-      }
-
-      if (foundUser.status !== 'active') {
-        error('Lỗi đăng nhập', 'Tài khoản chưa được kích hoạt hoặc bị khóa');
-        return false;
-      }
-
-      const userData: User = {
-        id: foundUser.id,
-        fullName: foundUser.fullName,
-        email: foundUser.email,
-        role: foundUser.role,
-        status: foundUser.status,
-        avatar: foundUser.avatar
-      };
-
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-      success('Thành công', `Chào mừng ${foundUser.fullName}!`);
-      return true;
-    } catch (err) {
-      console.error('Login error:', err);
-      error('Lỗi', 'Không thể đăng nhập. Vui lòng thử lại.');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const register = async (userData: RegisterData): Promise<boolean> => {
-    try {
-      setLoading(true);
+      setIsLoading(true);
 
       // Check if email already exists
-      const response = await fetch('/api/users');
+      const response = await fetch('http://localhost:5000/users');
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
@@ -124,56 +63,75 @@ const response = await fetch('http://localhost:5000/users');
       
       if (existingUser) {
         error('Lỗi đăng ký', 'Email đã được sử dụng');
-        return false;
+        return null;
       }
 
       // Create new user
+      const userId = `user_${Date.now()}`;
       const newUser = {
-        id: Date.now().toString(),
+        id: userId,
         ...userData,
         status: 'active',
         createdAt: new Date().toISOString()
       };
 
-      const createResponse = await fetch('http://localhost:5000/users', {
-      });
-
-const apiResponse = await fetch('http://localhost:5000/users', {
+      const apiResponse = await fetch('http://localhost:5000/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newUser),
+        body: JSON.stringify(newUser)
       });
 
       if (!apiResponse.ok) {
         throw new Error('Failed to create user');
       }
 
-      success('Thành công', 'Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
-      return true;
+toast.success("Thành công! Đăng ký tài khoản thành công.");
+      return { userId };
     } catch (err) {
       console.error('Register error:', err);
-      error('Lỗi', 'Không thể đăng ký. Vui lòng thử lại.');
+      toast.error("Lỗi! Không thể đăng ký. Vui lòng thử lại.");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const login = async (data: LoginData): Promise<boolean> => {
+    setIsLoading(true);
+    try {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mock successful login
+      const mockUser: User = {
+        id: `user_${Date.now()}`,
+        fullName: 'Test User',
+        email: data.email,
+        role: 'tenant'
+      };
+      
+      setUser(mockUser);
+      return true;
+    } catch (error) {
+      console.error('Login failed:', error);
       return false;
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('user');
-    success('Thành công', 'Đã đăng xuất');
   };
 
   const value: AuthContextType = {
     user,
-    login,
+    isLoading,
     register,
-    logout,
-    loading,
-    isAuthenticated: !!user
+    login,
+    logout
   };
 
   return (

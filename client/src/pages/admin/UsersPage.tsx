@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  Users, 
-  UserPlus, 
+  Users,  
   Search, 
   Eye, 
-  Edit, 
   Trash2, 
   User, 
   Calendar,
@@ -15,51 +13,31 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Save,
-  EyeOff,
-  X
+  X,
+  ChevronDown
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
 import { userService } from '../../services/userService';
-import type { User as UserType, UserStats, UserFilters, CreateUserData, UpdateUserData } from '../../types/user';
+import type { User as UserType, UserStats, UserFilters } from '../../types/user';
 
-// User Modal Component
+// User Modal Component (chỉ để xem)
 interface UserModalProps {
   isOpen: boolean;
   onClose: () => void;
   userId: string | null;
-  mode: 'create' | 'edit' | 'view';
-  onSave: () => void;
 }
 
-const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, onSave }) => {
+const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId }) => {
   const [user, setUser] = useState<UserType | null>(null);
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState<CreateUserData>({
-    fullName: '',
-    email: '',
-    password: '',
-    phone: '',
-    address: '',
-    idNumber: '',
-    dob: '',
-    role: 'tenant',
-    avatar: ''
-  });
 
-  const { success, error } = useToastContext();
+  const { error } = useToastContext();
 
   useEffect(() => {
-    if (isOpen) {
-      if (userId && (mode === 'edit' || mode === 'view')) {
-        loadUser();
-      } else if (mode === 'create') {
-        resetForm();
-      }
+    if (isOpen && userId) {
+      loadUser();
     }
-  }, [isOpen, userId, mode]);
+  }, [isOpen, userId]);
 
   const loadUser = async () => {
     if (!userId) return;
@@ -68,71 +46,12 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
       setLoading(true);
       const userData = await userService.getUserById(userId);
       setUser(userData);
-      setFormData({
-        fullName: userData.fullName,
-        email: userData.email,
-        password: '',
-        phone: userData.phone || '',
-        address: userData.address || '',
-        idNumber: userData.idNumber || '',
-        dob: userData.dob || '',
-        role: userData.role,
-        avatar: userData.avatar || ''
-      });
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải thông tin người dùng');
     } finally {
       setLoading(false);
     }
-  };
-
-  const resetForm = () => {
-    setUser(null);
-    setFormData({
-      fullName: '',
-      email: '',
-      password: '',
-      phone: '',
-      address: '',
-      idNumber: '',
-      dob: '',
-      role: 'tenant',
-      avatar: ''
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (mode === 'view') return;
-
-    try {
-      setSaving(true);
-      
-      if (mode === 'create') {
-        await userService.createUser(formData);
-        success('Thành công', 'Tạo người dùng mới thành công');
-      } else if (mode === 'edit' && userId) {
-        const updateData: UpdateUserData = { ...formData };
-        if (!updateData.password) {
-          delete updateData.password;
-        }
-        await userService.updateUser(userId, updateData);
-        success('Thành công', 'Cập nhật thông tin thành công');
-      }
-      
-      onSave();
-      onClose();
-    } catch (err) {
-      console.error(err);
-      error('Lỗi', mode === 'create' ? 'Không thể tạo người dùng' : 'Không thể cập nhật thông tin');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleInputChange = (field: keyof CreateUserData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const getRoleText = (role: UserType['role']) => {
@@ -175,19 +94,12 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
 
   if (!isOpen) return null;
 
-  const isViewMode = mode === 'view';
-  const isCreateMode = mode === 'create';
-  const isEditMode = mode === 'edit';
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-900">
-            {isEditMode && 'Chỉnh sửa người dùng'}
-            {isViewMode && 'Chi tiết người dùng'}
-          </h3>
+          <h3 className="text-xl font-semibold text-gray-900">Chi tiết người dùng</h3>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -203,141 +115,66 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
               <span className="ml-2 text-gray-600">Đang tải...</span>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          ) : user ? (
+            <div className="p-6 space-y-6">
               {/* Avatar and Basic Info */}
               <div className="flex items-start gap-6">
                 <div className="flex-shrink-0">
                   <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                    {formData.avatar ? (
+                    {user.avatar ? (
                       <img 
-                        src={formData.avatar} 
-                        alt={formData.fullName}
+                        src={user.avatar} 
+                        alt={user.fullName}
                         className="w-24 h-24 rounded-full object-cover"
                       />
                     ) : (
                       <User className="w-12 h-12 text-gray-500" />
                     )}
                   </div>
-                  {!isViewMode && (
-                    <div className="mt-2">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        URL Avatar
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.avatar}
-                        onChange={(e) => handleInputChange('avatar', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                        placeholder="https://..."
-                      />
-                    </div>
-                  )}
                 </div>
 
                 <div className="flex-1 space-y-4">
                   {/* Full Name */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Họ và tên *
+                      Họ và tên
                     </label>
-                    {isViewMode ? (
-                      <p className="text-gray-900 font-medium">{user?.fullName}</p>
-                    ) : (
-                      <input
-                        type="text"
-                        value={formData.fullName}
-                        onChange={(e) => handleInputChange('fullName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    )}
+                    <p className="text-gray-900 font-medium text-lg">{user.fullName}</p>
                   </div>
 
                   {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Email *
+                      Email
                     </label>
-                    {isViewMode ? (
-                      <div className="flex items-center gap-2">
-                        <Mail className="w-4 h-4 text-gray-500" />
-                        <p className="text-gray-900">{user?.email}</p>
-                      </div>
-                    ) : (
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange('email', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      />
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Mail className="w-4 h-4 text-gray-500" />
+                      <p className="text-gray-900">{user.email}</p>
+                    </div>
                   </div>
 
                   {/* Role */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Vai trò *
+                      Vai trò
                     </label>
-                    {isViewMode ? (
-                      <div className="flex items-center gap-2">
-                        <Shield className="w-4 h-4 text-gray-500" />
-                        <p className="text-gray-900">{getRoleText(user?.role || 'tenant')}</p>
-                      </div>
-                    ) : (
-                      <select
-                        value={formData.role}
-                        onChange={(e) => handleInputChange('role', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        required
-                      >
-                        <option value="tenant">Người thuê</option>
-                        <option value="host">Chủ trọ</option>
-                        <option value="admin">Quản trị viên</option>
-                        <option value="guest">Khách</option>
-                      </select>
-                    )}
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4 text-gray-500" />
+                      <p className="text-gray-900">{getRoleText(user.role)}</p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Status (View mode only) */}
-              {isViewMode && user && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Trạng thái
-                  </label>
-                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(user.status)}`}>
-                    {getStatusText(user.status)}
-                  </span>
-                </div>
-              )}
-
-              {/* Password */}
-              {!isViewMode && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mật khẩu {isCreateMode ? '*' : '(để trống nếu không đổi)'}
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      value={formData.password}
-                      onChange={(e) => handleInputChange('password', e.target.value)}
-                      className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      required={isCreateMode}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                    </button>
-                  </div>
-                </div>
-              )}
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Trạng thái
+                </label>
+                <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getStatusColor(user.status)}`}>
+                  {getStatusText(user.status)}
+                </span>
+              </div>
 
               {/* Contact Information */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -346,22 +183,13 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Số điện thoại
                   </label>
-                  {isViewMode ? (
-                    user?.phone ? (
-                      <div className="flex items-center gap-2">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <p className="text-gray-900">{user.phone}</p>
-                      </div>
-                    ) : (
-                      <p className="text-gray-500 italic">Chưa cập nhật</p>
-                    )
+                  {user.phone ? (
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-4 h-4 text-gray-500" />
+                      <p className="text-gray-900">{user.phone}</p>
+                    </div>
                   ) : (
-                    <input
-                      type="tel"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
+                    <p className="text-gray-500 italic">Chưa cập nhật</p>
                   )}
                 </div>
 
@@ -370,19 +198,10 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     CCCD/CMND
                   </label>
-                  {isViewMode ? (
-                    user?.idNumber ? (
-                      <p className="text-gray-900">{user.idNumber}</p>
-                    ) : (
-                      <p className="text-gray-500 italic">Chưa cập nhật</p>
-                    )
+                  {user.idNumber ? (
+                    <p className="text-gray-900">{user.idNumber}</p>
                   ) : (
-                    <input
-                      type="text"
-                      value={formData.idNumber}
-                      onChange={(e) => handleInputChange('idNumber', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    />
+                    <p className="text-gray-500 italic">Chưa cập nhật</p>
                   )}
                 </div>
               </div>
@@ -392,22 +211,13 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Ngày sinh
                 </label>
-                {isViewMode ? (
-                  user?.dob ? (
-                    <div className="flex items-center gap-2">
-                      <Calendar className="w-4 h-4 text-gray-500" />
-                      <p className="text-gray-900">{new Date(user.dob).toLocaleDateString('vi-VN')}</p>
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">Chưa cập nhật</p>
-                  )
+                {user.dob ? (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <p className="text-gray-900">{new Date(user.dob).toLocaleDateString('vi-VN')}</p>
+                  </div>
                 ) : (
-                  <input
-                    type="date"
-                    value={formData.dob}
-                    onChange={(e) => handleInputChange('dob', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
+                  <p className="text-gray-500 italic">Chưa cập nhật</p>
                 )}
               </div>
 
@@ -416,39 +226,31 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Địa chỉ
                 </label>
-                {isViewMode ? (
-                  user?.address ? (
-                    <div className="flex items-start gap-2">
-                      <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
-                      <p className="text-gray-900">{user.address}</p>
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 italic">Chưa cập nhật</p>
-                  )
+                {user.address ? (
+                  <div className="flex items-start gap-2">
+                    <MapPin className="w-4 h-4 text-gray-500 mt-0.5" />
+                    <p className="text-gray-900">{user.address}</p>
+                  </div>
                 ) : (
-                  <textarea
-                    value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                    rows={2}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Nhập địa chỉ..."
-                  />
+                  <p className="text-gray-500 italic">Chưa cập nhật</p>
                 )}
               </div>
 
-              {/* Created Date (View mode only) */}
-              {isViewMode && user && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Ngày tạo tài khoản
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-500" />
-                    <p className="text-gray-900">{formatDate(user.createdAt)}</p>
-                  </div>
+              {/* Created Date */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Ngày tạo tài khoản
+                </label>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-gray-500" />
+                  <p className="text-gray-900">{formatDate(user.createdAt)}</p>
                 </div>
-              )}
-            </form>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center py-12">
+              <p className="text-gray-500">Không tìm thấy thông tin người dùng</p>
+            </div>
           )}
         </div>
 
@@ -458,20 +260,65 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId, mode, on
             onClick={onClose}
             className="px-4 py-2 text-gray-700 bg-gray-300 rounded-lg hover:bg-gray-400 transition-colors"
           >
-            {isViewMode ? 'Đóng' : 'Hủy'}
+            Đóng
           </button>
-          {!isViewMode && (
-            <button
-              onClick={handleSubmit}
-              disabled={saving}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
-            >
-              <Save className="w-4 h-4" />
-              {saving ? 'Đang lưu...' : (isCreateMode ? 'Tạo mới' : 'Cập nhật')}
-            </button>
-          )}
         </div>
       </div>
+    </div>
+  );
+};
+
+// Role Selector Component
+interface RoleSelectorProps {
+  currentRole: UserType['role'];
+  userId: string;
+  onRoleChange: (userId: string, newRole: UserType['role']) => void;
+}
+
+const RoleSelector: React.FC<RoleSelectorProps> = ({ currentRole, userId, onRoleChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const roles = [
+    { value: 'tenant', label: 'Người thuê', color: 'bg-green-100 text-green-800' },
+    { value: 'host', label: 'Chủ trọ', color: 'bg-blue-100 text-blue-800' },
+    { value: 'admin', label: 'Quản trị viên', color: 'bg-purple-100 text-purple-800' },
+    { value: 'guest', label: 'Khách', color: 'bg-gray-100 text-gray-800' }
+  ];
+
+  const currentRoleData = roles.find(role => role.value === currentRole);
+
+  const handleRoleSelect = (newRole: UserType['role']) => {
+    if (newRole !== currentRole) {
+      onRoleChange(userId, newRole);
+    }
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-full cursor-pointer hover:opacity-80 transition-opacity ${currentRoleData?.color}`}
+      >
+        {currentRoleData?.label}
+        <ChevronDown className="w-3 h-3 ml-1" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-10 py-1">
+          {roles.map((role) => (
+            <button
+              key={role.value}
+              onClick={() => handleRoleSelect(role.value as UserType['role'])}
+              className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors block ${
+                role.value === currentRole ? 'bg-blue-50 font-medium' : ''
+              }`}
+            >
+              {role.label}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
@@ -497,7 +344,6 @@ const UsersPage: React.FC = () => {
   });
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'create' | 'edit' | 'view'>('view');
 
   const { success, error } = useToastContext();
 
@@ -536,17 +382,8 @@ const UsersPage: React.FC = () => {
     });
   }, [users, filters]);
 
-
-
-  const handleEditUser = (userId: string) => {
-    setSelectedUserId(userId);
-    setModalMode('edit');
-    setIsModalOpen(true);
-  };
-
   const handleViewUser = (userId: string) => {
     setSelectedUserId(userId);
-    setModalMode('view');
     setIsModalOpen(true);
   };
 
@@ -574,33 +411,20 @@ const UsersPage: React.FC = () => {
     }
   };
 
+  const handleRoleChange = async (userId: string, newRole: UserType['role']) => {
+    try {
+      await userService.updateUserRole(userId, newRole);
+      success('Thành công', 'Cập nhật vai trò thành công');
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      error('Lỗi', 'Không thể cập nhật vai trò');
+    }
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedUserId(null);
-  };
-
-  const handleSaveModal = () => {
-    loadData();
-  };
-
-  const getRoleText = (role: UserType['role']) => {
-    switch (role) {
-      case 'admin': return 'Quản trị viên';
-      case 'host': return 'Chủ trọ';
-      case 'tenant': return 'Người thuê';
-      case 'guest': return 'Khách';
-      default: return 'Không xác định';
-    }
-  };
-
-  const getRoleColor = (role: UserType['role']) => {
-    switch (role) {
-      case 'admin': return 'bg-purple-100 text-purple-800';
-      case 'host': return 'bg-blue-100 text-blue-800';
-      case 'tenant': return 'bg-green-100 text-green-800';
-      case 'guest': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
   };
 
   const getStatusText = (status: UserType['status']) => {
@@ -646,7 +470,6 @@ const UsersPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Quản lý người dùng</h1>
           <p className="text-gray-600">Quản lý tài khoản và thông tin người dùng</p>
         </div>
-   
       </div>
 
       {/* Stats Cards */}
@@ -804,9 +627,11 @@ const UsersPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(user.role)}`}>
-                      {getRoleText(user.role)}
-                    </span>
+                    <RoleSelector
+                      currentRole={user.role}
+                      userId={user.id}
+                      onRoleChange={handleRoleChange}
+                    />
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(user.status)}`}>
@@ -827,13 +652,6 @@ const UsersPage: React.FC = () => {
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleEditUser(user.id)}
-                        className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
-                        title="Chỉnh sửa"
-                      >
-                        <Edit className="w-4 h-4" />
                       </button>
                       {user.status === 'pending' && (
                         <button 
@@ -877,13 +695,11 @@ const UsersPage: React.FC = () => {
         )}
       </div>
 
-      {/* User Modal */}
+      {/* User Modal (chỉ để xem) */}
       <UserModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         userId={selectedUserId}
-        mode={modalMode}
-        onSave={handleSaveModal}
       />
     </div>
   );

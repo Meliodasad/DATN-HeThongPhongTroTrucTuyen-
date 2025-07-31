@@ -21,7 +21,7 @@ import {
   Facebook,
   Twitter,
   Instagram,
-  Home
+  X
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
 import { messageService } from '../../services/messageService';
@@ -112,8 +112,8 @@ const ContactsPage: React.FC = () => {
 
   const filteredMessages = messages.filter(message => {
     const matchesSearch = message.message.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         message.sender.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         message.receiver.fullName.toLowerCase().includes(searchTerm.toLowerCase());
+                         message.sender?.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         message.receiver?.fullName.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRead = readFilter === 'all' || 
                        (readFilter === 'read' && message.isRead) ||
                        (readFilter === 'unread' && !message.isRead);
@@ -138,6 +138,11 @@ const ContactsPage: React.FC = () => {
       setMessages(prev => prev.map(m => 
         m.id === messageId ? { ...m, isRead: true } : m
       ));
+      // Update stats
+      setStats(prev => ({
+        ...prev,
+        unread: Math.max(0, prev.unread - 1)
+      }));
     } catch (err) {
       console.error(err);
     }
@@ -149,9 +154,10 @@ const ContactsPage: React.FC = () => {
     try {
       // Create a response message
       const responseMessage = {
-        hostId: selectedMessage.receiverId,
-        tenantId: selectedMessage.senderId,
+        hostId: selectedMessage.hostId,
+        tenantId: selectedMessage.tenantId,
         senderId: selectedMessage.receiverId, // Admin responds as the receiver
+        receiverId: selectedMessage.senderId, // Send back to original sender
         message: responseText,
         time: new Date().toISOString(),
         isRead: false
@@ -356,7 +362,7 @@ const ContactsPage: React.FC = () => {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                              {message.sender.avatar ? (
+                              {message.sender?.avatar ? (
                                 <img 
                                   src={message.sender.avatar} 
                                   alt={message.sender.fullName}
@@ -367,15 +373,15 @@ const ContactsPage: React.FC = () => {
                               )}
                             </div>
                             <div className="ml-3">
-                              <div className="text-sm font-medium text-gray-900">{message.sender.fullName}</div>
-                              <div className="text-sm text-gray-500">{message.sender.email}</div>
+                              <div className="text-sm font-medium text-gray-900">{message.sender?.fullName}</div>
+                              <div className="text-sm text-gray-500">{message.sender?.email}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                              {message.receiver.avatar ? (
+                              {message.receiver?.avatar ? (
                                 <img 
                                   src={message.receiver.avatar} 
                                   alt={message.receiver.fullName}
@@ -386,7 +392,7 @@ const ContactsPage: React.FC = () => {
                               )}
                             </div>
                             <div className="ml-2">
-                              <div className="text-sm font-medium text-gray-900">{message.receiver.fullName}</div>
+                              <div className="text-sm font-medium text-gray-900">{message.receiver?.fullName}</div>
                             </div>
                           </div>
                         </td>
@@ -599,7 +605,7 @@ const ContactsPage: React.FC = () => {
                 onClick={() => setIsDetailModalOpen(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors"
               >
-                <User className="w-6 h-6" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
@@ -612,7 +618,7 @@ const ContactsPage: React.FC = () => {
                       <h4 className="font-medium text-gray-900 mb-4">Người gửi</h4>
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                          {selectedMessage.sender.avatar ? (
+                          {selectedMessage.sender?.avatar ? (
                             <img 
                               src={selectedMessage.sender.avatar} 
                               alt={selectedMessage.sender.fullName}
@@ -623,9 +629,9 @@ const ContactsPage: React.FC = () => {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{selectedMessage.sender.fullName}</p>
-                          <p className="text-sm text-gray-500">{selectedMessage.sender.email}</p>
-                          {selectedMessage.sender.phone && (
+                          <p className="font-medium text-gray-900">{selectedMessage.sender?.fullName}</p>
+                          <p className="text-sm text-gray-500">{selectedMessage.sender?.email}</p>
+                          {selectedMessage.sender?.phone && (
                             <p className="text-sm text-gray-500">{selectedMessage.sender.phone}</p>
                           )}
                         </div>
@@ -635,7 +641,7 @@ const ContactsPage: React.FC = () => {
                       <h4 className="font-medium text-gray-900 mb-4">Người nhận</h4>
                       <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
-                          {selectedMessage.receiver.avatar ? (
+                          {selectedMessage.receiver?.avatar ? (
                             <img 
                               src={selectedMessage.receiver.avatar} 
                               alt={selectedMessage.receiver.fullName}
@@ -646,9 +652,9 @@ const ContactsPage: React.FC = () => {
                           )}
                         </div>
                         <div>
-                          <p className="font-medium text-gray-900">{selectedMessage.receiver.fullName}</p>
-                          <p className="text-sm text-gray-500">{selectedMessage.receiver.email}</p>
-                          {selectedMessage.receiver.phone && (
+                          <p className="font-medium text-gray-900">{selectedMessage.receiver?.fullName}</p>
+                          <p className="text-sm text-gray-500">{selectedMessage.receiver?.email}</p>
+                          {selectedMessage.receiver?.phone && (
                             <p className="text-sm text-gray-500">{selectedMessage.receiver.phone}</p>
                           )}
                         </div>
