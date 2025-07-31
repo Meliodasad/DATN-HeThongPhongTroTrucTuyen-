@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import '../../css/MyContracts.css';
 
 interface Contract {
@@ -16,19 +17,19 @@ interface Room {
   roomTitle: string;
 }
 
-interface MyContractsProps {
-  tenantId: string;
-}
-
-const MyContracts: React.FC<MyContractsProps> = ({ tenantId }) => {
+const MyContracts: React.FC = () => {
+  const { user } = useAuth();
   const [contracts, setContracts] = useState<Contract[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!user?.id) return;
+
     const fetchContracts = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/contracts?tenantId=${tenantId}`);
+        // Lấy hợp đồng theo tenantId hiện tại
+        const res = await fetch(`http://localhost:3000/contracts?tenantId=${user.id}`);
         const data = await res.json();
         setContracts(data);
       } catch (err) {
@@ -47,7 +48,7 @@ const MyContracts: React.FC<MyContractsProps> = ({ tenantId }) => {
     };
 
     Promise.all([fetchContracts(), fetchRooms()]).finally(() => setLoading(false));
-  }, [tenantId]);
+  }, [user]);
 
   const getRoomTitle = (roomId: string) => {
     const room = rooms.find((r) => r.id === roomId);
@@ -57,10 +58,11 @@ const MyContracts: React.FC<MyContractsProps> = ({ tenantId }) => {
   const formatDate = (dateStr: string | undefined) => {
     if (!dateStr) return 'Chưa có';
     const date = new Date(dateStr);
-    if (isNaN(date.getTime())) return dateStr; // fallback nếu chuỗi ngày không hợp lệ
-    return date.toLocaleDateString();
+    if (isNaN(date.getTime())) return dateStr;
+    return date.toLocaleDateString('vi-VN');
   };
 
+  if (!user?.id) return <p>Bạn cần đăng nhập để xem hợp đồng.</p>;
   if (loading) return <p>Đang tải dữ liệu...</p>;
 
   return (
@@ -77,10 +79,10 @@ const MyContracts: React.FC<MyContractsProps> = ({ tenantId }) => {
             <p>
               <strong>Trạng thái:</strong>{' '}
               <span className={`status ${contract.status}`}>
-                {contract.status === 'pending' && 'Pending'}
-                {contract.status === 'accepted' && 'Accepted'}
-                {contract.status === 'rejected' && 'Rejected'}
-                {contract.status === 'ended' && 'Ended'}
+                {contract.status === 'pending' && 'Đang chờ duyệt'}
+                {contract.status === 'accepted' && 'Đã chấp nhận'}
+                {contract.status === 'rejected' && 'Đã từ chối'}
+                {contract.status === 'ended' && 'Đã kết thúc'}
               </span>
             </p>
 

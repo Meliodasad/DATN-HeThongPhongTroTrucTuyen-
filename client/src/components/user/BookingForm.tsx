@@ -1,82 +1,139 @@
-import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import '../../css/BookingForm.css';
+import { useAuth } from '../../contexts/AuthContext';
+
+interface Room {
+  id: string;
+  roomTitle: string;
+  price: number;
+  location: string;
+}
+
+interface Contract {
+  id: string;
+  tenantId: string;
+  roomId: string;
+  status: 'active' | 'terminated' | 'pending';
+}
 
 const BookingForm = () => {
   const { roomId } = useParams();
   const navigate = useNavigate();
+  const { user: currentUser } = useAuth();
+  const currentUserId = currentUser?.id;
 
-  const [bookingDate, setBookingDate] = useState('');
-  const [endDate, setEndDate] = useState('');
-  const [note, setNote] = useState('');
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
+  const [room, setRoom] = useState<Room | null>(null);
+  const [extendMonths, setExtendMonths] = useState(3);
+  const [note, setNote] = useState(''); // thêm ghi chú
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [hasActiveContract, setHasActiveContract] = useState(false);
+  const [hasAnyContract, setHasAnyContract] = useState(false);
 
-  const currentUserId = 'u1'; 
+  useEffect(() => {
+    const fetchRoom = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/rooms/${roomId}`);
+        const data = await res.json();
+        setRoom(data);
+      } catch (err) {
+        console.error('Lỗi khi lấy phòng:', err);
+      }
+    };
+
+    const fetchContracts = async () => {
+      try {
+        const res = await fetch(`http://localhost:3000/contracts?tenantId=${currentUserId}`);
+        const data = await res.json();
+        setContracts(data);
+        setHasActiveContract(data.some((c: Contract) => c.status === 'active'));
+        setHasAnyContract(data.length > 0);
+      } catch (err) {
+        console.error('Lỗi khi lấy hợp đồng:', err);
+      }
+    };
+
+    if (roomId) fetchRoom();
+    if (currentUserId) fetchContracts();
+  }, [roomId, currentUserId]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!room || !currentUserId) return;
 
-    const newBooking = {
-      id: `b${Date.now()}`,
-      roomId: roomId || '',
+    if (hasActiveContract) {
+      alert('❌ Bạn đang có hợp đồng đang hoạt động. Không thể gửi thêm yêu cầu thuê.');
+      return;
+    }
+
+    const newRequest = {
+      id: Date.now().toString(),
       tenantId: currentUserId,
-      bookingDate,
-      endDate,
-      note,
-      name,
-      phone,
-      email,
-      address,
-      status: 'pending'
+      roomId: room.id,
+      extendMonths,
+      note: note.trim(), // lưu ghi chú
+      status: 'pending',
+      createdAt: new Date().toISOString(),
+      requestType: 'booking', // đánh dấu là yêu cầu thuê
     };
 
     try {
-      const res = await fetch('http://localhost:3000/bookings', {
+      await fetch(`http://localhost:3000/room_requests`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(newBooking)
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newRequest),
       });
-
-      if (!res.ok) {
-        throw new Error('Gửi booking thất bại');
-      }
-
-      alert('Gửi yêu cầu thuê thành công!');
+      alert('✅ Yêu cầu thuê đã được gửi thành công!');
       navigate('/my-bookings');
     } catch (error) {
-      console.error('Lỗi gửi booking:', error);
-      alert('Có lỗi khi gửi yêu cầu thuê.');
+      console.error('Lỗi gửi yêu cầu:', error);
+      alert('❌ Gửi yêu cầu thất bại!');
     }
   };
 
   return (
     <div className="booking-form-container">
-      <h2>Đặt phòng</h2>
-      <form onSubmit={handleSubmit}>
-        <label>Họ tên:</label>
-        <input value={name} onChange={e => setName(e.target.value)} required />
+      <h2>Yêu cầu thuê phòng</h2>
+
+      {room && (
+        <div className="room-info">
+          <p><strong>Tên phòng:</strong> {room.roomTitle}</p>
+          <p><strong>Giá thuê:</strong> {room.price.toLocaleString()} VND / tháng</p>
+          <p><strong>Địa chỉ:</strong> {room.location}</p>
+        </div>
+      )}
+
+      {hasAnyContract && !hasActiveContract && (
+        <p className="warning">
+          ⚠️ Bạn đã từng ký hợp đồng trước đây. Vẫn có thể gửi yêu cầu thuê mới.
+        </p>
+      )}
+
+      <form onSubmit={handleSubmit} className="booking-form">
+        <label>Họ và tên:</label>
+        <input type="text" value={currentUser?.fullName || ''} disabled />
 
         <label>Số điện thoại:</label>
-        <input value={phone} onChange={e => setPhone(e.target.value)} required />
+        <input type="text" value={currentUser?.phone || ''} disabled />
 
         <label>Email:</label>
-        <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+        <input type="email" value={currentUser?.email || ''} disabled />
 
-        <label>Địa chỉ hiện tại:</label>
-        <input value={address} onChange={e => setAddress(e.target.value)} required />
-
-        <label>Ngày thuê mong muốn:</label>
-        <input type="date" value={bookingDate} onChange={e => setBookingDate(e.target.value)} required />
-
-        <label>Ngày trả phòng (dự kiến):</label>
-        <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} required />
+        <label>Gia hạn hợp đồng dự kiến (tháng):</label>
+        <input
+          type="number"
+          min={3}
+          value={extendMonths}
+          onChange={(e) => setExtendMonths(Number(e.target.value))}
+          required
+        />
 
         <label>Ghi chú:</label>
-        <textarea value={note} onChange={e => setNote(e.target.value)} rows={4} />
+        <textarea
+          placeholder="Nhập ghi chú cho chủ trọ (ví dụ: Tôi muốn xem phòng vào cuối tuần)..."
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+        />
 
         <button type="submit">Gửi yêu cầu</button>
       </form>

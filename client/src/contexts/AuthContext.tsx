@@ -1,5 +1,4 @@
 /* eslint-disable react-refresh/only-export-components */
-// src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useToastContext } from './ToastContext';
@@ -7,6 +6,7 @@ import { useToastContext } from './ToastContext';
 interface User {
   id: string;
   fullName: string;
+  phone: string;
   email: string;
   role: 'admin' | 'host' | 'tenant' | 'guest';
   status: 'active' | 'inactive' | 'pending';
@@ -54,7 +54,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
-      } catch (err) {
+      } catch {
         localStorage.removeItem('user');
       }
     }
@@ -64,7 +64,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (email: string, password: string): Promise<User | null> => {
     try {
       setLoading(true);
-
       const response = await fetch('http://localhost:3000/users');
       if (!response.ok) throw new Error('Failed to fetch users');
       const users = await response.json();
@@ -84,6 +83,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         id: foundUser.id,
         fullName: foundUser.fullName,
         email: foundUser.email,
+        phone: foundUser.phone,
         role: foundUser.role,
         status: foundUser.status,
         avatar: foundUser.avatar
@@ -108,15 +108,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await fetch('http://localhost:3000/users');
       if (!response.ok) throw new Error('Failed to fetch users');
       const users = await response.json();
-      const existingUser = users.find((u: any) => u.email === userData.email);
 
+      const existingUser = users.find((u: any) => u.email === userData.email);
       if (existingUser) {
         error('Lỗi đăng ký', 'Email đã được sử dụng');
         return false;
       }
 
+      const maxIndex = users
+        .map((u: any) => u.id)
+        .filter((id: string) => id && id.startsWith('u'))
+        .map((id: string) => parseInt(id.replace('u', ''), 10))
+        .reduce((a: number, b: number) => Math.max(a, b), 0);
+
       const newUser = {
-        id: Date.now().toString(),
+        id: `u${maxIndex + 1}`,
         ...userData,
         status: 'active',
         createdAt: new Date().toISOString()
@@ -124,9 +130,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const createResponse = await fetch('http://localhost:3000/users', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser),
       });
 

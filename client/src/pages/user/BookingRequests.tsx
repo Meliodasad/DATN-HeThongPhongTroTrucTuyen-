@@ -1,75 +1,91 @@
 import React, { useEffect, useState } from 'react';
-import '../../css/BookingRequests.css';
+import "../../css/BookingRequests.css";
 
-interface Booking {
+interface RentalRequest {
   id: string;
   roomId: string;
   tenantId: string;
-  bookingDate: string;
-  endDate?: string;
+  contractId?: string;
+  createdAt: string;
+  extendMonths?: number;
   note?: string;
   status: 'pending' | 'accepted' | 'rejected';
-  name?: string;
-  phone?: string;
-  email?: string;
-  address?: string;
+  requestType?: 'booking' | 'cancel';
 }
 
 interface Room {
   id: string;
   roomTitle: string;
   location: string;
+  hostId?: string;
+  images?: string[];
+}
+
+interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
 }
 
 const BookingRequests: React.FC = () => {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [requests, setRequests] = useState<RentalRequest[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
-  // Load bookings and rooms from API
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const bookingRes = await fetch('http://localhost:3000/bookings');
-        const bookingData: Booking[] = await bookingRes.json();
-        // Lọc lấy các booking có status pending
-        const pendingBookings = bookingData.filter(b => b.status === 'pending');
-        setBookings(pendingBookings);
+        const [reqRes, roomsRes, usersRes] = await Promise.all([
+          fetch('http://localhost:3000/room_requests'),
+          fetch('http://localhost:3000/rooms'),
+          fetch('http://localhost:3000/users')
+        ]);
 
-        const roomsRes = await fetch('http://localhost:3000/rooms');
+        const reqData: RentalRequest[] = await reqRes.json();
         const roomsData: Room[] = await roomsRes.json();
+        const usersData: User[] = await usersRes.json();
+
+        const pending = reqData.filter(r => r.status?.toLowerCase() === 'pending');
+        setRequests(pending);
         setRooms(roomsData);
+        setUsers(usersData);
       } catch (error) {
-        console.error('Lỗi khi tải dữ liệu booking hoặc phòng:', error);
+        console.error('Lỗi khi tải dữ liệu:', error);
       }
     };
 
     fetchData();
   }, []);
 
-  // Hàm lấy thông tin phòng theo id
-  const getRoomInfo = (roomId: string) => {
-    const room = rooms.find(r => r.id === roomId);
-    return room ? `${room.roomTitle} - ${room.location}` : 'Không tìm thấy phòng';
-  };
+  const getRoom = (roomId: string) => rooms.find(r => r.id === roomId);
+  const getTenantInfo = (tenantId: string) => users.find(u => u.id === tenantId);
 
-  // Chấp nhận booking: update status và tạo hợp đồng (nếu có)
-  const handleAccept = async (booking: Booking) => {
+  const handleAcceptBooking = async (request: RentalRequest) => {
     try {
-      // Cập nhật trạng thái booking
-      await fetch(`http://localhost:3000/bookings/${booking.id}`, {
+      await fetch(`http://localhost:3000/room_requests/${request.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'accepted' }),
       });
 
-      // Tạo hợp đồng mới
+      const startDate = new Date();
+      const extendMonths = request.extendMonths || 6;
+      const endDate = new Date(startDate);
+      endDate.setMonth(startDate.getMonth() + extendMonths);
+
+      const room = getRoom(request.roomId);
+      const hostId = room?.hostId || '';
+
       const newContract = {
         id: 'c' + Date.now(),
-        tenantId: booking.tenantId,
-        roomId: booking.roomId,
-        startDate: booking.bookingDate,
-        endDate: booking.endDate || '',
+        tenantId: request.tenantId,
+        hostId,
+        roomId: request.roomId,
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
         status: 'accepted',
+        terms: 'Hợp đồng có hiệu lực. Thanh toán tiền phòng trước ngày 5 hàng tháng.',
       };
 
       await fetch('http://localhost:3000/contracts', {
@@ -78,50 +94,119 @@ const BookingRequests: React.FC = () => {
         body: JSON.stringify(newContract),
       });
 
-      // Cập nhật lại danh sách bookings ở trạng thái pending
-      setBookings(prev => prev.filter(b => b.id !== booking.id));
+      setRequests(prev => prev.filter(r => r.id !== request.id));
     } catch (error) {
-      console.error('Lỗi khi chấp nhận booking:', error);
-      alert('Có lỗi xảy ra khi duyệt yêu cầu đặt phòng.');
+      console.error('Lỗi khi chấp nhận:', error);
+      alert('Có lỗi xảy ra.');
     }
   };
 
-  // Từ chối booking: update status
-  const handleReject = async (bookingId: string) => {
+  const handleAcceptCancel = async (request: RentalRequest) => {
     try {
-      await fetch(`http://localhost:3000/bookings/${bookingId}`, {
+      await fetch(`http://localhost:3000/room_requests/${request.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'accepted' }),
+      });
+
+      if (request.contractId) {
+        await fetch(`http://localhost:3000/contracts/${request.contractId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'ended', endDate: new Date().toISOString() }),
+        });
+      }
+
+      setRequests(prev => prev.filter(r => r.id !== request.id));
+      alert('Đã duyệt yêu cầu hủy hợp đồng.');
+    } catch (error) {
+      console.error('Lỗi khi duyệt hủy:', error);
+    }
+  };
+
+  const handleReject = async (id: string) => {
+    try {
+      await fetch(`http://localhost:3000/room_requests/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'rejected' }),
       });
-      setBookings(prev => prev.filter(b => b.id !== bookingId));
+
+      setRequests(prev => prev.filter(r => r.id !== id));
     } catch (error) {
-      console.error('Lỗi khi từ chối booking:', error);
-      alert('Có lỗi xảy ra khi từ chối yêu cầu đặt phòng.');
+      console.error('Lỗi khi từ chối:', error);
+      alert('Có lỗi xảy ra.');
     }
   };
 
+  const bookingRequests = requests.filter(r => !r.requestType || r.requestType === 'booking');
+  const cancelRequests = requests.filter(r => r.requestType === 'cancel');
+
   return (
     <div className="booking-requests-container">
-      <h2>Yêu cầu đặt phòng chờ duyệt</h2>
-      {bookings.length === 0 ? (
-        <p>Không có yêu cầu nào.</p>
-      ) : (
-        <ul className="booking-list">
-          {bookings.map(b => (
-            <li key={b.id} className="booking-item">
-              <div><strong>Phòng:</strong> {getRoomInfo(b.roomId)}</div>
-              <div><strong>Ngày bắt đầu:</strong> {new Date(b.bookingDate).toLocaleDateString()}</div>
-              {b.endDate && <div><strong>Ngày kết thúc:</strong> {new Date(b.endDate).toLocaleDateString()}</div>}
-              <div><strong>Người thuê:</strong> {b.name || 'Không rõ'}</div>
-              <div><strong>Email:</strong> {b.email || 'Không rõ'}</div>
-              <div><strong>Ghi chú:</strong> {b.note || 'Không có'}</div>
-              <button onClick={() => handleAccept(b)}>Chấp nhận</button>
-              <button onClick={() => handleReject(b.id)}>Từ chối</button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="booking-column">
+        <h2>Yêu cầu thuê phòng chờ duyệt</h2>
+        {bookingRequests.length === 0 ? (
+          <p>Không có yêu cầu thuê phòng.</p>
+        ) : (
+          <ul className="booking-list">
+            {bookingRequests.map(r => {
+              const tenant = getTenantInfo(r.tenantId);
+              const room = getRoom(r.roomId);
+              const image = room?.images?.[0] || "/default-thumbnail.jpg";
+
+              return (
+                <li key={r.id} className="booking-item">
+                  <img src={image} alt={room?.roomTitle} className="room-image" />
+                  <div className="booking-item-content">
+                    <div><strong>Phòng:</strong> {room ? `${room.roomTitle} - ${room.location}` : 'Không rõ'}</div>
+                    <div><strong>Ngày gửi yêu cầu:</strong> {r.createdAt ? new Date(r.createdAt).toLocaleDateString('vi-VN') : 'Không rõ'}</div>
+                    <div><strong>Gia hạn dự kiến:</strong> {r.extendMonths || 'Không rõ'} tháng</div>
+                    <div><strong>Người thuê:</strong> {tenant?.fullName || `ID: ${r.tenantId}`}</div>
+                    <div><strong>Email:</strong> {tenant?.email || 'Không rõ'}</div>
+                    <div><strong>Ghi chú:</strong> {r.note && r.note.trim() !== '' ? r.note : 'Không có'}</div>
+                    <div className="actions">
+                      <button className="accept" onClick={() => handleAcceptBooking(r)}>Chấp nhận</button>
+                      <button className="reject" onClick={() => handleReject(r.id)}>Từ chối</button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+
+      <div className="booking-column">
+        <h2>Yêu cầu hủy hợp đồng</h2>
+        {cancelRequests.length === 0 ? (
+          <p>Không có yêu cầu hủy hợp đồng.</p>
+        ) : (
+          <ul className="booking-list">
+            {cancelRequests.map(r => {
+              const tenant = getTenantInfo(r.tenantId);
+              const room = getRoom(r.roomId);
+              const image = room?.images?.[0] || "/default-thumbnail.jpg";
+
+              return (
+                <li key={r.id} className="booking-item cancel-request">
+                  <img src={image} alt={room?.roomTitle} className="room-image" />
+                  <div className="booking-item-content">
+                    <div><strong>Phòng:</strong> {room ? `${room.roomTitle} - ${room.location}` : 'Không rõ'}</div>
+                    <div><strong>Ngày gửi yêu cầu:</strong> {new Date(r.createdAt).toLocaleDateString('vi-VN')}</div>
+                    <div><strong>Người thuê:</strong> {tenant?.fullName || 'Không rõ'}</div>
+                    <div><strong>Lý do hủy:</strong> {r.note || 'Không có'}</div>
+                    <div className="actions">
+                      <button className="accept" onClick={() => handleAcceptCancel(r)}>Duyệt hủy</button>
+                      <button className="reject" onClick={() => handleReject(r.id)}>Từ chối</button>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
     </div>
   );
 };

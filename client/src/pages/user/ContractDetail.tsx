@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import '../../css/ContractDetail.css';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Contract {
   id: string;
@@ -9,8 +10,7 @@ interface Contract {
   hostId?: string;
   startDate: string;
   endDate: string;
-  status?: string;          // hoặc contractStatus
-  contractStatus?: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'ended';
   terms?: string;
 }
 
@@ -25,41 +25,43 @@ interface Room {
 interface User {
   id: string;
   fullName: string;
-  phone?: string;
+  phone: string;
+  email: string;
+  role: 'admin' | 'host' | 'tenant' | 'guest';
+  status: 'active' | 'inactive' | 'pending';
+  avatar?: string;
 }
 
-const ContractDetail = () => {
+const ContractDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
   const [contract, setContract] = useState<Contract | null>(null);
   const [room, setRoom] = useState<Room | null>(null);
   const [tenant, setTenant] = useState<User | null>(null);
   const [host, setHost] = useState<User | null>(null);
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Lấy hợp đồng
         const resContract = await fetch(`http://localhost:3000/contracts/${id}`);
         const contractData: Contract = await resContract.json();
         setContract(contractData);
 
-        // Lấy phòng
         const resRoom = await fetch(`http://localhost:3000/rooms/${contractData.roomId}`);
         const roomData: Room = await resRoom.json();
         setRoom(roomData);
 
-        // Lấy người thuê
         const resTenant = await fetch(`http://localhost:3000/users/${contractData.tenantId}`);
         const tenantData: User = await resTenant.json();
         setTenant(tenantData);
 
-        // Lấy người cho thuê (host)
-        // Nếu contract có hostId thì lấy, còn không lấy theo room.hostId
         const hostId = contractData.hostId || roomData.hostId;
         const resHost = await fetch(`http://localhost:3000/users/${hostId}`);
         const hostData: User = await resHost.json();
         setHost(hostData);
-
       } catch (error) {
         console.error('Lỗi khi tải dữ liệu hợp đồng:', error);
       }
@@ -77,54 +79,99 @@ const ContractDetail = () => {
     );
   };
 
+  const handleRequestCancel = async () => {
+    if (!contract || !user) return;
+    if (!cancelReason.trim()) {
+      alert('Vui lòng nhập lý do hủy hợp đồng');
+      return;
+    }
+
+    try {
+      const cancelRequest = {
+        id: 'rr' + Date.now(),
+        roomId: contract.roomId,
+        tenantId: contract.tenantId,
+        contractId: contract.id,
+        createdAt: new Date().toISOString(),
+        note: cancelReason,
+        status: 'pending',
+        requestType: 'cancel',
+      };
+
+      await fetch('http://localhost:3000/room_requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cancelRequest),
+      });
+
+      alert('Đã gửi yêu cầu hủy hợp đồng, chờ chủ trọ duyệt.');
+      navigate('/my-contracts');
+    } catch (error) {
+      console.error('Lỗi khi gửi yêu cầu hủy:', error);
+      alert('Gửi yêu cầu thất bại.');
+    }
+  };
+
   if (!contract) return <div className="contract-detail">Đang tải hợp đồng...</div>;
 
   const durationMonths = getMonthsBetween(contract.startDate, contract.endDate);
-  const status = contract.status || contract.contractStatus || 'unknown';
 
   return (
     <div className="contract-detail">
       <h2>Chi tiết hợp đồng</h2>
 
-      <p><strong>Mã hợp đồng:</strong> {contract.id}</p>
-      <p><strong>Trạng thái:</strong> {status}</p>
-      <p><strong>Ngày ký hợp đồng:</strong> {new Date(contract.startDate).toLocaleDateString()}</p>
-      <p><strong>Ngày kết thúc:</strong> {new Date(contract.endDate).toLocaleDateString()}</p>
-      <p><strong>Thời hạn hợp đồng:</strong> {durationMonths} tháng</p>
+      <div className="contract-info">
+        <div className="info-row"><strong>Mã hợp đồng:</strong> <span>{contract.id}</span></div>
+        <div className="info-row"><strong>Trạng thái:</strong> <span>{contract.status}</span></div>
+        <div className="info-row"><strong>Ngày ký hợp đồng:</strong> <span>{new Date(contract.startDate).toLocaleDateString()}</span></div>
+        <div className="info-row"><strong>Ngày kết thúc:</strong> <span>{new Date(contract.endDate).toLocaleDateString()}</span></div>
+        <div className="info-row"><strong>Thời hạn hợp đồng:</strong> <span>{durationMonths} tháng</span></div>
+      </div>
 
       {room && (
-        <>
+        <div className="room-info">
           <h3>Thông tin phòng</h3>
-          <p><strong>Tên phòng:</strong> {room.roomTitle}</p>
-          <p><strong>Địa chỉ:</strong> {room.location}</p>
-          <p><strong>Giá thuê phòng:</strong> {room.price ? room.price.toLocaleString() + ' VNĐ/tháng' : 'Chưa có'}</p>
-        </>
+          <div className="info-row"><strong>Tên phòng:</strong> <span>{room.roomTitle}</span></div>
+          <div className="info-row"><strong>Địa chỉ:</strong> <span>{room.location}</span></div>
+          <div className="info-row"><strong>Giá thuê phòng:</strong> <span>{room.price?.toLocaleString()} VNĐ/tháng</span></div>
+        </div>
       )}
 
-      {tenant && (
-        <>
-          <h3>Người thuê</h3>
-          <p><strong>Họ tên:</strong> {tenant.fullName}</p>
-          <p><strong>SĐT:</strong> {tenant.phone || 'Chưa có'}</p>
-        </>
+      {tenant && host && (
+        <div className="user-info">
+          <div className="user-card">
+            <h4>Người thuê</h4>
+            <div className="info-row"><strong>Họ tên:</strong> <span>{tenant.fullName}</span></div>
+            <div className="info-row"><strong>SĐT:</strong> <span>{tenant.phone || 'Chưa có'}</span></div>
+          </div>
+          <div className="user-card">
+            <h4>Bên cho thuê</h4>
+            <div className="info-row"><strong>Họ tên:</strong> <span>{host.fullName}</span></div>
+            <div className="info-row"><strong>SĐT:</strong> <span>{host.phone || 'Chưa có'}</span></div>
+          </div>
+        </div>
       )}
 
-      {host && (
-        <>
-          <h3>Bên cho thuê</h3>
-          <p><strong>Họ tên:</strong> {host.fullName}</p>
-          <p><strong>SĐT:</strong> {host.phone || 'Chưa có'}</p>
-        </>
-      )}
+      <Link to="/my-contracts" className="back-button">Quay lại</Link>
 
-      {contract.terms && (
-        <>
-          <h3>Điều khoản hợp đồng</h3>
-          <p>{contract.terms}</p>
-        </>
+      {contract.status === 'accepted' && user?.id === contract.tenantId && (
+        <div className="cancel-contract">
+          {!showCancelForm ? (
+            <button onClick={() => setShowCancelForm(true)} className="cancel-button">
+              Yêu cầu hủy hợp đồng
+            </button>
+          ) : (
+            <div className="cancel-form">
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Nhập lý do hủy hợp đồng..."
+              />
+              <button onClick={handleRequestCancel}>Gửi yêu cầu</button>
+            </div>
+          )}
+        </div>
       )}
-
-      <Link to="/my-contracts" className="back-button">← Quay lại danh sách hợp đồng</Link>
     </div>
   );
 };

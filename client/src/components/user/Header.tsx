@@ -63,7 +63,7 @@ const Header = () => {
 
               {showDropdown && (
                 <div className="dropdown-menu">
-                  <Link to={`/user/${user.id}`} onClick={() => setShowDropdown(false)}>
+                  <Link to="/my-account" onClick={() => setShowDropdown(false)}>
                     Tài khoản của tôi
                   </Link>
                   <button onClick={handleLogout} className="dropdown-item">

@@ -5,6 +5,7 @@ import 'react-image-gallery/styles/css/image-gallery.css';
 import '../../css/PostDetail.css';
 import ReviewSection from '../../components/user/ReviewSection';
 import ReportForm from '../../components/user/ReportForm';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface Room {
   id: string;
@@ -40,6 +41,7 @@ const PostDetail = () => {
   const [host, setHost] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user: currentUser } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,11 +85,10 @@ const PostDetail = () => {
     <div className="post-detail-container">
       <ImageGallery items={images} showPlayButton={false} showFullscreenButton={false} />
 
-      <Link to={`/booking/${room.id}`} className="booking">Đặt phòng</Link>
+      <Link to={`/booking/${room.id}`} className="booking">Yêu cầu thuê phòng</Link>
 
       <div className="post-info">
         <h1 className="title">{room.roomTitle}</h1>
-
         <div className="meta">
           <span className="price">{room.price.toLocaleString('vi-VN')} đ</span>
           <span className="dot">•</span>
@@ -126,12 +127,30 @@ const PostDetail = () => {
       <div className="contact-info">
         <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${host.phone}`}>{host.phone}</a></p>
         {host.zalo && (
-          <p><strong>💬 Zalo:</strong> <a href={host.zalo} target="_blank" rel="noopener noreferrer">Nhắn Zalo</a></p>
+          <p>
+            <strong>💬 Zalo:</strong>{" "}
+            <a
+              href={host.zalo.startsWith("http") ? host.zalo : `https://zalo.me/${host.zalo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Nhắn Zalo
+            </a>
+          </p>
         )}
       </div>
 
-      <ReviewSection roomId={room.id} />
-      <ReportForm roomId={room.id} />
+
+      {currentUser ? (
+        <>
+          <ReviewSection roomId={room.id} />
+          <ReportForm roomId={room.id} />
+        </>
+      ) : (
+        <p style={{ marginTop: '1rem', color: 'gray' }}>
+          🔒 Bạn cần <Link to="/login">đăng nhập</Link> để phản ánh và đánh giá phòng này.
+        </p>
+      )}
     </div>
   );
 };
