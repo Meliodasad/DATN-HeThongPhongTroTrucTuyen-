@@ -56,11 +56,10 @@ const UserProfile = () => {
           <img src={host.avatar || '/default-avatar.png'} alt={host.name} className="avatar" />
           <div className="user-info-text">
             <h2>Tên :   {host.name}</h2>
-            <p className="role">Role :    {host.role || 'Chủ trọ'}</p>
             <div className="contact-info">
-              <p> <a href={`tel:${host.phone}`}>{host.phone}</a></p>
+              <p> 📞<a href={`tel:${host.phone}`}>{host.phone}</a></p>
               {host.zalo && (
-                <p> <a href={host.zalo} target="_blank" rel="noopener noreferrer">Nhắn Zalo</a></p>
+                <p>💬<a href={host.zalo} target="_blank" rel="noopener noreferrer">Nhắn Zalo</a></p>
               )}
             </div>
           </div>

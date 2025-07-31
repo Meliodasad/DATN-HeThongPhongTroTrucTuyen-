@@ -86,11 +86,9 @@
 
 /* Icon màu sắc */
 .contact-info p:first-child::before {
-  content: '📞';
   margin-right: 4px;
 }
 .contact-info p:nth-child(2)::before {
-  content: '💬';
   margin-right: 4px;
 }
 

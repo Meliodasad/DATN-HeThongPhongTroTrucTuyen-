@@ -77,7 +77,6 @@ const RegisterPage: React.FC = () => {
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -86,7 +85,6 @@ const RegisterPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
         <div className="text-center">
           <div className="flex justify-center">
             <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center">
@@ -101,10 +99,8 @@ const RegisterPage: React.FC = () => {
           </p>
         </div>
 
-        {/* Register Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Full Name */}
             <div>
               <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
                 Họ và tên *
@@ -131,7 +127,6 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email *
@@ -159,7 +154,6 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Phone */}
             <div>
               <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                 Số điện thoại
@@ -185,7 +179,6 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Role */}
             <div>
               <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
                 Loại tài khoản *
@@ -202,7 +195,6 @@ const RegisterPage: React.FC = () => {
               </select>
             </div>
 
-            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Mật khẩu *
@@ -241,7 +233,6 @@ const RegisterPage: React.FC = () => {
               )}
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
                 Xác nhận mật khẩu *
@@ -281,7 +272,6 @@ const RegisterPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Submit Button */}
           <div>
             <button
               type="submit"
@@ -302,7 +292,6 @@ const RegisterPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Login Link */}
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Đã có tài khoản?{' '}

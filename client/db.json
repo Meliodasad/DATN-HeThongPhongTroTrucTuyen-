@@ -200,6 +200,16 @@
       "role": "tenant",
       "status": "active",
       "createdAt": "2025-07-30T11:11:55.319Z"
+    },
+    {
+      "id": "u16",
+      "fullName": "anh8784",
+      "email": "anh8784@gmail.com",
+      "password": "123456",
+      "phone": "0486172764",
+      "role": "tenant",
+      "status": "active",
+      "createdAt": "2025-07-31T15:54:04.375Z"
     }
   ],
   "rooms": [
@@ -493,7 +503,7 @@
       "roomId": "1",
       "extendMonths": 3,
       "note": "tôi muốn thuê luôn",
-      "status": "pending",
+      "status": "rejected",
       "createdAt": "2025-07-31T08:43:14.447Z",
       "requestType": "booking"
     },
@@ -505,6 +515,26 @@
       "createdAt": "2025-07-31T08:52:41.408Z",
       "note": "hủy\n",
       "status": "pending",
+      "requestType": "cancel"
+    },
+    {
+      "id": "1753977420508",
+      "tenantId": "u16",
+      "roomId": "2",
+      "extendMonths": 3,
+      "note": "hiihihhhiihi",
+      "status": "accepted",
+      "createdAt": "2025-07-31T15:57:00.508Z",
+      "requestType": "booking"
+    },
+    {
+      "id": "rr1753977583886",
+      "roomId": "2",
+      "tenantId": "u16",
+      "contractId": "c1753977518425",
+      "createdAt": "2025-07-31T15:59:43.886Z",
+      "note": "hủy",
+      "status": "accepted",
       "requestType": "cancel"
     }
   ],
@@ -642,6 +672,16 @@
       "startDate": "2025-07-31T08:22:06.189Z",
       "endDate": "2025-10-31T08:22:06.189Z",
       "status": "accepted",
+      "terms": "Hợp đồng có hiệu lực. Thanh toán tiền phòng trước ngày 5 hàng tháng."
+    },
+    {
+      "id": "c1753977518425",
+      "tenantId": "u16",
+      "hostId": "u2",
+      "roomId": "2",
+      "startDate": "2025-07-31T15:58:38.425Z",
+      "endDate": "2025-07-31T16:00:15.552Z",
+      "status": "ended",
       "terms": "Hợp đồng có hiệu lực. Thanh toán tiền phòng trước ngày 5 hàng tháng."
     }
   ],
