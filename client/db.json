@@ -5,8 +5,8 @@
       "fullName": "Nguyễn Văn A",
       "email": "a@example.com",
       "phone": "0901234567",
-      "role": "host",
-      "status": "active",
+      "role": "admin",
+      "status": "inactive",
       "avatar": "https://i.pravatar.cc/150?u=U001",
       "address": "123 Đường ABC, TP.HCM",
       "password": "123456",
@@ -45,10 +45,12 @@
       "fullName": "Tùng xuân tung",
       "email": "admin@gmail.com",
       "phone": "",
+      "password": "123123",
       "address": "",
       "avatar": "",
       "id": "1753856858656",
-      "role": "host"
+      "role": "admin",
+      "status": "active"
     },
     {
       "id": "1753934260262",
@@ -85,7 +87,7 @@
         "https://placehold.co/300x200"
       ],
       "roomType": "single",
-      "status": "available",
+      "status": "maintenance",
       "utilities": [
         "Wifi",
         "Điều hòa",
@@ -184,7 +186,7 @@
       "tenantId": "U003",
       "bookingDate": "2025-07-30T10:00:00Z",
       "note": "Muốn xem phòng cuối tuần.",
-      "bookingStatus": "pending",
+      "bookingStatus": "cancelled",
       "id": "f3d2"
     },
     {
@@ -206,7 +208,7 @@
       "contractDate": "2025-07-30T10:00:00Z",
       "duration": 12,
       "rentPrice": 3000000,
-      "terms": "Thanh toán đầu tháng, báo trước 30 ngày khi chấm dứt.",
+      "terms": "Thanh toán đầu3232 tháng, báo trước 30 ngày khi chấm dứt.",
       "id": "4193"
     },
     {
@@ -249,7 +251,7 @@
       "contractId": "C002",
       "amount": 3500000,
       "paymentDate": "2025-08-01T00:00:00Z",
-      "paymentStatus": "paid",
+      "paymentStatus": "pending",
       "extraNote": "Thanh toán qua ví điện tử",
       "id": "789c"
     },
@@ -296,6 +298,80 @@
       "time": "2025-07-29T08:30:00Z",
       "id": "4d32",
       "isRead": true
+    },
+    {
+      "messageId": "M002",
+      "tenantId": "U003",
+      "hostId": "U001",
+      "message": "Phòng đã được đặt rồi.",
+      "time": "2025-07-29T09:00:00Z",
+      "id": "4d33",
+      "isRead": true
+    },
+    {
+      "messageId": "M003",
+      "tenantId": "U003",
+      "hostId": "U002",
+      "message": "Có thể xem phòng vào cuối tuần này không?",
+      "time": "2025-07-29T10:00:00Z",
+      "id": "4d34",
+      "isRead": true
+    },
+    {
+      "id": "1753976891143",
+      "messageId": "MSG1753976891143",
+      "hostId": "U001",
+      "tenantId": "U003",
+      "receiverId": "U001",
+      "message": "sacc",
+      "time": "2025-07-31T15:48:11.142Z",
+      "isRead": true
+    },
+    {
+      "id": "1753976939680",
+      "messageId": "MSG1753976939680",
+      "hostId": "U001",
+      "tenantId": "U003",
+      "receiverId": "U001",
+      "message": "sadda",
+      "time": "2025-07-31T15:48:59.680Z",
+      "isRead": true
+    },
+    {
+      "id": "6417",
+      "messageId": "MSG1754018583540",
+      "tenantId": "U001",
+      "hostId": "fe51",
+      "message": "ok",
+      "time": "2025-08-01T03:23:03.540Z",
+      "isRead": false
+    },
+    {
+      "id": "11cb",
+      "messageId": "MSG1754018591490",
+      "tenantId": "U001",
+      "hostId": "fe51",
+      "message": "ok",
+      "time": "2025-08-01T03:23:11.490Z",
+      "isRead": false
+    },
+    {
+      "id": "a1e1",
+      "messageId": "MSG1754018603862",
+      "tenantId": "U001",
+      "hostId": "fe51",
+      "message": "a",
+      "time": "2025-08-01T03:23:23.862Z",
+      "isRead": false
+    },
+    {
+      "id": "bc20",
+      "messageId": "MSG1754018819423",
+      "tenantId": "U001",
+      "hostId": "fe51",
+      "message": "ok nhe",
+      "time": "2025-08-01T03:26:59.423Z",
+      "isRead": false
     }
   ],
   "room_requests": [
@@ -343,6 +419,15 @@
       "roomId": "R003",
       "approvalStatus": "approved",
       "approvalDate": "2025-07-31T03:06:00.391Z",
+      "note": "Phòng đạt yêu cầu.",
+      "adminId": "U001"
+    },
+    {
+      "id": "b3f4",
+      "approvalId": "A1753975742584",
+      "roomId": "R002",
+      "approvalStatus": "approved",
+      "approvalDate": "2025-07-31T15:29:02.584Z",
       "note": "Phòng đạt yêu cầu.",
       "adminId": "U001"
     }
@@ -400,6 +485,16 @@
       "reviewDate": "2025-07-30T09:00:00Z",
       "id": "9f17",
       "status": "approved"
+    },
+    {
+      "reviewId": "RV002",
+      "roomId": "R002",
+      "tenantId": "U003",
+      "review": "Phòng đẹp nhưng giá hơi cao.",
+      "rating": 4,
+      "reviewDate": "2025-07-30T09:30:00Z",
+      "id": "9f18",
+      "status": "pending"
     }
   ],
   "export_logs": [

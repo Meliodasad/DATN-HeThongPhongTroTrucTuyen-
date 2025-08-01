@@ -1,108 +1,277 @@
-import type { Message, MessageStats, MessageFilters, CreateMessageData } from '../types/message';
+const API_BASE_URL = 'http://localhost:5000';
+
+export interface User {
+  id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+  avatar?: string;
+  role: 'admin' | 'host' | 'tenant';
+  status: 'active' | 'inactive';
+}
+
+export interface Message {
+  id: string;
+  messageId: string;
+  tenantId?: string;
+  hostId?: string;
+  receiverId?: string;
+  message: string;
+  time: string;
+  isRead: boolean;
+  sender?: User;
+  receiver?: User;
+}
+
+export interface Conversation {
+  id: string;
+  participant: User;
+  lastMessage: string;
+  lastMessageTime: string;
+  unreadCount: number;
+  messages: Message[];
+}
+
+export interface MessageStats {
+  total: number;
+  unread: number;
+  today: number;
+  thisWeek: number;
+}
 
 class MessageService {
-  private baseUrl = 'http://localhost:5000';
-
-  async getMessages(filters?: MessageFilters): Promise<Message[]> {
+  private async fetchUsers(): Promise<User[]> {
     try {
-      // Fetch messages and users
-      const [messagesRes, usersRes] = await Promise.all([
-        fetch(`${this.baseUrl}/messages`),
-        fetch(`${this.baseUrl}/users`)
-      ]);
-
-      const [messagesData, usersData] = await Promise.all([
-        messagesRes.json(),
-        usersRes.json()
-      ]);
-
-      // Combine data
-      const enrichedMessages = messagesData.map((message: any) => {
-        // Find sender by userId matching senderId
-        const sender = usersData.find((u: any) => u.userId === message.senderId);
-        
-        // Find receiver by userId matching receiverId (if exists) or hostId/tenantId
-        let receiver = null;
-        if (message.receiverId) {
-          receiver = usersData.find((u: any) => u.userId === message.receiverId);
-        } else {
-          // If no receiverId, try to find by hostId or tenantId (whoever is not the sender)
-          if (message.senderId === message.hostId) {
-            receiver = usersData.find((u: any) => u.userId === message.tenantId);
-          } else {
-            receiver = usersData.find((u: any) => u.userId === message.hostId);
-          }
-        }
-
-        return {
-          ...message,
-          sender: sender || { 
-            fullName: 'Người dùng không tồn tại', 
-            email: 'unknown@example.com' 
-          },
-          receiver: receiver || { 
-            fullName: 'Người nhận không tồn tại', 
-            email: 'unknown@example.com' 
-          }
-        };
-      });
-
-      // Apply filters
-      let filteredMessages = enrichedMessages;
-
-      if (filters) {
-        if (filters.isRead !== undefined && filters.isRead !== 'all') {
-          filteredMessages = filteredMessages.filter((message: Message) => 
-            message.isRead === filters.isRead
-          );
-        }
-        if (filters.searchTerm) {
-          const searchLower = filters.searchTerm.toLowerCase();
-          filteredMessages = filteredMessages.filter((message: Message) => 
-            message.message.toLowerCase().includes(searchLower) ||
-            message.sender?.fullName.toLowerCase().includes(searchLower) ||
-            message.receiver?.fullName.toLowerCase().includes(searchLower)
-          );
-        }
+      const response = await fetch(`${API_BASE_URL}/users`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+      const users = await response.json();
+      console.log('Users fetched:', users);
+      return users;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      throw error;
+    }
+  }
 
-      return filteredMessages.sort((a: Message, b: Message) => 
-        new Date(b.time).getTime() - new Date(a.time).getTime()
-      );
+  private async fetchMessages(): Promise<Message[]> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/messages`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const messages = await response.json();
+      console.log('Messages fetched:', messages);
+      return messages;
     } catch (error) {
       console.error('Error fetching messages:', error);
-      throw new Error('Không thể tải danh sách tin nhắn');
+      throw error;
     }
   }
 
-  async getMessageById(id: string): Promise<Message> {
+  async getConversations(): Promise<Conversation[]> {
     try {
-      const messages = await this.getMessages();
-      const message = messages.find(m => m.id === id);
+      const [messages, users] = await Promise.all([
+        this.fetchMessages(),
+        this.fetchUsers()
+      ]);
+
+      console.log('=== PROCESSING CONVERSATIONS ===');
+      console.log('Total messages:', messages.length);
+      console.log('Total users:', users.length);
+
+      // Tạo map user theo userId
+      const userByUserId = new Map<string, User>();
+      const userById = new Map<string, User>();
       
-      if (!message) {
-        throw new Error('Message not found');
-      }
+      users.forEach(user => {
+        userByUserId.set(user.userId, user);
+        userById.set(user.id, user);
+        console.log(`User mapped: ${user.userId} (${user.id}) -> ${user.fullName}`);
+      });
 
-      return message;
+      // Admin có userId = U001 và id = f7b3
+      const adminUserIds = ['U001'];
+      const adminIds = ['f7b3'];
+      
+      console.log('Admin UserIds:', adminUserIds);
+      console.log('Admin IDs:', adminIds);
+      
+      // Nhóm tin nhắn theo người tham gia (không phải admin)
+      const conversationMap = new Map<string, Message[]>();
+
+      messages.forEach((message, index) => {
+        console.log(`\n--- Processing message ${index + 1} ---`);
+        console.log('Message:', message);
+
+        let partnerUserId: string | undefined;
+        let partnerId: string | undefined;
+
+        // Logic tìm partner:
+        // 1. Nếu tenantId là admin, thì partner là hostId
+        // 2. Nếu hostId là admin (userId hoặc id), thì partner là tenantId  
+        // 3. Nếu không có admin, tìm người không phải admin
+        
+        if (adminUserIds.includes(message.tenantId || '')) {
+          // Admin gửi tin nhắn, partner là hostId
+          partnerUserId = message.hostId;
+          console.log(`Admin sent message, partner hostId: ${partnerUserId}`);
+        } else if (adminUserIds.includes(message.hostId || '') || adminIds.includes(message.hostId || '')) {
+          // Admin nhận tin nhắn, partner là tenantId
+          partnerUserId = message.tenantId;
+          console.log(`Admin received message, partner tenantId: ${partnerUserId}`);
+        } else {
+          // Không có admin, tìm người không phải admin
+          if (message.tenantId && !adminUserIds.includes(message.tenantId)) {
+            partnerUserId = message.tenantId;
+            console.log(`Non-admin conversation, partner tenantId: ${partnerUserId}`);
+          } else if (message.hostId && !adminUserIds.includes(message.hostId) && !adminIds.includes(message.hostId)) {
+            partnerUserId = message.hostId;
+            console.log(`Non-admin conversation, partner hostId: ${partnerUserId}`);
+          }
+        }
+
+        // Tìm user object từ partnerUserId
+        if (partnerUserId) {
+          // Thử tìm theo userId trước
+          let partner = userByUserId.get(partnerUserId);
+          if (!partner) {
+            // Nếu không tìm thấy theo userId, thử tìm theo id
+            partner = userById.get(partnerUserId);
+          }
+          
+          if (partner) {
+            partnerId = partner.id;
+            console.log(`Partner found: ${partnerUserId} -> ${partner.fullName} (${partnerId})`);
+
+            if (!conversationMap.has(partnerId)) {
+              conversationMap.set(partnerId, []);
+              console.log(`Created new conversation for: ${partnerId}`);
+            }
+
+            conversationMap.get(partnerId)!.push({
+              ...message,
+              sender: message.tenantId ? (userByUserId.get(message.tenantId) || userById.get(message.tenantId)) : undefined,
+              receiver: message.hostId ? (userByUserId.get(message.hostId) || userById.get(message.hostId)) : undefined
+            });
+          } else {
+            console.log(`Partner user not found for: ${partnerUserId}`);
+          }
+        } else {
+          console.log('No partner found for message:', message);
+        }
+      });
+
+      console.log('\n=== CONVERSATION MAP ===');
+      console.log('Number of conversations:', conversationMap.size);
+      conversationMap.forEach((msgs, partnerId) => {
+        console.log(`Conversation ${partnerId}: ${msgs.length} messages`);
+      });
+
+      const conversations: Conversation[] = [];
+
+      conversationMap.forEach((messages, partnerId) => {
+        const participant = userById.get(partnerId);
+        console.log(`\n--- Creating conversation for ${partnerId} ---`);
+        console.log('Participant:', participant);
+
+        if (!participant) {
+          console.log(`Participant not found for ID: ${partnerId}`);
+          return;
+        }
+
+        // Sắp xếp tin nhắn theo thời gian
+        messages.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+
+        const lastMessage = messages[messages.length - 1];
+        
+        // Đếm tin nhắn chưa đọc (không phải từ admin)
+        const unreadCount = messages.filter(m => {
+          const isFromAdmin = adminUserIds.includes(m.tenantId || '') || adminIds.includes(m.hostId || '');
+          return !m.isRead && !isFromAdmin;
+        }).length;
+
+        console.log(`Conversation stats:`, {
+          partnerId,
+          participantName: participant.fullName,
+          messageCount: messages.length,
+          unreadCount,
+          lastMessage: lastMessage.message
+        });
+
+        conversations.push({
+          id: partnerId,
+          participant,
+          lastMessage: lastMessage.message,
+          lastMessageTime: lastMessage.time,
+          unreadCount,
+          messages
+        });
+      });
+
+      // Sắp xếp theo thời gian tin nhắn cuối
+      conversations.sort((a, b) => 
+        new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime()
+      );
+
+      console.log('\n=== FINAL RESULT ===');
+      console.log('Final conversations:', conversations.length);
+      conversations.forEach(conv => {
+        console.log(`- ${conv.participant.fullName}: ${conv.messages.length} messages, ${conv.unreadCount} unread`);
+      });
+
+      return conversations;
+
     } catch (error) {
-      console.error('Error fetching message:', error);
-      throw new Error('Không thể tải thông tin tin nhắn');
+      console.error('Error in getConversations:', error);
+      throw error;
     }
   }
 
-  async sendMessage(messageData: CreateMessageData): Promise<Message> {
+  async getMessageStats(): Promise<MessageStats> {
     try {
-      const newMessage = {
-        id: Date.now().toString(),
-        messageId: `MSG${Date.now()}`,
-        ...messageData,
-        receiverId: messageData.receiverId || (messageData.senderId === messageData.hostId ? messageData.tenantId : messageData.hostId),
-        time: messageData.time || new Date().toISOString(),
-        isRead: messageData.isRead || false
+      const messages = await this.fetchMessages();
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const thisWeek = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+      const adminUserIds = ['U001'];
+      const adminIds = ['f7b3'];
+
+      const stats = {
+        total: messages.length,
+        unread: messages.filter(m => {
+          const isFromAdmin = adminUserIds.includes(m.tenantId || '') || adminIds.includes(m.hostId || '');
+          return !m.isRead && !isFromAdmin;
+        }).length,
+        today: messages.filter(m => new Date(m.time) >= today).length,
+        thisWeek: messages.filter(m => new Date(m.time) >= thisWeek).length
       };
 
-      const response = await fetch(`${this.baseUrl}/messages`, {
+      console.log('Message stats:', stats);
+      return stats;
+    } catch (error) {
+      console.error('Error fetching message stats:', error);
+      throw error;
+    }
+  }
+
+  async sendMessage(conversationId: string, content: string): Promise<Message> {
+    try {
+      const newMessage = {
+        messageId: `MSG${Date.now()}`,
+        tenantId: 'U001', // Admin gửi  
+        hostId: conversationId, // Người nhận (sử dụng id)
+        message: content,
+        time: new Date().toISOString(),
+        isRead: false
+      };
+
+      console.log('Sending message:', newMessage);
+
+      const response = await fetch(`${API_BASE_URL}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -110,24 +279,21 @@ class MessageService {
         body: JSON.stringify(newMessage),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to send message');
-      }
-
-      const createdMessage = await response.json();
+      if (!response.ok) throw new Error('Failed to send message');
       
-      // Get enriched message data
-      const messages = await this.getMessages();
-      return messages.find(m => m.id === createdMessage.id) || createdMessage;
+      const result = await response.json();
+      console.log('Message sent successfully:', result);
+      return result;
     } catch (error) {
       console.error('Error sending message:', error);
-      throw new Error('Không thể gửi tin nhắn');
+      throw error;
     }
   }
 
-  async markAsRead(id: string): Promise<void> {
+  async markAsRead(messageId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/messages/${id}`, {
+      console.log('Marking message as read:', messageId);
+      const response = await fetch(`${API_BASE_URL}/messages/${messageId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -135,49 +301,97 @@ class MessageService {
         body: JSON.stringify({ isRead: true }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to mark message as read');
-      }
+      if (!response.ok) throw new Error('Failed to mark message as read');
+      console.log('Message marked as read successfully');
     } catch (error) {
       console.error('Error marking message as read:', error);
-      throw new Error('Không thể đánh dấu tin nhắn đã đọc');
+      throw error;
     }
   }
 
-  async deleteMessage(id: string): Promise<void> {
+  async markConversationAsRead(conversationId: string): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/messages/${id}`, {
-        method: 'DELETE',
+      console.log('Marking conversation as read:', conversationId);
+      const messages = await this.fetchMessages();
+      const adminUserIds = ['U001'];
+      const adminIds = ['f7b3'];
+      
+      // Tìm user theo ID để lấy userId
+      const users = await this.fetchUsers();
+      const userById = new Map(users.map(u => [u.id, u]));
+      const targetUser = userById.get(conversationId);
+      
+      if (!targetUser) {
+        console.log('Target user not found:', conversationId);
+        return;
+      }
+
+      const targetUserId = targetUser.userId || targetUser.id;
+      console.log('Target userId:', targetUserId);
+      
+      const conversationMessages = messages.filter(m => {
+        const isInConversation = (m.tenantId === targetUserId || m.hostId === targetUserId || 
+                                 m.tenantId === conversationId || m.hostId === conversationId);
+        const isFromPartner = !adminUserIds.includes(m.tenantId || '') && !adminIds.includes(m.hostId || '');
+        return isInConversation && !m.isRead && isFromPartner;
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to delete message');
-      }
+      console.log('Messages to mark as read:', conversationMessages);
+
+      const promises = conversationMessages.map(message =>
+        fetch(`${API_BASE_URL}/messages/${message.id}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ isRead: true }),
+        })
+      );
+
+      await Promise.all(promises);
+      console.log('Conversation marked as read successfully');
     } catch (error) {
-      console.error('Error deleting message:', error);
-      throw new Error('Không thể xóa tin nhắn');
+      console.error('Error marking conversation as read:', error);
+      throw error;
     }
   }
 
-  async getMessageStats(): Promise<MessageStats> {
+  async deleteConversation(conversationId: string): Promise<void> {
     try {
-      const messages = await this.getMessages();
+      console.log('Deleting conversation:', conversationId);
+      const messages = await this.fetchMessages();
       
-      const now = new Date();
-      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+      // Tìm user theo ID để lấy userId
+      const users = await this.fetchUsers();
+      const userById = new Map(users.map(u => [u.id, u]));
+      const targetUser = userById.get(conversationId);
+      
+      if (!targetUser) {
+        console.log('Target user not found:', conversationId);
+        return;
+      }
 
-      const stats: MessageStats = {
-        total: messages.length,
-        unread: messages.filter(m => !m.isRead).length,
-        today: messages.filter(m => new Date(m.time) >= today).length,
-        thisWeek: messages.filter(m => new Date(m.time) >= weekAgo).length
-      };
+      const targetUserId = targetUser.userId || targetUser.id;
+      console.log('Target userId:', targetUserId);
+      
+      const conversationMessages = messages.filter(m => 
+        m.tenantId === targetUserId || m.hostId === targetUserId ||
+        m.tenantId === conversationId || m.hostId === conversationId
+      );
 
-      return stats;
+      console.log('Messages to delete:', conversationMessages);
+
+      const promises = conversationMessages.map(message =>
+        fetch(`${API_BASE_URL}/messages/${message.id}`, {
+          method: 'DELETE',
+        })
+      );
+
+      await Promise.all(promises);
+      console.log('Conversation deleted successfully');
     } catch (error) {
-      console.error('Error fetching message stats:', error);
-      throw new Error('Không thể tải thống kê tin nhắn');
+      console.error('Error deleting conversation:', error);
+      throw error;
     }
   }
 }
