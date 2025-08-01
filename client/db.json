@@ -251,8 +251,8 @@
       "contractId": "C002",
       "amount": 3500000,
       "paymentDate": "2025-08-01T00:00:00Z",
-      "paymentStatus": "pending",
-      "extraNote": "Thanh toán qua ví điện tử",
+      "paymentStatus": "overdue",
+      "extraNote": "",
       "id": "789c"
     },
     {
@@ -371,6 +371,15 @@
       "hostId": "fe51",
       "message": "ok nhe",
       "time": "2025-08-01T03:26:59.423Z",
+      "isRead": false
+    },
+    {
+      "id": "a2b7",
+      "messageId": "MSG1754069634091",
+      "tenantId": "U001",
+      "hostId": "fe51",
+      "message": "e nè",
+      "time": "2025-08-01T17:33:54.091Z",
       "isRead": false
     }
   ],
