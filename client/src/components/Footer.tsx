@@ -1,3 +1,4 @@
+// src/components/Footer.tsx
 const Footer = () => {
   return (
     <footer className="bg-gray-50 text-center text-sm text-gray-600 py-6 mt-10 border-t">

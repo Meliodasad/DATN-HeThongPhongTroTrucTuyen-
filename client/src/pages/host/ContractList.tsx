@@ -50,7 +50,12 @@ const ContractList = () => {
     if (!confirmDelete) return;
 
     try {
-      await hostService.deleteContract(id);
+      // 1. Chấm dứt hợp đồng (cập nhật trạng thái phòng, tenant, contract)
+      await hostService.terminateContract(id);
+
+      // 2. Xóa hợp đồng khỏi db
+      await hostService.deleteContract(id.toString());
+
       alert("Đã xóa hợp đồng.");
       fetchContracts();
     } catch (error) {

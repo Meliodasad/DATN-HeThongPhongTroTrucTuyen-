@@ -7,7 +7,7 @@ import { hostService } from "../../services/hostService";
 export default function CreateRoom() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    code: "",
+    roomId: "",
     area: 0,
     price: 0,
     utilities: "",
@@ -61,9 +61,10 @@ export default function CreateRoom() {
               </label>
               <input 
                 type="text" 
-                name="code" 
-                value={formData.code} 
+                name="roomId" 
+                value={formData.roomId} 
                 onChange={handleChange}
+                placeholder="VD: P101, P102..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required 
               />
@@ -78,6 +79,7 @@ export default function CreateRoom() {
                 name="price" 
                 value={formData.price} 
                 onChange={handleChange}
+                placeholder="3000000"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required 
               />
@@ -92,6 +94,7 @@ export default function CreateRoom() {
                 name="area" 
                 value={formData.area} 
                 onChange={handleChange}
+                placeholder="25"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required 
               />
@@ -106,6 +109,7 @@ export default function CreateRoom() {
                 name="maxPeople" 
                 value={formData.maxPeople} 
                 onChange={handleChange}
+                min="1"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -119,6 +123,7 @@ export default function CreateRoom() {
                 name="deposit" 
                 value={formData.deposit} 
                 onChange={handleChange}
+                placeholder="1 tháng tiền phòng"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -132,6 +137,7 @@ export default function CreateRoom() {
                 name="electricity" 
                 value={formData.electricity} 
                 onChange={handleChange}
+                placeholder="3.500đ/kWh"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -160,6 +166,7 @@ export default function CreateRoom() {
               name="image" 
               value={formData.image} 
               onChange={handleChange}
+              placeholder="https://images.unsplash.com/..."
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -173,6 +180,7 @@ export default function CreateRoom() {
               name="location" 
               value={formData.location} 
               onChange={handleChange}
+              placeholder="Lầu 1, Số 10 Nguyễn Văn Bảo..."
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -186,6 +194,7 @@ export default function CreateRoom() {
               value={formData.description} 
               onChange={handleChange}
               rows={4}
+              placeholder="Mô tả về phòng, môi trường xung quanh..."
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>

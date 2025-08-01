@@ -6,6 +6,7 @@ interface RoomCardProps {
   room: {
     id: number;
     code: string;
+    roomId?: string;
     area: number;
     price: number;
     utilities: string;
@@ -37,10 +38,14 @@ const RoomCard = ({ room, onViewDetail, onEdit, onDelete }: RoomCardProps) => {
     }
   };
 
+  const displayCode = room.roomId || room.code || `P${room.id}`;
+  const displayUtilities = room.utilities || "Chưa có thông tin";
+  const displayImage = room.image || "https://images.pexels.com/photos/276724/pexels-photo-276724.jpeg?auto=compress&cs=tinysrgb&w=400&h=250&dpr=1";
+
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
       <div className="relative">
-        <img src={room.image} alt={room.code} className="w-full h-48 object-cover" />
+        <img src={displayImage} alt={displayCode} className="w-full h-48 object-cover" />
         <div className="absolute top-3 left-3">
           <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(room.status)}`}>
             {room.status}
@@ -49,7 +54,7 @@ const RoomCard = ({ room, onViewDetail, onEdit, onDelete }: RoomCardProps) => {
       </div>
       
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{room.code}</h3>
+        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{displayCode}</h3>
         
         <div className="space-y-2 mb-4">
           <div className="flex items-center text-sm text-gray-600">
@@ -62,13 +67,13 @@ const RoomCard = ({ room, onViewDetail, onEdit, onDelete }: RoomCardProps) => {
           </div>
           <div className="flex items-center text-sm text-gray-600">
             <Zap className="w-4 h-4 mr-1" />
-            <span className="truncate">{room.utilities}</span>
+            <span className="truncate">{displayUtilities}</span>
           </div>
         </div>
 
         <div className="mb-4">
           <p className="text-lg font-bold text-blue-600">
-            {room.price.toLocaleString()}đ/tháng
+            {room.price?.toLocaleString() || 0}đ/tháng
           </p>
         </div>
 

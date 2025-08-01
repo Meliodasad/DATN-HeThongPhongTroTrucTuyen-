@@ -1,11 +1,15 @@
+// src/pages/host/Dashboard.tsx
+// Trang tổng quan của chủ nhà
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { hostService } from "../../services/hostService";
 import StatCard from "../../components/StatCard";
 import RoomCard from "../../components/RoomCard";
 import RentalRequestCard from "../../components/RentalRequestCard";
+import TenantCard from "../../components/TenantCard";
 import RoomDetail from "./RoomDetail";
-import { Home, CheckCircle, Users, DollarSign, Plus, Eye } from "lucide-react";
+import TenantDetail from "./TenantDetail";
+import { Home, CheckCircle, Users, DollarSign, Plus, Eye, UserCheck } from "lucide-react";
 
 interface Room {
   id: number;
@@ -39,11 +43,26 @@ interface RentalRequest {
   avatar: string;
 }
 
+interface Tenant {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  avatar: string;
+  roomCode: string;
+  roomId: number;
+  startDate: string;
+  endDate: string;
+  contractId?: number;
+  monthlyRent: number;
+}
+
 interface Statistics {
   totalRooms: number;
   availableRooms: number;
   rentedRooms: number;
   totalRevenue: number;
+  totalTenants: number;
 }
 
 const Dashboard = () => {
@@ -51,21 +70,25 @@ const Dashboard = () => {
     totalRooms: 0,
     availableRooms: 0,
     rentedRooms: 0,
-    totalRevenue: 0
+    totalRevenue: 0,
+    totalTenants: 0
   });
   const [rooms, setRooms] = useState<Room[]>([]);
   const [rentalRequests, setRentalRequests] = useState<RentalRequest[]>([]);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [statsRes, roomsRes, requestsRes] = await Promise.all([
+      const [statsRes, roomsRes, requestsRes, tenantsRes] = await Promise.all([
         hostService.getStatistics(),
         hostService.getRooms(),
-        hostService.getRentalRequests()
+        hostService.getRentalRequests(),
+        hostService.getTenants()
       ]);
 
       setStatistics(statsRes.data);
@@ -78,6 +101,7 @@ const Dashboard = () => {
         submittedAt: new Date().toLocaleDateString('vi-VN') + " - " + new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
         avatar: "https://i.pravatar.cc/100?img=" + req.id
       })));
+      setTenants(tenantsRes.data || []);
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
@@ -107,13 +131,13 @@ const Dashboard = () => {
     if (!confirm) return;
 
     try {
-      await hostService.approveRentalRequest(request.id.toString());
-      alert("Đã duyệt yêu cầu. Chuyển sang trang tạo hợp đồng.");
       navigate("/host/create-contract", {
         state: {
           tenantName: request.tenantName,
           phone: request.phone,
+          email: request.email,
           roomId: request.desiredRoomId,
+          requestId: request.id
         },
       });
     } catch (error) {
@@ -131,6 +155,26 @@ const Dashboard = () => {
       alert("Đã từ chối yêu cầu.");
     } catch (error) {
       alert("Lỗi khi từ chối yêu cầu!");
+    }
+  };
+
+  // ✅ SỬA LẠI: Sử dụng contractId thay vì tenant.id
+  const handleTerminateTenant = async (tenant: Tenant) => {
+    const confirm = window.confirm(`Bạn có chắc muốn chấm dứt hợp đồng với ${tenant.name}?`);
+    if (!confirm) return;
+
+    try {
+      if (!tenant.contractId) {
+        alert("❌ Không tìm thấy mã hợp đồng để chấm dứt!");
+        return;
+      }
+
+      await hostService.terminateContract(tenant.contractId);
+      alert("✅ Đã chấm dứt hợp đồng thành công!");
+      fetchData(); // Refresh data
+    } catch (error: any) {
+      alert(`❌ Có lỗi xảy ra: ${error.message || 'Không thể chấm dứt hợp đồng'}`);
+      console.error(error);
     }
   };
 
@@ -159,7 +203,7 @@ const Dashboard = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
           <StatCard
             title="Tổng phòng"
             value={statistics.totalRooms}
@@ -182,20 +226,27 @@ const Dashboard = () => {
             bgColor="bg-yellow-100"
           />
           <StatCard
+            title="Người thuê"
+            value={statistics.totalTenants}
+            icon={UserCheck}
+            iconColor="text-purple-600"
+            bgColor="bg-purple-100"
+          />
+          <StatCard
             title="Doanh thu/tháng"
             value={`${statistics.totalRevenue.toLocaleString()}đ`}
             icon={DollarSign}
-            iconColor="text-purple-600"
-            bgColor="bg-purple-100"
+            iconColor="text-emerald-600"
+            bgColor="bg-emerald-100"
           />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Rooms Section */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
-                Phòng trọ của bạn
+                Phòng trọ
               </h2>
               <div className="flex space-x-2">
                 <button
@@ -203,32 +254,32 @@ const Dashboard = () => {
                   className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
                 >
                   <Eye size={16} />
-                  <span>Xem tất cả</span>
+                  <span>Tất cả</span>
                 </button>
                 <button
                   onClick={() => navigate("/host/create-room")}
-                  className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+                  className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm font-medium"
                 >
                   <Plus size={16} />
-                  <span>Thêm phòng</span>
+                  <span>Thêm</span>
                 </button>
               </div>
             </div>
 
             {rooms.length === 0 ? (
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 text-center">
-                <Home className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500 mb-4">Bạn chưa có phòng nào</p>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
+                <Home className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm mb-3">Bạn chưa có phòng nào</p>
                 <button
                   onClick={() => navigate("/host/create-room")}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                  className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
                 >
                   Tạo phòng đầu tiên
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {rooms.slice(0, 4).map((room) => (
+              <div className="space-y-4">
+                {rooms.slice(0, 2).map((room) => (
                   <RoomCard
                     key={room.id}
                     room={room}
@@ -241,18 +292,53 @@ const Dashboard = () => {
             )}
           </div>
 
+          {/* Tenants Section */}
+          <div className="lg:col-span-1">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Người thuê
+              </h2>
+              <button
+                onClick={() => navigate("/host/tenant-list")}
+                className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+              >
+                <Eye size={16} />
+                <span>Tất cả</span>
+              </button>
+            </div>
+
+            {tenants.length === 0 ? (
+              <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 text-center">
+                <UserCheck className="w-8 h-8 text-gray-400 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">Chưa có người thuê nào</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {tenants.slice(0, 2).map((tenant) => (
+                  <TenantCard
+                    key={tenant.id}
+                    tenant={tenant}
+                    onViewDetail={() => setSelectedTenant(tenant)}
+                    onTerminateContract={() => handleTerminateTenant(tenant)}
+                    onEditTenant={() => navigate(`/host/tenant-edit/${tenant.id}`)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Rental Requests Section */}
           <div className="lg:col-span-1">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-gray-900">
-                Yêu cầu thuê phòng
+                Yêu cầu thuê
               </h2>
               <button
                 onClick={() => navigate("/host/rental-request")}
                 className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
               >
                 <Eye size={16} />
-                <span>Xem tất cả</span>
+                <span>Tất cả</span>
               </button>
             </div>
 
@@ -263,7 +349,7 @@ const Dashboard = () => {
               </div>
             ) : (
               <div className="space-y-4">
-                {rentalRequests.slice(0, 3).map((request) => (
+                {rentalRequests.slice(0, 2).map((request) => (
                   <RentalRequestCard
                     key={request.id}
                     request={request}
@@ -277,10 +363,19 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Modals */}
       {selectedRoom && (
         <RoomDetail 
           room={selectedRoom} 
           onClose={() => setSelectedRoom(null)} 
+        />
+      )}
+
+      {selectedTenant && (
+        <TenantDetail 
+          tenant={selectedTenant} 
+          onClose={() => setSelectedTenant(null)} 
+          onUpdated={fetchData}
         />
       )}
     </div>

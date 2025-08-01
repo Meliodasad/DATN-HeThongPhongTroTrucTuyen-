@@ -11,7 +11,9 @@ import RoomStatus from "./pages/host/RoomStatus";
 import RentalRequest from "./pages/host/RentalRequest";
 import ContractList from "./pages/host/ContractList";
 import RoomList from "./pages/host/RoomList";
+import TenantList from "./pages/host/TenantList";
 import HomepageLayout from "./components/HomePageLayout";
+import TenantEdit from "./pages/host/TenantEdit";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
           <Route path="/host/create-room" element={<CreateRoom />} />
           <Route path="/host/update-room/:id" element={<UpdateRoom />} />
           <Route path="/host/room-status" element={<RoomStatus />} />
+          <Route path="/host/tenant-list" element={<TenantList />} />
+          <Route path="/host/tenant-edit/:id" element={<TenantEdit />} />
           <Route path="/host/rental-request" element={<RentalRequest />} />
           <Route path="/host/create-contract" element={<CreateContract />} />
           <Route path="/host/contracts" element={<ContractList />} />

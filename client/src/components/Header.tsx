@@ -1,4 +1,3 @@
-// src/components/Header.tsx
 import { Link, useLocation } from "react-router-dom";
 import { Bell, User } from "lucide-react";
 
@@ -9,6 +8,7 @@ const Header = () => {
     { path: "/host/profile", label: "Thông tin cá nhân" },
     { path: "/host/room-list", label: "Danh sách phòng của tôi" },
     { path: "/host/room-status", label: "Trạng thái phòng" },
+    { path: "/host/tenant-list", label: "Danh sách người thuê" },
     { path: "/host/rental-request", label: "Yêu cầu thuê" },
     { path: "/host/create-contract", label: "Tạo hợp đồng" },
     { path: "/host/contracts", label: "Hợp đồng" },

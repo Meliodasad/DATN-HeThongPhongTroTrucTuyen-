@@ -42,12 +42,16 @@ export default function RoomList() {
       const res = await hostService.getRooms();
       const roomsWithStatus = res.data.map((room: any) => ({
         ...room,
+        code: room.roomId || room.code || `P${room.id}`,
+        utilities: room.utilities || "",
         status: room.tenant ? "Đã cho thuê" : "Còn trống"
       }));
       setRooms(roomsWithStatus);
       setFilteredRooms(roomsWithStatus);
     } catch (error) {
       console.error("Error fetching rooms:", error);
+      setRooms([]);
+      setFilteredRooms([]);
     } finally {
       setLoading(false);
     }
@@ -62,10 +66,12 @@ export default function RoomList() {
 
     // Filter by search term
     if (searchTerm) {
-      filtered = filtered.filter(room =>
-        room.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        room.utilities.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter(room => {
+        const code = room.code || "";
+        const utilities = room.utilities || "";
+        return code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+               utilities.toLowerCase().includes(searchTerm.toLowerCase());
+      });
     }
 
     // Filter by status
@@ -83,6 +89,7 @@ export default function RoomList() {
     try {
       await hostService.deleteRoom(id);
       fetchRooms();
+      alert("✅ Đã xóa phòng thành công!");
     } catch (err) {
       alert("❌ Lỗi khi xóa phòng!");
       console.error(err);

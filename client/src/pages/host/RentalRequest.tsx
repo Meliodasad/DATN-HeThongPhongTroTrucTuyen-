@@ -33,12 +33,13 @@ const RentalRequests = () => {
         ...req,
         submittedAt: new Date().toLocaleDateString('vi-VN') + " - " + new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
         avatar: "https://i.pravatar.cc/100?img=" + req.id,
-        message: "Tôi muốn thuê phòng này, có thể xem phòng được không?"
+        message: req.message || "Tôi muốn thuê phòng này, có thể xem phòng được không?"
       }));
       setRequests(requestsWithDetails);
       setFilteredRequests(requestsWithDetails);
     } catch (error) {
       console.error("Error fetching rental requests:", error);
+      alert("❌ Lỗi khi tải yêu cầu thuê phòng. Vui lòng kiểm tra lại JSON Server.");
     } finally {
       setLoading(false);
     }
@@ -57,17 +58,18 @@ const RentalRequests = () => {
   }, [statusFilter, requests]);
 
   const handleApprove = async (req: RentalRequest) => {
-    const confirm = window.confirm("Bạn có chắc muốn duyệt và tạo hợp đồng?");
+    const confirm = window.confirm("Bạn có chắc muốn duyệt và tạo hợp đồng cho yêu cầu này?");
     if (!confirm) return;
 
     try {
-      await hostService.approveRentalRequest(req.id.toString());
-      alert("Đã duyệt yêu cầu. Chuyển sang trang tạo hợp đồng.");
+      // Chuyển sang trang tạo hợp đồng với thông tin từ yêu cầu
       navigate("/host/create-contract", {
         state: {
           tenantName: req.tenantName,
           phone: req.phone,
+          email: req.email,
           roomId: req.desiredRoomId,
+          requestId: req.id
         },
       });
     } catch (error) {

@@ -1,4 +1,4 @@
-// 📁 src/pages/host/ContractCreate.tsx
+// 📁 src/pages/host/CreateContract.tsx
 // TRANG TẠO HỢP ĐỒNG MỚI
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -10,6 +10,7 @@ const CreateContract = () => {
   const [contract, setContract] = useState({
     tenantName: location.state?.tenantName || "",
     phone: location.state?.phone || "",
+    email: location.state?.email || "",
     roomId: location.state?.roomId || "",
     startDate: "",
     endDate: "",
@@ -17,6 +18,7 @@ const CreateContract = () => {
     terms: "",
   });
   const [loading, setLoading] = useState(false);
+  const [assignTenant, setAssignTenant] = useState(true); // Checkbox để gắn người thuê
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -34,8 +36,19 @@ const CreateContract = () => {
     };
 
     try {
-      await hostService.createContract(dataToSubmit);
-      alert("✅ Tạo hợp đồng thành công!");
+      if (assignTenant && location.state?.requestId) {
+        // Sử dụng API mới để duyệt yêu cầu và gắn người thuê
+        await hostService.approveRentalRequestWithAssignment(
+          location.state.requestId.toString(),
+          dataToSubmit
+        );
+        alert("✅ Tạo hợp đồng và gắn người thuê thành công!");
+      } else {
+        // Chỉ tạo hợp đồng thông thường
+        await hostService.createContract(dataToSubmit);
+        alert("✅ Tạo hợp đồng thành công!");
+      }
+      
       navigate("/host/contracts");
     } catch (error) {
       alert("❌ Tạo hợp đồng thất bại!");
@@ -76,6 +89,19 @@ const CreateContract = () => {
                 value={contract.phone}
                 onChange={handleChange}
                 required
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                📧 Email
+              </label>
+              <input
+                name="email"
+                type="email"
+                value={contract.email}
+                onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
@@ -136,6 +162,27 @@ const CreateContract = () => {
               />
             </div>
           </div>
+
+          {/* Checkbox để gắn người thuê */}
+          {location.state?.requestId && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="flex items-center">
+                <input
+                  id="assignTenant"
+                  type="checkbox"
+                  checked={assignTenant}
+                  onChange={(e) => setAssignTenant(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                />
+                <label htmlFor="assignTenant" className="ml-2 block text-sm text-blue-800">
+                  🏠 Gắn người thuê vào phòng ngay sau khi tạo hợp đồng
+                </label>
+              </div>
+              <p className="text-xs text-blue-600 mt-1">
+                Phòng sẽ được cập nhật trạng thái "Đã cho thuê" và người thuê sẽ được thêm vào danh sách quản lý
+              </p>
+            </div>
+          )}
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

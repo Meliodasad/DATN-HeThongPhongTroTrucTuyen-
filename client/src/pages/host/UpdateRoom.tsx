@@ -8,7 +8,7 @@ export default function UpdateRoom() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    code: "",
+    roomId: "",
     area: 0,
     price: 0,
     utilities: "",
@@ -22,16 +22,32 @@ export default function UpdateRoom() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
 
-  // Gọi API để lấy thông tin phòng theo id
   useEffect(() => {
     if (id) {
       setInitialLoading(true);
       hostService.getRoomById(Number(id))
-        .then((res) => setFormData(res.data))
-        .catch(() => alert("❌ Không tìm thấy thông tin phòng."))
+        .then((res) => {
+          const room = res.data;
+          setFormData({
+            roomId: room.roomId || room.code || "",
+            area: room.area || 0,
+            price: room.price || 0,
+            utilities: room.utilities || "",
+            maxPeople: room.maxPeople || 1,
+            image: room.image || "",
+            description: room.description || "",
+            location: room.location || "",
+            deposit: room.deposit || "",
+            electricity: room.electricity || "",
+          });
+        })
+        .catch(() => {
+          alert("❌ Không tìm thấy thông tin phòng.");
+          navigate("/host/room-list");
+        })
         .finally(() => setInitialLoading(false));
     }
-  }, [id]);
+  }, [id, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -86,8 +102,8 @@ export default function UpdateRoom() {
               </label>
               <input 
                 type="text" 
-                name="code" 
-                value={formData.code} 
+                name="roomId" 
+                value={formData.roomId} 
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required 
