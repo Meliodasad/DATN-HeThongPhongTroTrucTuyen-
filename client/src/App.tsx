@@ -1,15 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+// client/src/App.tsx
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Dashboard from "./pages/host/Dashboard";
+import Profile from "./pages/host/Profile";
+import UpdateProfile from "./pages/host/UpdateProfile";
+import CreateRoom from "./pages/host/CreateRoom";
+import UpdateRoom from "./pages/host/UpdateRoom";
+import CreateContract from "./pages/host/CreateContract";
+import ContractDetail from "./pages/host/ContractDetail";
+import RoomStatus from "./pages/host/RoomStatus";
+import RentalRequest from "./pages/host/RentalRequest";
+import ContractList from "./pages/host/ContractList";
+import RoomList from "./pages/host/RoomList";
+import TenantList from "./pages/host/TenantList";
+import HomepageLayout from "./components/HomePageLayout";
+import TenantEdit from "./pages/host/TenantEdit";
 
 function App() {
   return (
-    <div className="text-center mt-10">
-      <h1 className="text-4xl font-bold text-orange-500">Hello Khải!</h1>
-      <p className="text-gray-500">Tailwind chạy ngon lành rồi 😎</p>
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomepageLayout />}>
+          <Route index element={<Navigate to="/host/dashboard" replace />} />
+          <Route path="/host/dashboard" element={<Dashboard />} />
+          <Route path="/host/profile" element={<Profile />} />
+          <Route path="/host/update-profile" element={<UpdateProfile />} />
+          <Route path="/host/room-list" element={<RoomList />} />
+          <Route path="/host/create-room" element={<CreateRoom />} />
+          <Route path="/host/update-room/:id" element={<UpdateRoom />} />
+          <Route path="/host/room-status" element={<RoomStatus />} />
+          <Route path="/host/tenant-list" element={<TenantList />} />
+          <Route path="/host/tenant-edit/:id" element={<TenantEdit />} />
+          <Route path="/host/rental-request" element={<RentalRequest />} />
+          <Route path="/host/create-contract" element={<CreateContract />} />
+          <Route path="/host/contracts" element={<ContractList />} />
+          <Route path="/host/contracts/:id" element={<ContractDetail />} />
+          <Route path="/host/logout" element={<div className="p-6"><h1>Đăng xuất (chưa hoàn thành)</h1></div>} />
+        </Route>
+      </Routes>
+    </Router>
   );
 }
 
-export default App
+export default App;

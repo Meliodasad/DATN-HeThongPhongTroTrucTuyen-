@@ -1,0 +1,254 @@
+// Sửa thông tin phòng
+// ../client/src/pages/host/UpdateRoom.tsx
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { hostService } from "../../services/hostService";
+
+export default function UpdateRoom() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    roomId: "",
+    area: 0,
+    price: 0,
+    utilities: "",
+    maxPeople: 1,
+    image: "",
+    description: "",
+    location: "",
+    deposit: "",
+    electricity: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      setInitialLoading(true);
+      hostService.getRoomById(Number(id))
+        .then((res) => {
+          const room = res.data;
+          setFormData({
+            roomId: room.roomId || room.code || "",
+            area: room.area || 0,
+            price: room.price || 0,
+            utilities: room.utilities || "",
+            maxPeople: room.maxPeople || 1,
+            image: room.image || "",
+            description: room.description || "",
+            location: room.location || "",
+            deposit: room.deposit || "",
+            electricity: room.electricity || "",
+          });
+        })
+        .catch(() => {
+          alert("❌ Không tìm thấy thông tin phòng.");
+          navigate("/host/room-list");
+        })
+        .finally(() => setInitialLoading(false));
+    }
+  }, [id, navigate]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ 
+      ...prev, 
+      [name]: name === "area" || name === "price" || name === "maxPeople" ? Number(value) : value 
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!id) return;
+
+    setLoading(true);
+    try {
+      await hostService.updateRoom(Number(id), formData);
+      alert("✅ Cập nhật phòng thành công!");
+      navigate("/host/room-list");
+    } catch (error) {
+      alert("❌ Cập nhật phòng thất bại!");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (initialLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-500">Đang tải thông tin phòng...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          🛠 Cập nhật thông tin phòng
+        </h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Mã phòng *
+              </label>
+              <input 
+                type="text" 
+                name="roomId" 
+                value={formData.roomId} 
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Giá phòng (VNĐ) *
+              </label>
+              <input 
+                type="number" 
+                name="price" 
+                value={formData.price} 
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Diện tích (m²) *
+              </label>
+              <input 
+                type="number" 
+                name="area" 
+                value={formData.area} 
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required 
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Số người tối đa
+              </label>
+              <input 
+                type="number" 
+                name="maxPeople" 
+                value={formData.maxPeople} 
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tiền cọc
+              </label>
+              <input 
+                type="text" 
+                name="deposit" 
+                value={formData.deposit} 
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Giá điện/nước
+              </label>
+              <input 
+                type="text" 
+                name="electricity" 
+                value={formData.electricity} 
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tiện ích
+            </label>
+            <input 
+              type="text" 
+              name="utilities" 
+              value={formData.utilities} 
+              onChange={handleChange}
+              placeholder="Máy lạnh, Wifi, Máy giặt..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Ảnh phòng (URL)
+            </label>
+            <input 
+              type="text" 
+              name="image" 
+              value={formData.image} 
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Địa chỉ phòng
+            </label>
+            <input 
+              type="text" 
+              name="location" 
+              value={formData.location} 
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mô tả chi tiết
+            </label>
+            <textarea 
+              name="description" 
+              value={formData.description} 
+              onChange={handleChange}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
+
+          <div className="flex justify-center space-x-4">
+            <button
+              type="button"
+              onClick={() => navigate("/host/room-list")}
+              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition"
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
+            >
+              {loading ? "Đang cập nhật..." : "💾 Cập nhật phòng"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
