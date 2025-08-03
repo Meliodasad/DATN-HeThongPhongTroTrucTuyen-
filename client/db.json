@@ -1,46 +1,54 @@
 {
   "users": [
     {
+      "id": "u1",
       "fullName": "Nguyễn Văn Admin",
-      "email": "admin@rental32132hub.com",
-      "phone": "",
-      "address": "",
-      "avatar": "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150",
-      "id": "1"
+      "email": "admin@rentalhub.com",
+      "password": "admin123",
+      "phone": "0123456789",
+      "zalo": "0123456789",
+      "role": "admin",
+      "status": "active",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "avatar": "https://images.pexels.com/photos/614810/pexels-photo-614810.jpeg?auto=compress&cs=tinysrgb&w=150"
     },
     {
-      "id": "2",
+      "id": "u2",
       "fullName": "Trần Thị Lan",
       "email": "host1@example.com",
       "password": "host123",
       "phone": "0987654321",
+      "zalo": "0987654321",
       "address": "123 Nguyễn Huệ, Quận 1, TP.HCM",
       "idNumber": "079012345678",
       "role": "host",
-      "status": "inactive",
+      "status": "active",
       "createdAt": "2024-01-15T10:30:00Z",
-      "avatar": "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150"
+      "avatar": "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=150",
+      "name": "Mary"
     },
     {
-      "id": "3",
+      "id": "u3",
       "fullName": "Lê Minh Tuấn32131",
       "email": "tenant1@example.com",
       "password": "tenant123",
       "phone": "0369852147",
+      "zalo": "0369852147",
       "dob": "1995-05-20",
       "idNumber": "079098765432",
       "address": "456 Lê Lợi, Quận 3, TP.HCM",
-      "role": "host",
-      "status": "active",
+      "role": "tenant",
+      "status": "inactive",
       "createdAt": "2024-02-01T14:20:00Z",
       "avatar": "https://images.pexels.com/photos/697509/pexels-photo-697509.jpeg?auto=compress&cs=tinysrgb&w=150"
     },
     {
-      "id": "4",
+      "id": "u4",
       "fullName": "Phạm Thị Mai",
       "email": "tenant2@example.com",
       "password": "tenant456",
       "phone": "0789123456",
+      "zalo": "0369852147",
       "dob": "1998-03-15",
       "idNumber": "079087654321",
       "address": "789 Trần Hưng Đạo, Quận 5, TP.HCM",
@@ -50,7 +58,7 @@
       "avatar": "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=150"
     },
     {
-      "id": "5",
+      "id": "u5",
       "fullName": "Nguyễn Văn Khách",
       "email": "guest@example.com",
       "password": "guest123",
@@ -62,14 +70,16 @@
       "createdAt": "2024-03-01T16:45:00Z",
       "otpCode": "123456",
       "phone": "",
+      "zalo": "",
       "avatar": ""
     },
     {
-      "id": "1753496433989",
+      "id": "u6",
       "fullName": "lkj",
       "email": "nưldqwqw",
       "password": "32132",
       "phone": "321321",
+      "zalo": "",
       "address": "àdads",
       "idNumber": "3213131",
       "dob": "",
@@ -79,25 +89,27 @@
       "createdAt": "2025-07-26T02:20:33.989Z"
     },
     {
-      "id": "1753499781221",
+      "id": "u7",
       "fullName": "21312312432131321321eqasfz",
       "email": "2132131231232",
       "password": "",
       "phone": "",
+      "zalo": "",
       "address": "",
       "idNumber": "",
       "dob": "",
       "role": "host",
       "avatar": "",
-      "status": "inactive",
+      "status": "active",
       "createdAt": "2025-07-26T03:16:21.221Z"
     },
     {
-      "id": "1753502841195",
+      "id": "u8",
       "fullName": "tung",
       "email": "host@gmail.com",
       "password": "123123",
       "phone": "",
+      "zalo": "",
       "address": "dấ",
       "idNumber": "",
       "dob": "",
@@ -107,23 +119,25 @@
       "createdAt": "2025-07-26T04:07:21.195Z"
     },
     {
-      "id": "1753504435011",
+      "id": "u9",
       "fullName": "21313",
       "email": "23232@gmail.com",
       "password": "123123",
       "phone": "32321321312",
+      "zalo": "",
       "role": "tenant",
       "status": "active",
       "createdAt": "2025-07-26T04:33:55.011Z"
     },
     {
-      "id": "1753538444384",
+      "id": "u10",
       "fullName": "tung",
       "email": "admin@gmail.com",
       "password": "123123",
       "phone": "0121231321",
+      "zalo": "",
       "role": "admin",
-      "status": "inactive",
+      "status": "active",
       "createdAt": "2025-07-26T14:00:44.384Z",
       "address": "",
       "idNumber": "",
@@ -131,11 +145,12 @@
       "avatar": ""
     },
     {
-      "id": "1753538526903",
+      "id": "u11",
       "fullName": "user",
       "email": "user@gmail.com",
       "password": "123123",
       "phone": "",
+      "zalo": "",
       "address": "",
       "idNumber": "",
       "dob": "",
@@ -143,12 +158,64 @@
       "avatar": "",
       "status": "active",
       "createdAt": "2025-07-26T14:02:06.903Z"
+    },
+    {
+      "id": "u12",
+      "fullName": "an",
+      "email": "an11111@gmail.com",
+      "password": "1234567",
+      "phone": "0156891452",
+      "zalo": "0156891452",
+      "role": "tenant",
+      "status": "active",
+      "createdAt": "2025-07-28T07:12:25.851Z"
+    },
+    {
+      "id": "u13",
+      "fullName": "an123",
+      "email": "an11@gmail.com",
+      "password": "123123",
+      "phone": "0156891452",
+      "zalo": "0156891452",
+      "role": "tenant",
+      "status": "active",
+      "createdAt": "2025-07-28T08:12:43.830Z"
+    },
+    {
+      "id": "u14",
+      "fullName": "an1234546",
+      "email": "an456@gmail.com",
+      "password": "123456789",
+      "phone": "0949974724",
+      "role": "tenant",
+      "status": "active",
+      "createdAt": "2025-07-30T09:05:08.991Z"
+    },
+    {
+      "id": "u15",
+      "fullName": "anh123",
+      "email": "anh123@gmail.com",
+      "password": "123456",
+      "phone": "0486172764",
+      "role": "tenant",
+      "status": "active",
+      "createdAt": "2025-07-30T11:11:55.319Z"
+    },
+    {
+      "id": "u16",
+      "fullName": "anh8784",
+      "email": "anh8784@gmail.com",
+      "password": "123456",
+      "phone": "0486172764",
+      "role": "tenant",
+      "status": "active",
+      "createdAt": "2025-07-31T15:54:04.375Z"
     }
   ],
   "rooms": [
     {
       "id": "1",
-      "hostId": "2",
+      "hostId": "u2",
       "roomTitle": "Phòng đơn cao cấp gần trung tâm",
       "price": 4500000,
       "area": 25,
@@ -174,7 +241,7 @@
     },
     {
       "id": "2",
-      "hostId": "2",
+      "hostId": "u2",
       "roomTitle": "Căn hộ mini 2 phòng ngủ",
       "price": 8000000,
       "area": 45,
@@ -201,7 +268,7 @@
     },
     {
       "id": "1753540367846",
-      "hostId": "2",
+      "hostId": "u2",
       "roomTitle": "312312321",
       "price": 32322,
       "area": 3232,
@@ -212,80 +279,271 @@
       "utilities": [],
       "terms": "",
       "status": "available",
-      "approvalStatus": "approved",
-      "createdAt": "2025-07-26T14:32:47.846Z",
-      "approvalDate": "2025-07-27T17:01:37.910Z"
+      "approvalStatus": "pending",
+      "createdAt": "2025-07-26T14:32:47.846Z"
     }
   ],
   "bookings": [
     {
       "id": "1",
       "roomId": "1",
-      "tenantId": "3",
+      "tenantId": "u3",
       "bookingDate": "2024-02-05T10:00:00Z",
       "note": "Muốn xem phòng vào cuối tuần",
       "bookingStatus": "cancelled",
-      "approvalStatus": "waiting",
       "createdAt": "2024-02-05T10:00:00Z"
     },
     {
       "id": "2",
       "roomId": "2",
-      "tenantId": "4",
+      "tenantId": "u4",
       "bookingDate": "2024-02-15T14:30:00Z",
       "note": "Cần thuê gấp trong tuần này",
       "bookingStatus": "confirmed",
-      "approvalStatus": "waiting",
       "createdAt": "2024-02-15T14:30:00Z"
     },
     {
-      "id": "3",
+      "id": "b1753634635521",
       "roomId": "1",
-      "tenantId": "3",
-      "bookingDate": "2024-02-05T10:00:00Z",
-      "note": "Muốn xem phòng vào cuối tuần",
-      "bookingStatus": "confirmed",
-      "approvalStatus": "waiting",
-      "createdAt": "2024-02-05T10:00:00Z"
+      "tenantId": "u1",
+      "bookingDate": "2025-08-09",
+      "endDate": "2025-09-20",
+      "note": "hihii",
+      "name": "hihihihihihi",
+      "phone": "09099909",
+      "email": "heh321232@gmail.com",
+      "address": "Hà Nội",
+      "status": "accepted"
     },
     {
-      "id": "4",
+      "id": "b1753637114816",
       "roomId": "1",
-      "tenantId": "3",
-      "bookingDate": "2024-02-05T10:00:00Z",
-      "note": "Muốn xem phòng vào cuối tuần",
-      "bookingStatus": "pending",
-      "approvalStatus": "waiting",
-      "createdAt": "2024-02-05T10:00:00Z"
+      "tenantId": "u1",
+      "bookingDate": "2025-08-09",
+      "endDate": "2025-09-20",
+      "note": "nndvnksd",
+      "name": "hihihihihihi",
+      "phone": "09099909",
+      "email": "heh321232@gmail.com",
+      "address": "Hà Nội",
+      "status": "rejected"
+    },
+    {
+      "id": "b1753637574074",
+      "roomId": "1",
+      "tenantId": "u1",
+      "bookingDate": "2025-08-09",
+      "endDate": "2025-09-20",
+      "note": "Tôi muốn thuê nguyên căn ",
+      "name": "heheh",
+      "phone": "4151113",
+      "email": "heh321232@gmail.com",
+      "address": "Hà Nội",
+      "status": "accepted"
     }
   ],
-  "rental_requests": [
+  "room_requests": [
     {
-      "id": "1",
+      "id": "r1",
       "roomId": "1",
-      "tenantId": "3",
-      "hostId": "2",
-      "requestStatus": "approved",
-      "requestDate": "2024-02-06T09:00:00Z",
-      "responseDate": "2024-02-06T15:30:00Z",
-      "note": "Khách hàng uy tín, có thể cho thuê"
+      "tenantId": "u3",
+      "hostId": "u2",
+      "status": "approved",
+      "extendMonths": 6,
+      "note": "Khách hàng uy tín, có thể cho thuê",
+      "createdAt": "2024-02-06T09:00:00Z",
+      "updatedAt": "2024-02-06T15:30:00Z"
     },
     {
-      "id": "2",
-      "roomId": null,
-      "tenantId": "4",
-      "hostId": "2",
-      "requestStatus": "pending",
-      "requestDate": "2024-02-16T11:00:00Z",
-      "note": "Đang xem xét hồ sơ"
+      "id": "r2",
+      "roomId": "2",
+      "tenantId": "u4",
+      "hostId": "u2",
+      "status": "accepted",
+      "extendMonths": 4,
+      "note": "Đang xem xét hồ sơ",
+      "createdAt": "2024-02-16T11:00:00Z",
+      "updatedAt": null
+    },
+    {
+      "id": "r3",
+      "roomId": "1",
+      "tenantId": "u1",
+      "hostId": "u2",
+      "status": "accepted",
+      "extendMonths": 6,
+      "note": "ở ngay",
+      "createdAt": "2025-07-30T08:27:04.389Z",
+      "updatedAt": "2025-07-30T09:00:00.000Z"
+    },
+    {
+      "id": "r4",
+      "roomId": "1",
+      "tenantId": "u14",
+      "hostId": "u2",
+      "status": "rejected",
+      "extendMonths": 3,
+      "note": "",
+      "createdAt": "2025-07-30T09:18:24.293Z",
+      "updatedAt": null
+    },
+    {
+      "id": "1753868181076",
+      "tenantId": "u14",
+      "roomId": "1",
+      "extendMonths": 3,
+      "status": "accepted",
+      "createdAt": "2025-07-30T09:36:21.076Z"
+    },
+    {
+      "id": "1753872779001",
+      "tenantId": "u14",
+      "roomId": "2",
+      "extendMonths": 3,
+      "status": "accepted",
+      "createdAt": "2025-07-30T10:52:59.001Z"
+    },
+    {
+      "id": "1753873927755",
+      "tenantId": "u15",
+      "roomId": "1",
+      "extendMonths": 3,
+      "status": "accepted",
+      "createdAt": "2025-07-30T11:12:07.755Z"
+    },
+    {
+      "id": "1753889213156",
+      "tenantId": "u15",
+      "roomId": "1",
+      "extendMonths": 3,
+      "status": "accepted",
+      "createdAt": "2025-07-30T15:26:53.156Z"
+    },
+    {
+      "id": "1753889815000",
+      "tenantId": "u15",
+      "roomId": "2",
+      "extendMonths": 3,
+      "status": "accepted",
+      "createdAt": "2025-07-30T15:36:55.000Z"
+    },
+    {
+      "id": "1753945203791",
+      "tenantId": "u15",
+      "roomId": "1",
+      "extendMonths": 3,
+      "status": "accepted",
+      "createdAt": "2025-07-31T07:00:03.791Z"
+    },
+    {
+      "id": "1753946691301",
+      "tenantId": "1753873915319",
+      "roomId": "2",
+      "extendMonths": 3,
+      "status": "rejected",
+      "createdAt": "2025-07-31T07:24:51.301Z"
+    },
+    {
+      "id": "1753946904260",
+      "tenantId": "u15",
+      "roomId": "1",
+      "extendMonths": 6,
+      "status": "accepted",
+      "createdAt": "2025-07-31T07:28:24.260Z"
+    },
+    {
+      "id": "1753947431123",
+      "tenantId": "u15",
+      "roomId": "1753540367846",
+      "extendMonths": 3,
+      "status": "rejected",
+      "createdAt": "2025-07-31T07:37:11.123Z"
+    },
+    {
+      "id": "1753947469191",
+      "tenantId": "u15",
+      "roomId": "1753540367846",
+      "extendMonths": 3,
+      "status": "accepted",
+      "createdAt": "2025-07-31T07:37:49.191Z"
+    },
+    {
+      "id": "rr1753948476207",
+      "roomId": "1",
+      "tenantId": "u15",
+      "contractId": "c1753946934499",
+      "createdAt": "2025-07-31T07:54:36.207Z",
+      "note": "tôi không muốn thuê nữa",
+      "status": "accepted",
+      "requestType": "cancel"
+    },
+    {
+      "id": "rr1753948685434",
+      "roomId": "1753540367846",
+      "tenantId": "u15",
+      "contractId": "c1753947480232",
+      "createdAt": "2025-07-31T07:58:05.434Z",
+      "note": "hủy ",
+      "status": "accepted",
+      "requestType": "cancel"
+    },
+    {
+      "id": "1753950081428",
+      "tenantId": "u15",
+      "roomId": "1753540367846",
+      "extendMonths": 3,
+      "note": "tôi muốn xem vào ngày kia",
+      "status": "accepted",
+      "createdAt": "2025-07-31T08:21:21.428Z",
+      "requestType": "booking"
+    },
+    {
+      "id": "1753951394447",
+      "tenantId": "u15",
+      "roomId": "1",
+      "extendMonths": 3,
+      "note": "tôi muốn thuê luôn",
+      "status": "rejected",
+      "createdAt": "2025-07-31T08:43:14.447Z",
+      "requestType": "booking"
+    },
+    {
+      "id": "rr1753951961408",
+      "roomId": "1",
+      "tenantId": "u15",
+      "contractId": "c1753873942478",
+      "createdAt": "2025-07-31T08:52:41.408Z",
+      "note": "hủy\n",
+      "status": "pending",
+      "requestType": "cancel"
+    },
+    {
+      "id": "1753977420508",
+      "tenantId": "u16",
+      "roomId": "2",
+      "extendMonths": 3,
+      "note": "hiihihhhiihi",
+      "status": "accepted",
+      "createdAt": "2025-07-31T15:57:00.508Z",
+      "requestType": "booking"
+    },
+    {
+      "id": "rr1753977583886",
+      "roomId": "2",
+      "tenantId": "u16",
+      "contractId": "c1753977518425",
+      "createdAt": "2025-07-31T15:59:43.886Z",
+      "note": "hủy",
+      "status": "accepted",
+      "requestType": "cancel"
     }
   ],
   "contracts": [
     {
       "id": "1",
       "roomId": "2",
-      "tenantId": "4",
-      "hostId": "2",
+      "tenantId": "u4",
+      "hostId": "u2",
       "contractDate": "2024-02-20T00:00:00Z",
       "duration": 12,
       "rentPrice": 8000000,
@@ -296,32 +554,146 @@
       "createdAt": "2024-02-20T10:00:00Z"
     },
     {
-      "id": "2",
-      "roomId": "3",
-      "tenantId": "5",
-      "hostId": "2",
-      "contractDate": "2024-06-10T00:00:00Z",
-      "duration": 6,
-      "rentPrice": 6500000,
-      "startDate": "2024-06-15T00:00:00Z",
-      "terms": "Thanh toán mỗi 2 tháng, không hoàn tiền khi huỷ sớm",
-      "note": "Chuyển khoản ngân hàng",
-      "contractStatus": "active",
-      "createdAt": "2024-06-10T09:00:00Z"
+      "id": "c1",
+      "tenantId": "u2",
+      "roomId": "1",
+      "startDate": "2024-07-01",
+      "endDate": "2025-07-01",
+      "status": "accepted",
+      "terms": "Hợp đồng có hiệu lực 12 tháng. Thanh toán tiền phòng trước ngày 5 mỗi tháng. Không tự ý sửa phòng."
     },
     {
-      "id": "3",
-      "roomId": "4",
-      "tenantId": "6",
-      "hostId": "3",
-      "contractDate": "2024-07-01T00:00:00Z",
-      "duration": 3,
-      "rentPrice": 7000000,
-      "startDate": "2024-07-10T00:00:00Z",
-      "terms": "Đặt cọc 1 tháng, thanh toán đầu tháng",
-      "note": "Sẽ chuyển cọc trong tuần",
-      "contractStatus": "active",
-      "createdAt": "2024-07-01T08:30:00Z"
+      "id": "c1753637427544",
+      "tenantId": "u1",
+      "roomId": "1",
+      "startDate": "2025-08-09",
+      "endDate": "2025-07-30",
+      "status": "ended",
+      "terms": "Hợp đồng có hiệu lực 12 tháng. Thanh toán tiền phòng trước ngày 5 mỗi tháng. Không tự ý sửa phòng."
+    },
+    {
+      "id": "c1753637713061",
+      "tenantId": "u1",
+      "roomId": "1",
+      "startDate": "2025-08-09",
+      "endDate": "2025-09-20",
+      "status": "accepted",
+      "terms": "Hợp đồng có hiệu lực 12 tháng. Thanh toán tiền phòng trước ngày 5 mỗi tháng. Không tự ý sửa phòng."
+    },
+    {
+      "id": "c1753867685266",
+      "tenantId": "u1",
+      "roomId": "1",
+      "startDate": "2025-07-30T08:27:04.389Z",
+      "endDate": "2030-07-30T08:27:04.389Z",
+      "status": "accepted"
+    },
+    {
+      "id": "c1753869066104",
+      "tenantId": "u4",
+      "roomId": "2",
+      "startDate": "2024-02-16T11:00:00Z",
+      "endDate": "2024-06-16T11:00:00.000Z",
+      "status": "accepted"
+    },
+    {
+      "id": "c1753869067393",
+      "tenantId": "u14",
+      "roomId": "1",
+      "startDate": "2025-07-30T09:36:21.076Z",
+      "endDate": "2025-10-30T09:36:21.076Z",
+      "status": "accepted"
+    },
+    {
+      "id": "c1753872796020",
+      "tenantId": "u14",
+      "roomId": "2",
+      "startDate": "2025-07-30T10:52:59.001Z",
+      "endDate": "2025-10-30T10:52:59.001Z",
+      "status": "accepted"
+    },
+    {
+      "id": "c1753873942478",
+      "tenantId": "u15",
+      "roomId": "1",
+      "startDate": "2025-07-30T11:12:07.755Z",
+      "endDate": "2025-10-30T11:12:07.755Z",
+      "status": "accepted"
+    },
+    {
+      "id": "c1753889328139",
+      "tenantId": "u15",
+      "roomId": "1",
+      "startDate": "2025-07-30T15:26:53.156Z",
+      "endDate": "2025-10-30T15:26:53.156Z",
+      "status": "accepted"
+    },
+    {
+      "id": "c1753890282115",
+      "tenantId": "u15",
+      "roomId": "2",
+      "startDate": "2025-07-30T15:36:55.000Z",
+      "endDate": "2025-10-30T15:36:55.000Z",
+      "status": "accepted"
+    },
+    {
+      "id": "c1753945263829",
+      "tenantId": "u15",
+      "roomId": "1",
+      "startDate": "2025-07-31T07:00:03.791Z",
+      "endDate": "2025-10-31T07:00:03.791Z",
+      "status": "accepted"
+    },
+    {
+      "id": "c1753946934499",
+      "tenantId": "u15",
+      "hostId": "u2",
+      "roomId": "1",
+      "startDate": "2025-07-31T07:28:54.499Z",
+      "endDate": "2025-07-31T07:57:33.957Z",
+      "status": "ended",
+      "terms": "Hợp đồng có hiệu lực. Thanh toán tiền phòng trước ngày 5 mỗi tháng."
+    },
+    {
+      "id": "c1753947480232",
+      "tenantId": "u15",
+      "hostId": "u2",
+      "roomId": "1753540367846",
+      "startDate": "2025-07-31T07:38:00.231Z",
+      "endDate": "2025-07-31T07:58:12.469Z",
+      "status": "ended",
+      "terms": "Hợp đồng có hiệu lực. Thanh toán tiền phòng trước ngày 5 hàng tháng."
+    },
+    {
+      "id": "c1753950126189",
+      "tenantId": "u15",
+      "hostId": "u2",
+      "roomId": "1753540367846",
+      "startDate": "2025-07-31T08:22:06.189Z",
+      "endDate": "2025-10-31T08:22:06.189Z",
+      "status": "accepted",
+      "terms": "Hợp đồng có hiệu lực. Thanh toán tiền phòng trước ngày 5 hàng tháng."
+    },
+    {
+      "id": "c1753977518425",
+      "tenantId": "u16",
+      "hostId": "u2",
+      "roomId": "2",
+      "startDate": "2025-07-31T15:58:38.425Z",
+      "endDate": "2025-07-31T16:00:15.552Z",
+      "status": "ended",
+      "terms": "Hợp đồng có hiệu lực. Thanh toán tiền phòng trước ngày 5 hàng tháng."
+    }
+  ],
+  "contract_cancellations": [
+    {
+      "id": "cc1",
+      "contractId": "c1",
+      "tenantId": "u2",
+      "hostId": "u1",
+      "reason": "Tôi muốn chuyển phòng khác",
+      "status": "pending",
+      "createdAt": "2025-07-31T10:00:00Z"
     }
   ],
   "payments": [
@@ -331,32 +703,12 @@
       "contractId": "1",
       "amount": 16000000,
       "paymentDate": "2024-02-25T00:00:00Z",
-      "paymentStatus": "pending",
+      "paymentStatus": "completed",
       "extraNote": "Tiền cọc 2 tháng đầu",
       "createdAt": "2024-02-25T14:20:00Z"
     },
     {
       "id": "2",
-      "tenantId": "4",
-      "contractId": "1",
-      "amount": 8000000,
-      "paymentDate": "2024-03-05T00:00:00Z",
-      "paymentStatus": "completed",
-      "extraNote": "Tiền thuê tháng 3/2024",
-      "createdAt": "2024-03-05T09:15:00Z"
-    },
-    {
-      "id": "3",
-      "tenantId": "4",
-      "contractId": "1",
-      "amount": 16000000,
-      "paymentDate": "2024-02-25T00:00:00Z",
-      "paymentStatus": "pending",
-      "extraNote": "Tiền cọc 2 tháng đầu",
-      "createdAt": "2024-02-25T14:20:00Z"
-    },
-    {
-      "id": "4",
       "tenantId": "4",
       "contractId": "1",
       "amount": 8000000,
@@ -374,7 +726,7 @@
       "senderId": "3",
       "message": "Chào anh, em muốn hỏi về phòng trọ",
       "time": "2024-02-05T08:30:00Z",
-      "isRead": false
+      "isRead": true
     },
     {
       "id": "2",
@@ -383,7 +735,7 @@
       "senderId": "2",
       "message": "Chào em, phòng hiện tại còn trống, em có thể đến xem",
       "time": "2024-02-05T08:45:00Z",
-      "isRead": false
+      "isRead": true
     },
     {
       "id": "3",
@@ -411,17 +763,71 @@
       "rating": 5,
       "reviewDate": "2024-03-10T00:00:00Z",
       "createdAt": "2024-03-10T16:30:00Z",
-      "replies": []
+      "replies": [
+        {
+          "id": "1753540925900",
+          "content": "fadsdEWSFDADS",
+          "author": "Admin",
+          "authorEmail": "admin@rentalhub.com",
+          "isAdmin": true,
+          "createdAt": "2025-07-26T14:42:05.900Z"
+        }
+      ]
+    },
+    {
+      "id": "1b59",
+      "user": "Ẩn danh",
+      "rating": 5,
+      "comment": "phòng sạch đẹp",
+      "date": "2025-07-27"
+    },
+    {
+      "id": "4e97",
+      "roomId": "2",
+      "user": "Ẩn danh",
+      "rating": 5,
+      "comment": "sạch sẽ",
+      "date": "2025-07-27"
+    },
+    {
+      "id": "171b",
+      "roomId": "2",
+      "user": "Ẩn danh",
+      "rating": 5,
+      "comment": "hihi",
+      "date": "2025-07-30"
+    }
+  ],
+  "reports": [
+    {
+      "id": "1",
+      "roomId": "1",
+      "userId": "3",
+      "type": "report",
+      "message": "Phòng không sạch sẽ, cần dọn dẹp lại",
+      "createdAt": "2024-03-10T08:00:00Z"
     },
     {
       "id": "2",
       "roomId": "2",
-      "tenantId": "4",
-      "review": "Phòng hơi cũ, nhà vệ sinh chưa sạch sẽ lắm, cần cải thiện.",
-      "rating": 2,
-      "reviewDate": "2024-04-01T00:00:00Z",
-      "createdAt": "2024-04-01T14:10:00Z",
-      "replies": []
+      "userId": "4",
+      "type": "support",
+      "message": "Yêu cầu hỗ trợ thay đổi hợp đồng",
+      "createdAt": "2024-03-12T10:30:00Z"
+    },
+    {
+      "id": "f659",
+      "roomId": "1",
+      "type": "report",
+      "message": "hiehife",
+      "createdAt": "2025-07-27T17:16:28.150Z"
+    },
+    {
+      "id": "b5a7",
+      "roomId": "2",
+      "type": "owner",
+      "message": "xinh gái ",
+      "createdAt": "2025-07-27T17:40:47.743Z"
     }
   ],
   "transactions": [

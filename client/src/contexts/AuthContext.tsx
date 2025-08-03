@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useToastContext } from './ToastContext';
@@ -5,6 +6,7 @@ import { useToastContext } from './ToastContext';
 interface User {
   id: string;
   fullName: string;
+  phone: string;
   email: string;
   role: 'admin' | 'host' | 'tenant' | 'guest';
   status: 'active' | 'inactive' | 'pending';
@@ -13,7 +15,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<User | null>;
   register: (userData: RegisterData) => Promise<boolean>;
   logout: () => void;
   loading: boolean;
@@ -48,49 +50,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const { success, error } = useToastContext();
 
   useEffect(() => {
-    // Check if user is logged in on app start
     const savedUser = localStorage.getItem('user');
     if (savedUser) {
       try {
         setUser(JSON.parse(savedUser));
-      } catch (err) {
+      } catch {
         localStorage.removeItem('user');
       }
     }
     setLoading(false);
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<User | null> => {
     try {
       setLoading(true);
-      
-      // Fetch users from API
-const response = await fetch('http://localhost:5000/users');
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      
+      const response = await fetch('http://localhost:3000/users');
+      if (!response.ok) throw new Error('Failed to fetch users');
       const users = await response.json();
-      
-      // Find user with matching email and password
-      const foundUser = users.find((u: any) => 
-        u.email === email && u.password === password
-      );
-      
+
+      const foundUser = users.find((u: any) => u.email === email && u.password === password);
       if (!foundUser) {
         error('Lỗi đăng nhập', 'Email hoặc mật khẩu không đúng');
-        return false;
+        return null;
       }
 
       if (foundUser.status !== 'active') {
         error('Lỗi đăng nhập', 'Tài khoản chưa được kích hoạt hoặc bị khóa');
-        return false;
+        return null;
       }
 
       const userData: User = {
         id: foundUser.id,
         fullName: foundUser.fullName,
         email: foundUser.email,
+        phone: foundUser.phone,
         role: foundUser.role,
         status: foundUser.status,
         avatar: foundUser.avatar
@@ -99,11 +92,11 @@ const response = await fetch('http://localhost:5000/users');
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
       success('Thành công', `Chào mừng ${foundUser.fullName}!`);
-      return true;
+      return userData;
     } catch (err) {
       console.error('Login error:', err);
       error('Lỗi', 'Không thể đăng nhập. Vui lòng thử lại.');
-      return false;
+      return null;
     } finally {
       setLoading(false);
     }
@@ -112,41 +105,36 @@ const response = await fetch('http://localhost:5000/users');
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
       setLoading(true);
-
-      // Check if email already exists
-      const response = await fetch('/api/users');
-      if (!response.ok) {
-        throw new Error('Failed to fetch users');
-      }
-      
+      const response = await fetch('http://localhost:3000/users');
+      if (!response.ok) throw new Error('Failed to fetch users');
       const users = await response.json();
+
       const existingUser = users.find((u: any) => u.email === userData.email);
-      
       if (existingUser) {
         error('Lỗi đăng ký', 'Email đã được sử dụng');
         return false;
       }
 
-      // Create new user
+      const maxIndex = users
+        .map((u: any) => u.id)
+        .filter((id: string) => id && id.startsWith('u'))
+        .map((id: string) => parseInt(id.replace('u', ''), 10))
+        .reduce((a: number, b: number) => Math.max(a, b), 0);
+
       const newUser = {
-        id: Date.now().toString(),
+        id: `u${maxIndex + 1}`,
         ...userData,
         status: 'active',
         createdAt: new Date().toISOString()
       };
 
-      const createResponse = await fetch('http://localhost:5000/users', {
-      });
-
-const apiResponse = await fetch('http://localhost:5000/users', {
+      const createResponse = await fetch('http://localhost:3000/users', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser),
       });
 
-      if (!apiResponse.ok) {
+      if (!createResponse.ok) {
         throw new Error('Failed to create user');
       }
 

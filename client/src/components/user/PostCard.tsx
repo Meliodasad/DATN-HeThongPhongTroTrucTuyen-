@@ -1,8 +1,9 @@
 import '../../css/PostCard.css';
+
 type PostCardProps = {
   title: string;
-  price: string;
-  area: string;
+  price: number;
+  area: number;
   address: string;
   images: string[];
   description: string;
@@ -10,8 +11,8 @@ type PostCardProps = {
 
 const PostCard = ({
   title = '',
-  price = '',
-  area = '',
+  price = 0,
+  area = 0,
   address = '',
   images = [],
   description = '',
@@ -42,8 +43,8 @@ const PostCard = ({
         </h2>
 
         <div className="post-card-info">
-          {price}
-          <span> • {area} • {address}</span>
+          {price.toLocaleString()}đ / tháng
+          <span> • {area} m² • {address}</span>
         </div>
 
         <p className="post-card-description">{description}</p>
