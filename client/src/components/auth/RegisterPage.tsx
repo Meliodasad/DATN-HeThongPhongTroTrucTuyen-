@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Phone, UserPlus, Home } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -60,19 +59,29 @@ const RegisterPage: React.FC = () => {
 
     setIsLoading(true);
 
-    const success = await register({
-      fullName: formData.fullName,
-      email: formData.email,
-      password: formData.password,
-      phone: formData.phone || undefined,
-      role: formData.role
-    });
+    try {
+      const result = await register({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone || undefined,
+        role: formData.role
+      });
 
-    if (success) {
-      navigate('/login');
+      if (result && result.userId) {
+        console.log('Đăng ký thành công với userId:', result.userId);
+        // Lưu userId vào localStorage nếu cần
+        localStorage.setItem('registeredUserId', result.userId);
+        navigate('/login');
+      } else {
+        setErrors({ general: 'Đăng ký không thành công. Vui lòng thử lại.' });
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setErrors({ general: 'Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại.' });
+    } finally {
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
@@ -100,6 +109,13 @@ const RegisterPage: React.FC = () => {
             Tham gia hệ thống quản lý cho thuê trọ
           </p>
         </div>
+
+        {/* General Error Message */}
+        {errors.general && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+            <p className="text-sm text-red-600">{errors.general}</p>
+          </div>
+        )}
 
         {/* Register Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>

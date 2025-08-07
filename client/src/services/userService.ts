@@ -1,7 +1,7 @@
 import type { CreateUserData, UpdateUserData, User, UserFilters, UserStats } from "../types/user";
 
 class UserService {
-private baseUrl = 'http://localhost:5000';
+  private baseUrl = 'http://localhost:3000';
 
   async getUsers(filters?: UserFilters): Promise<User[]> {
     try {
@@ -153,6 +153,15 @@ private baseUrl = 'http://localhost:5000';
     } catch (error) {
       console.error('Error updating user status:', error);
       throw new Error('Không thể cập nhật trạng thái người dùng');
+    }
+  }
+
+  async updateUserRole(id: string, role: User['role']): Promise<void> {
+    try {
+      await this.updateUser(id, { role });
+    } catch (error) {
+      console.error('Error updating user role:', error);
+      throw new Error('Không thể cập nhật vai trò người dùng');
     }
   }
 }

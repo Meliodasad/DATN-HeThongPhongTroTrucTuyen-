@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Calendar, MessageSquare, Send, Trash2, Star, MapPin, Home } from 'lucide-react';
+import { X, User, Calendar, MessageSquare, Trash2, Star, MapPin, Home } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
 import { reviewService } from '../../services/reviewService';
 import type { Review, ReviewReplyFormData } from '../../types/review';
-import { CheckCircle, Clock } from "lucide-react";
 import { Eye } from "lucide-react";
-
-
 
 interface CommentDetailModalProps {
   isOpen: boolean;
@@ -21,14 +18,6 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
 }) => {
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(false);
-  const [replyLoading, setReplyLoading] = useState(false);
-  const [showReplyForm, setShowReplyForm] = useState(false);
-  const [replyForm, setReplyForm] = useState<ReviewReplyFormData>({
-    content: '',
-    author: 'Admin',
-    authorEmail: 'admin@rentalhub.com',
-    isAdmin: true
-  });
 
   const { success, error } = useToastContext();
 
@@ -52,8 +41,6 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
       setLoading(false);
     }
   };
-
-  
 
   const handleDeleteReply = async (replyId: string) => {
     if (!reviewId || !confirm('Bạn có chắc chắn muốn xóa phản hồi này?')) return;
@@ -80,32 +67,6 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
         <span className="text-sm text-gray-600 ml-2">({rating}/5)</span>
       </div>
     );
-  };
-
-  const getStatusColor = (status: Review['status']) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: Review['status']) => {
-    switch (status) {
-      case 'approved':
-        return 'Đã duyệt';
-      case 'pending':
-        return 'Chờ duyệt';
-      case 'rejected':
-        return 'Từ chối';
-      default:
-        return 'Không xác định';
-    }
   };
 
   const formatDate = (dateString: string) => {
@@ -174,9 +135,6 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
                       </div>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(review.status)}`}>
-                    {getStatusText(review.status)}
-                  </span>
                 </div>
 
                 {/* Room Info */}
@@ -249,15 +207,6 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
 
               {/* Replies Section */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <h5 className="text-lg font-medium text-gray-900 flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5" />
-                    Phản hồi ({review.replies?.length || 0})
-                  </h5>
- 
-                </div>
-
-
                 {/* Replies List */}
                 <div className="space-y-4">
                   {review.replies && review.replies.length > 0 ? (
@@ -303,7 +252,6 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
                     <div className="text-center py-8 text-gray-500">
                       <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-2" />
                       <p>Chưa có phản hồi nào</p>
-                      <p className="text-sm">Hãy thêm phản hồi đầu tiên cho đánh giá này</p>
                     </div>
                   )}
                 </div>
@@ -344,7 +292,6 @@ const CommentsPage: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<Review['status'] | 'all'>('all');
   const [ratingFilter, setRatingFilter] = useState<number | 'all'>('all');
   const [selectedReviewId, setSelectedReviewId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -377,75 +324,34 @@ const CommentsPage: React.FC = () => {
                         review.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         review.room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         review.room.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || review.status === statusFilter;
     const matchesRating = ratingFilter === 'all' || review.rating === ratingFilter;
     
-    return matchesSearch && matchesStatus && matchesRating;
+    return matchesSearch && matchesRating;
   });
 
-  const handleUpdateStatus = async (id: string, status: Review['status']) => {
+  const handleToggleVisibility = async (id: string, currentHidden: boolean) => {
+    const action = currentHidden ? 'hiện' : 'ẩn';
+    if (!confirm(`Bạn có chắc chắn muốn ${action} đánh giá này?`)) return;
+
     try {
-      await reviewService.updateReviewStatus(id, status);
-      success('Thành công', `${status === 'approved' ? 'Duyệt' : status === 'rejected' ? 'Từ chối' : 'Cập nhật'} đánh giá thành công`);
+      await reviewService.toggleReviewVisibility(id);
+      success('Thành công', `${currentHidden ? 'Hiện' : 'Ẩn'} đánh giá thành công`);
       await loadData();
     } catch (err) {
       console.error(err);
-      error('Lỗi', 'Không thể cập nhật trạng thái đánh giá');
-    }
-  };
-
-  const handleDeleteReview = async (id: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return;
-
-    try {
-      await reviewService.deleteReview(id);
-      success('Thành công', 'Xóa đánh giá thành công');
-      await loadData();
-    } catch (err) {
-      console.error(err);
-      error('Lỗi', 'Không thể xóa đánh giá');
+      error('Lỗi', `Không thể ${action} đánh giá`);
     }
   };
 
   const handleViewDetail = (reviewId: string) => {
     setSelectedReviewId(reviewId);
     setIsDetailModalOpen(true);
-    
-    // Mark as read if needed (optional)
-    // You can add logic here to mark review as viewed
   };
 
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedReviewId(null);
-    // Reload data to refresh any changes
     loadData(); 
-  };
-
-  const getStatusColor = (status: Review['status']) => {
-    switch (status) {
-      case 'approved':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusText = (status: Review['status']) => {
-    switch (status) {
-      case 'approved':
-        return 'Đã duyệt';
-      case 'pending':
-        return 'Chờ duyệt';
-      case 'rejected':
-        return 'Từ chối';
-      default:
-        return 'Không xác định';
-    }
   };
 
   const renderStars = (rating: number) => {
@@ -460,6 +366,19 @@ const CommentsPage: React.FC = () => {
         <span className="text-xs text-gray-500 ml-1">({rating}/5)</span>
       </div>
     );
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) return;
+
+    try {
+      await reviewService.deleteReview(id);
+      success('Thành công', 'Đã xóa đánh giá');
+      await loadData();
+    } catch (err) {
+      console.error(err);
+      error('Lỗi', 'Không thể xóa đánh giá');
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -494,12 +413,12 @@ const CommentsPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Quản lý đánh giá</h1>
-          <p className="text-gray-600">Quản lý và duyệt đánh giá từ khách hàng</p>
+          <p className="text-gray-600">Xem và quản lý đánh giá từ khách hàng</p>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
             <MessageSquare className="w-8 h-8 text-blue-600" />
@@ -512,48 +431,24 @@ const CommentsPage: React.FC = () => {
 
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <div className="flex items-center">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Đã duyệt</p>
-              <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-              <Clock className="w-4 h-4 text-yellow-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Chờ duyệt</p>
-              <p className="text-2xl font-bold text-yellow-600">{stats.pending}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
-            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-              <X className="w-4 h-4 text-red-600" />
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Từ chối</p>
-              <p className="text-2xl font-bold text-red-600">{stats.rejected}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border">
-          <div className="flex items-center">
             <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
               <Star className="w-4 h-4 text-purple-600 fill-current" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Đánh giá TB</p>
               <p className="text-2xl font-bold text-purple-600">{stats.averageRating.toFixed(1)}/5</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white p-6 rounded-lg shadow-sm border">
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <Eye className="w-4 h-4 text-green-600" />
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">Đã xem</p>
+              <p className="text-2xl font-bold text-green-600">{stats.approved}</p>
             </div>
           </div>
         </div>
@@ -572,16 +467,6 @@ const CommentsPage: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as Review['status'] | 'all')}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="pending">Chờ duyệt</option>
-              <option value="approved">Đã duyệt</option>
-              <option value="rejected">Từ chối</option>
-            </select>
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value === 'all' ? 'all' : parseInt(e.target.value))}
@@ -619,9 +504,6 @@ const CommentsPage: React.FC = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Đánh giá
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Trạng thái
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ngày tạo
@@ -685,11 +567,6 @@ const CommentsPage: React.FC = () => {
                     {renderStars(review.rating)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(review.status)}`}>
-                      {getStatusText(review.status)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
                       <Calendar className="w-4 h-4 mr-1" />
                       {formatDate(review.reviewDate)}
@@ -697,35 +574,17 @@ const CommentsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
-                      {review.status === 'pending' && (
-                        <>
-                          <button 
-                            onClick={() => handleUpdateStatus(review.id, 'approved')}
-                            className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
-                            title="Duyệt đánh giá"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleUpdateStatus(review.id, 'rejected')}
-                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                            title="Từ chối đánh giá"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
                       <button 
                         onClick={() => handleViewDetail(review.id)}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
+                        className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
                         onClick={() => handleDeleteReview(review.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                        title="Xóa đánh giá"
+                        className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                        title="Ẩn đánh giá"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

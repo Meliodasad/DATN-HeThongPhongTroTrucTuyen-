@@ -1,29 +1,33 @@
 export interface Review {
   id: string;
+  reviewId: string;
   roomId: string;
   tenantId: string;
   review: string;
   rating: number;
   reviewDate: string;
-  createdAt: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status?: 'approved' | 'pending' | 'rejected';
   replies?: ReviewReply[];
-  room: {
+  // Populated data
+  tenant?: {
+    fullName: string;
+    email: string;
+    phone?: string;
+    avatar?: string;
+  };
+  room?: {
     roomTitle: string;
     location: string;
     area: number;
     price: number;
     images: string[];
-    host: {
+    hostId: string;
+    host?: {
       fullName: string;
       email: string;
+      phone?: string;
       avatar?: string;
     };
-  };
-  tenant: {
-    fullName: string;
-    email: string;
-    avatar?: string;
   };
 }
 
@@ -43,11 +47,18 @@ export interface ReviewReplyFormData {
   isAdmin: boolean;
 }
 
+export interface ReviewStats {
+  total: number;
+  approved: number;
+  pending: number;
+  rejected: number;
+  averageRating: number;
+}
+
 export interface ReviewFilters {
-  status?: 'all' | 'pending' | 'approved' | 'rejected';
-  rating?: number;
-  roomId?: string;
-  tenantId?: string;
+  status?: Review['status'] | 'all';
+  rating?: number | 'all';
+  searchTerm?: string;
   dateFrom?: string;
   dateTo?: string;
 }

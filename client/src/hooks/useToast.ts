@@ -21,7 +21,7 @@ export const useToast = () => {
     // Tự động xoá sau 5s nếu có duration
     setTimeout(() => {
       setToasts(prev => prev.filter(t => t.id !== id));
-    }, toast.duration ?? 5000);
+    }, toast.duration ?? 3000);
   }, []);
 
   const removeToast = useCallback((id: string) => {

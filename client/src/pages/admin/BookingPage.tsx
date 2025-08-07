@@ -18,23 +18,27 @@ import { useToastContext } from '../../contexts/ToastContext';
 
 interface Booking {
   id: string;
+  bookingId: string;
   roomId: string;
   tenantId: string;
   bookingDate: string;
   note: string;
   bookingStatus: 'pending' | 'confirmed' | 'cancelled';
-  createdAt: string;
+  createdAt?: string;
   room: {
     roomTitle: string;
     location: string;
     price: number;
     images: string[];
+    area?: number;
+    roomType?: string;
   };
   tenant: {
     fullName: string;
     email: string;
     phone?: string;
     avatar?: string;
+    userId?: string;
   };
 }
 
@@ -43,7 +47,7 @@ interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
   booking: Booking | null;
-  mode: 'view' ;
+  mode: 'view';
   onSave: () => void;
 }
 
@@ -72,7 +76,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
     try {
       setSaving(true);
       
-      const response = await fetch(`/api/bookings/${booking.id}`, {
+      const response = await fetch(`http://localhost:3000/bookings/${booking.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -96,6 +100,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Không có dữ liệu';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
@@ -130,6 +135,16 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
     }
   };
 
+  const getRoomTypeText = (type?: string) => {
+    switch (type) {
+      case 'single': return 'Phòng đơn';
+      case 'double': return 'Phòng đôi';
+      case 'shared': return 'Phòng chia sẻ';
+      case 'apartment': return 'Căn hộ';
+      default: return 'Không xác định';
+    }
+  };
+
   if (!isOpen || !booking) return null;
 
   const isViewMode = mode === 'view';
@@ -156,7 +171,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
             {/* Booking Info */}
             <div className="bg-gray-50 rounded-lg p-6">
               <h4 className="font-medium text-gray-900 mb-4">Thông tin đặt phòng</h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Mã đặt phòng
+                  </label>
+                  <p className="text-gray-900 font-mono text-sm">{booking.bookingId}</p>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Ngày đặt phòng
@@ -172,7 +193,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
                   </label>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-gray-500" />
-                    <p className="text-gray-900">{formatDate(booking.createdAt)}</p>
+                    <p className="text-gray-900">{formatDate(booking.createdAt || booking.bookingDate)}</p>
                   </div>
                 </div>
               </div>
@@ -191,12 +212,24 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
                 )}
                 <div className="flex-1">
                   <h5 className="font-medium text-gray-900 mb-2">{booking.room.roomTitle}</h5>
-                  <div className="flex items-center gap-2 mb-1">
-                    <MapPin className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">{booking.room.location}</span>
-                  </div>
-                  <div className="text-lg font-medium text-green-600">
-                    {formatPrice(booking.room.price)}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">{booking.room.location}</span>
+                    </div>
+                    <div className="text-lg font-medium text-green-600">
+                      {formatPrice(booking.room.price)}
+                    </div>
+                    {booking.room.area && (
+                      <div className="text-sm text-gray-600">
+                        Diện tích: {booking.room.area}m²
+                      </div>
+                    )}
+                    {booking.room.roomType && (
+                      <div className="text-sm text-gray-600">
+                        Loại phòng: {getRoomTypeText(booking.room.roomType)}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -220,6 +253,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
                 <div className="flex-1">
                   <h5 className="font-medium text-gray-900 mb-2">{booking.tenant.fullName}</h5>
                   <div className="space-y-1">
+                    {booking.tenant.userId && (
+                      <div className="text-sm text-gray-500">
+                        ID: {booking.tenant.userId}
+                      </div>
+                    )}
                     <div className="flex items-center gap-2">
                       <Mail className="w-4 h-4 text-gray-500" />
                       <span className="text-sm text-gray-600">{booking.tenant.email}</span>
@@ -311,7 +349,7 @@ const BookingsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled'>('all');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'view' | 'edit'>('view');
+  const [modalMode, setModalMode] = useState<'view' >('view');
 
   const { success, error } = useToastContext();
 
@@ -325,9 +363,9 @@ const BookingsPage: React.FC = () => {
       
       // Fetch bookings, rooms, and users
       const [bookingsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:5000/bookings'),
-        fetch('http://localhost:5000/rooms'),
-        fetch('http://localhost:5000/users')
+        fetch('http://localhost:3000/bookings'),
+        fetch('http://localhost:3000/rooms'),
+        fetch('http://localhost:3000/users')
       ]);
 
       const [bookingsData, roomsData, usersData] = await Promise.all([
@@ -336,21 +374,51 @@ const BookingsPage: React.FC = () => {
         usersRes.json()
       ]);
 
-      // Combine data
+      // Combine data with proper mapping based on your database structure
       const enrichedBookings = bookingsData.map((booking: any) => {
-        const room = roomsData.find((r: any) => r.id === booking.roomId);
-        const tenant = usersData.find((u: any) => u.id === booking.tenantId);
+        // Find room by roomId (matching your database structure)
+        const room = roomsData.find((r: any) => 
+          r.roomId === booking.roomId || r.id === booking.roomId
+        );
+        
+        // Find tenant by tenantId (matching your database structure)
+        const tenant = usersData.find((u: any) => 
+          u.userId === booking.tenantId || u.id === booking.tenantId
+        );
 
         return {
           ...booking,
-          room: room || { roomTitle: 'Unknown', location: 'Unknown', price: 0, images: [] },
-          tenant: tenant || { fullName: 'Unknown', email: 'unknown@example.com' }
+          // Add createdAt if not exists (use bookingDate as fallback)
+          createdAt: booking.createdAt || booking.bookingDate,
+          room: room ? {
+            roomTitle: room.roomTitle || 'Phòng không xác định',
+            location: room.location || 'Địa điểm không xác định',
+            price: room.price || 0,
+            images: room.images || [],
+            area: room.area,
+            roomType: room.roomType
+          } : { 
+            roomTitle: 'Phòng không tìm thấy', 
+            location: 'Không xác định', 
+            price: 0, 
+            images: [] 
+          },
+          tenant: tenant ? {
+            fullName: tenant.fullName || 'Khách hàng không xác định',
+            email: tenant.email || 'Email không xác định',
+            phone: tenant.phone,
+            avatar: tenant.avatar,
+            userId: tenant.userId
+          } : { 
+            fullName: 'Khách hàng không tìm thấy', 
+            email: 'unknown@example.com' 
+          }
         };
       });
 
       setBookings(enrichedBookings);
     } catch (err) {
-      console.error(err);
+      console.error('Error loading bookings:', err);
       error('Lỗi', 'Không thể tải danh sách đặt phòng');
     } finally {
       setLoading(false);
@@ -359,8 +427,9 @@ const BookingsPage: React.FC = () => {
 
   const filteredBookings = bookings.filter(booking => {
     const matchesSearch = booking.room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         booking.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         booking.room.location.toLowerCase().includes(searchTerm.toLowerCase());
+                        booking.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        booking.room.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (booking.bookingId && booking.bookingId.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || booking.bookingStatus === statusFilter;
     
     return matchesSearch && matchesStatus;
@@ -368,7 +437,7 @@ const BookingsPage: React.FC = () => {
 
   const handleUpdateStatus = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
     try {
-      const response = await fetch(`/api/bookings/${bookingId}`, {
+      const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -392,7 +461,7 @@ const BookingsPage: React.FC = () => {
     if (!confirm('Bạn có chắc chắn muốn xóa đặt phòng này?')) return;
 
     try {
-      const response = await fetch(`/api/bookings/${bookingId}`, {
+      const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
         method: 'DELETE',
       });
 
@@ -413,8 +482,6 @@ const BookingsPage: React.FC = () => {
     setModalMode('view');
     setIsModalOpen(true);
   };
-
-
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
@@ -444,6 +511,7 @@ const BookingsPage: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Không có dữ liệu';
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'short',
@@ -536,7 +604,7 @@ const BookingsPage: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên phòng, khách hàng, địa điểm..."
+              placeholder="Tìm kiếm theo mã đặt phòng, tên phòng, khách hàng, địa điểm..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -569,6 +637,9 @@ const BookingsPage: React.FC = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Mã đặt phòng
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Phòng trọ
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -591,6 +662,11 @@ const BookingsPage: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredBookings.map((booking) => (
                 <tr key={booking.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-mono font-medium text-gray-900">
+                      {booking.bookingId}
+                    </div>
+                  </td>
                   <td className="px-6 py-4">
                     <div className="flex items-start gap-3">
                       {booking.room.images && booking.room.images.length > 0 && (
@@ -644,7 +720,9 @@ const BookingsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{formatDate(booking.bookingDate)}</div>
-                    <div className="text-sm text-gray-500">Tạo: {formatDate(booking.createdAt)}</div>
+                    {booking.createdAt && booking.createdAt !== booking.bookingDate && (
+                      <div className="text-sm text-gray-500">Tạo: {formatDate(booking.createdAt)}</div>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900 max-w-xs">
@@ -683,7 +761,6 @@ const BookingsPage: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-     
                       <button 
                         onClick={() => handleDeleteBooking(booking.id)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
