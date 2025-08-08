@@ -20,17 +20,17 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const menuItems = [
-    { icon: Home, label: 'Dashboard', path: '/dashboard' },
-    { icon: Users, label: 'Người dùng', path: '/users' },
-    { icon: Building, label: 'Phòng trọ', path: '/rooms' },
-    { icon: Calendar, label: 'Đặt phòng', path: '/bookings' },
-    { icon: FileText, label: 'Hợp đồng', path: '/contracts' },
-    { icon: CreditCard, label: 'Thanh toán', path: '/payments' },
-    { icon: Star, label: 'Đánh giá', path: '/reviews' },
-    // { icon: MessageSquare, label: 'Tin nhắn', path: '/messages' },
-    { icon: Phone, label: 'Liên hệ', path: '/contacts' },
-    { icon: BarChart3, label: 'Báo cáo', path: '/reports' },
-    { icon: Settings, label: 'Cài đặt', path: '/settings' },
+    { icon: Home, label: 'Dashboard', path: '/admin/dashboard' },
+    { icon: Users, label: 'Người dùng', path: '/admin/users' },
+    { icon: Building, label: 'Phòng trọ', path: '/admin/rooms' },
+    { icon: Calendar, label: 'Đặt phòng', path: '/admin/bookings' },
+    { icon: FileText, label: 'Hợp đồng', path: '/admin/contracts' },
+    { icon: CreditCard, label: 'Thanh toán', path: '/admin/payments' },
+    { icon: Star, label: 'Đánh giá', path: '/admin/reviews' },
+    // { icon: MessageSquare, label: 'Tin nhắn', path: '/admin/messages' },
+    { icon: Phone, label: 'Liên hệ', path: '/admin/contacts' },
+    { icon: BarChart3, label: 'Báo cáo', path: '/admin/reports' },
+    { icon: Settings, label: 'Cài đặt', path: '/admin/settings' },
   ];
 
   return (

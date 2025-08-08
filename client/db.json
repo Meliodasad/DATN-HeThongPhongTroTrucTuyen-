@@ -145,7 +145,6 @@
       "avatar": ""
     },
     {
-
       "id": "u11",
       "fullName": "user",
       "email": "user@gmail.com",
@@ -211,6 +210,16 @@
       "role": "tenant",
       "status": "active",
       "createdAt": "2025-07-31T15:54:04.375Z"
+    },
+    {
+      "id": "u17",
+      "fullName": "Đào Sỹ Khảiiiii",
+      "email": "khaidaofpt@gmail.com",
+      "password": "khaikhai",
+      "phone": "0345981925",
+      "role": "tenant",
+      "status": "active",
+      "createdAt": "2025-08-08T09:25:34.519Z"
     }
   ],
   "rooms": [
@@ -297,7 +306,6 @@
     {
       "id": "2",
       "roomId": "2",
-
       "tenantId": "u4",
       "bookingDate": "2024-02-15T14:30:00Z",
       "note": "Cần thuê gấp trong tuần này",
@@ -538,7 +546,7 @@
       "note": "hủy",
       "status": "accepted",
       "requestType": "cancel"
-        }
+    }
   ],
   "contracts": [
     {

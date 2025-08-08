@@ -2,7 +2,12 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/common/ProtectedRoute';
 
-// Auth Pages
+// Shared
+import Header from './components/user/Header';
+import Footer from './components/user/Footer';
+import Layout from './components/layout/Layout';
+
+// Auth
 import LoginPage from './components/auth/LoginPage';
 import RegisterPage from './components/auth/RegisterPage';
 
@@ -33,65 +38,77 @@ import SettingsPage from './pages/admin/SettingsPage';
 function App() {
   return (
     <Routes>
-      {/* Auth routes */}
+      {/* Auth */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Client Routes */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/posts/:id" element={<PostDetail />} />
-      <Route path="/user/:userId" element={<UserProfile />} />
-      <Route path="/booking/:roomId" element={<BookingForm />} />
-      <Route path="/contracts/:id" element={<ContractDetail />} />
-      <Route path="/my-account" element={<MyAccount />} />
-
+      {/* Admin Layout riêng */}
       <Route
-        path="/my-bookings"
-        element={
-          <ProtectedRoute requiredRoles={['tenant', 'host']}>
-            <MyBookingsPage />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/my-contracts"
-        element={
-          <ProtectedRoute requiredRoles={['tenant', 'host']}>
-            <MyContracts />
-          </ProtectedRoute>
-        }
-      />
-      <Route
-        path="/booking-requests"
-        element={
-          <ProtectedRoute requiredRoles={['host']}>
-            <BookingRequests />
-          </ProtectedRoute>
-        }
-      />
-
-      {/* Admin Routes */}
-      <Route
-        path="/admin"
+        path="/admin/*"
         element={
           <ProtectedRoute requiredRoles={['admin']}>
-            <DashboardPage />
+            <Layout />
           </ProtectedRoute>
         }
-      />
-      <Route path="/admin/users" element={<UsersPage />} />
-      <Route path="/admin/rooms" element={<RoomsPage />} />
-      <Route path="/admin/bookings" element={<BookingsPage />} />
-      <Route path="/admin/contracts" element={<ContractsPage />} />
-      <Route path="/admin/payments" element={<PaymentsPage />} />
-      <Route path="/admin/reviews" element={<ReviewsPage />} />
-      <Route path="/admin/messages" element={<MessagesPage />} />
-      <Route path="/admin/contacts" element={<ContactsPage />} />
-      <Route path="/admin/reports" element={<ReportsPage />} />
-      <Route path="/admin/settings" element={<SettingsPage />} />
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardPage />} />
+        <Route path="users" element={<UsersPage />} />
+        <Route path="rooms" element={<RoomsPage />} />
+        <Route path="bookings" element={<BookingsPage />} />
+        <Route path="contracts" element={<ContractsPage />} />
+        <Route path="payments" element={<PaymentsPage />} />
+        <Route path="reviews" element={<ReviewsPage />} />
+        <Route path="messages" element={<MessagesPage />} />
+        <Route path="contacts" element={<ContactsPage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+      </Route>
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* Client Layout riêng, phải là `path="*"` */}
+      <Route
+        path="*"
+        element={
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+            <Header />
+            <main style={{ flex: 1 }}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/posts/:id" element={<PostDetail />} />
+                <Route path="/user/:userId" element={<UserProfile />} />
+                <Route path="/booking/:roomId" element={<BookingForm />} />
+                <Route path="/contracts/:id" element={<ContractDetail />} />
+                <Route path="/my-account" element={<MyAccount />} />
+                <Route
+                  path="/my-bookings"
+                  element={
+                    <ProtectedRoute requiredRoles={['tenant', 'host']}>
+                      <MyBookingsPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/my-contracts"
+                  element={
+                    <ProtectedRoute requiredRoles={['tenant', 'host']}>
+                      <MyContracts />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/booking-requests"
+                  element={
+                    <ProtectedRoute requiredRoles={['host']}>
+                      <BookingRequests />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </main>
+            <Footer />
+          </div>
+        }
+      />
     </Routes>
   );
 }
