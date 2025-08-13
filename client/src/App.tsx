@@ -1,3 +1,4 @@
+// src/App.tsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ProtectedRoute from './components/common/ProtectedRoute';
@@ -5,7 +6,6 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 // Shared
 import Header from './components/user/Header';
 import Footer from './components/user/Footer';
-import Layout from './components/layout/Layout';
 
 // Auth
 import LoginPage from './components/auth/LoginPage';
@@ -23,6 +23,7 @@ import ContractDetail from './pages/user/ContractDetail';
 import MyAccount from './pages/user/MyAccount';
 
 // Admin Pages
+import Layout from './components/layout/Layout';
 import DashboardPage from './pages/admin/DashboardPage';
 import UsersPage from './pages/admin/UsersPage';
 import RoomsPage from './pages/admin/RoomsPage';
@@ -35,6 +36,20 @@ import ContactsPage from './pages/admin/ContactsPage';
 import ReportsPage from './pages/admin/ReportsPage';
 import SettingsPage from './pages/admin/SettingsPage';
 
+// Host Pages
+import HomepageLayout from './components/HomePageLayout';
+import Dashboard from './pages/host/Dashboard';
+import Profile from './pages/host/Profile';
+import UpdateProfile from './pages/host/UpdateProfile';
+import CreateRoom from './pages/host/CreateRoom';
+import UpdateRoom from './pages/host/UpdateRoom';
+import CreateContract from './pages/host/CreateContract';
+import ContractDetailHost from './pages/host/ContractDetail';
+import RoomStatus from './pages/host/RoomStatus';
+import RentalRequest from './pages/host/RentalRequest';
+import ContractList from './pages/host/ContractList';
+import RoomList from './pages/host/RoomList';
+
 function App() {
   return (
     <Routes>
@@ -42,7 +57,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
 
-      {/* Admin Layout riêng */}
+      {/* Admin */}
       <Route
         path="/admin/*"
         element={
@@ -65,22 +80,45 @@ function App() {
         <Route path="settings" element={<SettingsPage />} />
       </Route>
 
-      {/* Client Layout riêng, phải là `path="*"` */}
+      {/* Host */}
       <Route
-        path="*"
+        path="/host/*"
+        element={
+          <ProtectedRoute requiredRoles={['host']}>
+            <HomepageLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="profile" element={<Profile />} />
+        <Route path="update-profile" element={<UpdateProfile />} />
+        <Route path="room-list" element={<RoomList />} />
+        <Route path="create-room" element={<CreateRoom />} />
+        <Route path="update-room/:id" element={<UpdateRoom />} />
+        <Route path="room-status" element={<RoomStatus />} />
+        <Route path="rental-request" element={<RentalRequest />} />
+        <Route path="create-contract" element={<CreateContract />} />
+        <Route path="contracts" element={<ContractList />} />
+        <Route path="contracts/:id" element={<ContractDetailHost />} />
+      </Route>
+
+      {/* Client */}
+      <Route
+        path="/*"
         element={
           <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Header />
             <main style={{ flex: 1 }}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
-                <Route path="/posts/:id" element={<PostDetail />} />
-                <Route path="/user/:userId" element={<UserProfile />} />
-                <Route path="/booking/:roomId" element={<BookingForm />} />
-                <Route path="/contracts/:id" element={<ContractDetail />} />
-                <Route path="/my-account" element={<MyAccount />} />
+                <Route path="posts/:id" element={<PostDetail />} />
+                <Route path="user/:userId" element={<UserProfile />} />
+                <Route path="booking/:roomId" element={<BookingForm />} />
+                <Route path="contracts/:id" element={<ContractDetail />} />
+                <Route path="my-account" element={<MyAccount />} />
                 <Route
-                  path="/my-bookings"
+                  path="my-bookings"
                   element={
                     <ProtectedRoute requiredRoles={['tenant', 'host']}>
                       <MyBookingsPage />
@@ -88,7 +126,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/my-contracts"
+                  path="my-contracts"
                   element={
                     <ProtectedRoute requiredRoles={['tenant', 'host']}>
                       <MyContracts />
@@ -96,7 +134,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/booking-requests"
+                  path="booking-requests"
                   element={
                     <ProtectedRoute requiredRoles={['host']}>
                       <BookingRequests />
