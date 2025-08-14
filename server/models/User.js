@@ -1,12 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { generateUserId } = require('../utils/generateId');
 
 const userSchema = new mongoose.Schema({
   userId: {
     type: String,
-    unique: true,
-    default: generateUserId
+    unique: true
   },
   fullName: {
     type: String,
@@ -67,25 +65,42 @@ const userSchema = new mongoose.Schema({
   }
 });
 
-// Encrypt password using bcrypt
-userSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) {
-    next();
+// Tạo userId tăng dần kiểu user001, user002...
+userSchema.pre('save', async function (next) {
+  if (this.isNew) {
+    // Lấy userId lớn nhất hiện tại
+    const lastUser = await this.constructor.findOne({})
+      .sort({ userId: -1 })
+      .collation({ locale: "en_US", numericOrdering: true }); // Sắp xếp số đúng thứ tự
+
+    let nextNumber = 1;
+    if (lastUser && lastUser.userId) {
+      const lastNumber = parseInt(lastUser.userId.replace('user', ''), 10);
+      nextNumber = lastNumber + 1;
+    }
+
+    this.userId = 'user' + String(nextNumber).padStart(3, '0'); // Ví dụ user001
   }
-  
+  next();
+});
+
+// Mã hóa mật khẩu
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) return next();
+
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
 });
 
-// Update updatedAt before saving
-userSchema.pre('save', function(next) {
+// Cập nhật updatedAt
+userSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
-// Match user entered password to hashed password in database
-userSchema.methods.matchPassword = async function(enteredPassword) {
+// So khớp mật khẩu
+userSchema.methods.matchPassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
