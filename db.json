@@ -126,7 +126,7 @@
       "phone": "0909123456",
       "email": "vana@example.com",
       "desiredRoomId": "P101",
-      "status": "chờ duyệt",
+      "status": "đã duyệt",
       "message": "Tôi muốn thuê phòng này, có thể xem phòng được không?",
       "submittedAt": "2025-07-28T08:30:00Z"
     },
@@ -178,9 +178,10 @@
       "rentPrice": 3000000,
       "deposit": 3000000,
       "terms": "Người thuê có trách nhiệm bảo vệ tài sản phòng trọ và thanh toán tiền thuê đúng hạn.",
-      "status": "active",
+      "status": "Đã chấm dứt",
       "extendedDate": "2025-08-02",
-      "extendedMonths": 6
+      "extendedMonths": 6,
+      "terminatedDate": "2025-09-08"
     },
     {
       "contractId": "C1754153479453",
@@ -240,8 +241,23 @@
       "duration": 12,
       "rentPrice": 3000000,
       "terms": "sdwdf",
+      "status": "Đã chấm dứt",
+      "id": 5,
+      "terminatedDate": "2025-09-08"
+    },
+    {
+      "contractId": "C1757301098395",
+      "tenantName": "Nguyễn Văn A",
+      "phone": "0909123456",
+      "email": "vana@example.com",
+      "roomId": "P101",
+      "tenantId": "Nguyễn Văn A",
+      "contractDate": "2025-09-08",
+      "duration": 12,
+      "rentPrice": 3000000,
+      "terms": "Không nuôi thú cưng",
       "status": "active",
-      "id": 5
+      "id": 6
     }
   ],
   "rooms": [
@@ -264,10 +280,10 @@
       "deposit": "1 tháng tiền phòng",
       "electricity": "3.500",
       "tenant": {
-        "userId": "U1754248240011",
-        "fullName": "Lê Văn C",
-        "phone": "0987654321",
-        "avatar": "https://i.pravatar.cc/100?img=2"
+        "userId": "U1757301098426",
+        "fullName": "Nguyễn Văn A",
+        "phone": "0909123456",
+        "avatar": "https://i.pravatar.cc/100?img=7"
       }
     },
     {
@@ -344,7 +360,8 @@
       "endDate": "2027-01-01",
       "contractId": "C001",
       "monthlyRent": 3000000,
-      "status": "active"
+      "status": "inactive",
+      "terminatedDate": "2025-09-08"
     },
     {
       "userId": "U1754153479485",
@@ -406,8 +423,38 @@
       "endDate": "2026-08-04",
       "contractId": "C1754248239984",
       "monthlyRent": 3000000,
+      "status": "inactive",
+      "id": 5,
+      "terminatedDate": "2025-09-08"
+    },
+    {
+      "userId": "U1757301098426",
+      "fullName": "Nguyễn Văn A",
+      "phone": "0909123456",
+      "email": "vana@example.com",
+      "avatar": "https://i.pravatar.cc/100?img=7",
+      "roomCode": "P101",
+      "roomId": "P101",
+      "startDate": "2025-09-08",
+      "endDate": "2026-09-08",
+      "contractId": "C1757301098395",
+      "monthlyRent": 3000000,
       "status": "active",
-      "id": 5
+      "id": 6
+    }
+  ],
+  "users": [
+    {
+      "id": "user_1757331911820",
+      "email": "vinhntph51392@gmail.com",
+      "password": "vinh2005",
+      "fullName": "Nguyễn Thế Vinh",
+      "phone": "0352082923",
+      "role": "host",
+      "address": "đỗ hà",
+      "avatar": "https://i.pravatar.cc/100?u=vinhntph51392@gmail.com",
+      "createdAt": "2025-09-08T11:45:11.820Z",
+      "isActive": true
     }
   ]
 }

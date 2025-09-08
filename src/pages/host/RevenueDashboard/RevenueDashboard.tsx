@@ -1,3 +1,5 @@
+// src/pages/host/RevenueDashboard/RevenueDashboard.tsx
+// Mô-đun Dashboard Doanh Thu
 import React, { useEffect, useState } from 'react';
 import { DollarSign, TrendingUp, Users, Home, Calendar, PieChart, BarChart3, AlertCircle } from 'lucide-react';
 import type { RevenueData, PaymentStats, RoomStats } from '../../../utils/revenueCalculator'; 

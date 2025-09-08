@@ -1,20 +1,31 @@
-// client/src/components/Header.tsx
-import { Link, useLocation } from "react-router-dom";
-import { Bell, User } from "lucide-react";
+// src/components/Header.tsx
+// Header đã được cập nhật với thông tin user và logout
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Bell, User, LogOut, Settings } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { useState } from "react";
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const navItems = [
-    { path: "/host/profile", label: "Thông tin cá nhân" },
-    { path: "/host/room-list", label: "Danh sách phòng của tôi" },
-    { path: "/host/room-status", label: "Trạng thái phòng" },
-    { path: "/host/tenant-list", label: "Danh sách người thuê" },
+    { path: "/host/dashboard", label: "Tổng quan" },
+    { path: "/host/room-list", label: "Danh sách phòng" },
+    { path: "/host/tenant-list", label: "Người thuê" },
     { path: "/host/rental-request", label: "Yêu cầu thuê" },
-    { path: "/host/create-contract", label: "Tạo hợp đồng" },
     { path: "/host/contracts", label: "Hợp đồng" },
-    { path: "/host/logout", label: "Đăng xuất" },
+    { path: "/host/invoices", label: "Hóa đơn" },
+    { path: "/host/revenue", label: "Doanh thu" },
   ];
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+    setShowUserMenu(false);
+  };
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -22,11 +33,11 @@ const Header = () => {
         <div className="flex justify-between items-center">
           {/* Logo */}
           <div className="flex items-center space-x-2">
-            <Link to="/" className="text-2xl font-bold text-blue-600">
+            <Link to="/host/dashboard" className="text-2xl font-bold text-blue-600">
               Phòng trọ 123
             </Link>
             <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-medium">
-              Chủ trọ
+              {user?.role === 'host' ? 'Chủ trọ' : 'Người thuê'}
             </span>
           </div>
 
@@ -43,13 +54,55 @@ const Header = () => {
               </span>
             </button>
 
-            <div className="flex items-center space-x-2">
-              <img
-                src="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&dpr=1"
-                alt="Avatar"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <span className="text-sm font-medium text-gray-700">Nguyễn Thị Mai</span>
+            {/* User Menu */}
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center space-x-2 p-2 hover:bg-gray-100 rounded-lg transition"
+              >
+                <img
+                  src={user?.avatar || `https://i.pravatar.cc/100?u=${user?.email}`}
+                  alt="Avatar"
+                  className="w-8 h-8 rounded-full object-cover"
+                />
+                <div className="text-left hidden sm:block">
+                  <div className="text-sm font-medium text-gray-700">{user?.fullName}</div>
+                  <div className="text-xs text-gray-500">{user?.email}</div>
+                </div>
+              </button>
+
+              {/* User Dropdown */}
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  <Link
+                    to="/host/profile"
+                    className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <User size={16} />
+                    <span>Thông tin cá nhân</span>
+                  </Link>
+                  
+                  <Link
+                    to="/host/update-profile"
+                    className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    <Settings size={16} />
+                    <span>Cài đặt tài khoản</span>
+                  </Link>
+                  
+                  <div className="border-t border-gray-100 my-1"></div>
+                  
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center space-x-2 px-4 py-2 text-sm text-red-600 hover:bg-gray-100 w-full text-left"
+                  >
+                    <LogOut size={16} />
+                    <span>Đăng xuất</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -71,6 +124,14 @@ const Header = () => {
           ))}
         </nav>
       </div>
+
+      {/* Overlay to close menu */}
+      {showUserMenu && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setShowUserMenu(false)}
+        ></div>
+      )}
     </header>
   );
 };

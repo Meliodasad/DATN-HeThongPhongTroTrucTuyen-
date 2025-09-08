@@ -1,3 +1,5 @@
+// src/pages/host/Invoice/InvoiceList.tsx
+// Trang danh sách hóa đơn của chủ nhà
 import React, { useEffect, useState } from 'react';
 import { FileText, Download, Eye, Trash2, CheckCircle, Clock, AlertCircle, Search, Filter } from 'lucide-react';
 

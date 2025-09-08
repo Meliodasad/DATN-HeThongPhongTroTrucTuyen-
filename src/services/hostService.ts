@@ -25,6 +25,114 @@ export interface Invoice {
   status: 'unpaid' | 'paid' | 'overdue';
 }
 
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface RegisterData {
+  email: string;
+  password: string;
+  fullName: string;
+  phone: string;
+  role: 'host' | 'tenant';
+  address?: string;
+}
+
+// Mock authentication - Trong thực tế sẽ gọi API backend
+export const authService = {
+  login: async (email: string, password: string) => {
+    try {
+      // Tìm user trong database
+      const response = await axios.get(`${API}/users?email=${email}`);
+      const users = response.data;
+      
+      if (users.length === 0) {
+        throw new Error('Email không tồn tại');
+      }
+
+      const user = users[0];
+      
+      // Kiểm tra password (trong thực tế sẽ hash)
+      if (user.password !== password) {
+        throw new Error('Mật khẩu không đúng');
+      }
+
+      // Tạo token giả (trong thực tế sẽ dùng JWT)
+      const token = `token_${user.id}_${Date.now()}`;
+
+      // Loại bỏ password khỏi response
+      const { password: _, ...userWithoutPassword } = user;
+
+      return {
+        data: {
+          user: userWithoutPassword,
+          token: token
+        }
+      };
+    } catch (error: any) {
+      if (error.message) {
+        throw { response: { data: { message: error.message } } };
+      }
+      throw { response: { data: { message: 'Lỗi kết nối server' } } };
+    }
+  },
+
+  register: async (userData: RegisterData) => {
+    try {
+      // Kiểm tra email đã tồn tại
+      const existingUsersResponse = await axios.get(`${API}/users?email=${userData.email}`);
+      if (existingUsersResponse.data.length > 0) {
+        throw new Error('Email đã được sử dụng');
+      }
+
+      // Tạo user mới
+      const newUser = {
+        id: `user_${Date.now()}`,
+        email: userData.email,
+        password: userData.password, // Trong thực tế sẽ hash
+        fullName: userData.fullName,
+        phone: userData.phone,
+        role: userData.role,
+        address: userData.address || '',
+        avatar: `https://i.pravatar.cc/100?u=${userData.email}`,
+        createdAt: new Date().toISOString(),
+        isActive: true
+      };
+
+      // Lưu user vào database
+      const response = await axios.post(`${API}/users`, newUser);
+      
+      // Tạo token
+      const token = `token_${newUser.id}_${Date.now()}`;
+
+      // Loại bỏ password khỏi response
+      const { password: _, ...userWithoutPassword } = response.data;
+
+      return {
+        data: {
+          user: userWithoutPassword,
+          token: token
+        }
+      };
+    } catch (error: any) {
+      if (error.message) {
+        throw { response: { data: { message: error.message } } };
+      }
+      throw { response: { data: { message: 'Lỗi kết nối server' } } };
+    }
+  },
+
+  getCurrentUser: async (token: string) => {
+    // Trong thực tế sẽ verify JWT và lấy user từ database
+    const userId = token.split('_')[1];
+    const response = await axios.get(`${API}/users/${userId}`);
+    const { password: _, ...userWithoutPassword } = response.data;
+    return { data: userWithoutPassword };
+  }
+  
+};
+
 // Thêm interceptor để xử lý lỗi
 axios.interceptors.response.use(
   (response) => response,
