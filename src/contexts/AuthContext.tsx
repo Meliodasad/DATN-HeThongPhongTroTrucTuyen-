@@ -28,7 +28,7 @@ interface RegisterData {
   email: string;
   password: string;
   fullName: string;
-  phone: string;
+  phone?: string;
   role: 'host' | 'tenant';
   address?: string;
 }
@@ -81,14 +81,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const register = async (userData: RegisterData) => {
     try {
-      const response = await authService.register(userData);
-      const { user: newUser, token } = response.data;
-      
-      // Tự động đăng nhập sau khi đăng ký thành công
-      localStorage.setItem('auth_token', token);
-      localStorage.setItem('user_data', JSON.stringify(newUser));
-      
-      setUser(newUser);
+      const response = await authService.register({
+        ...userData,
+        phone: userData.phone || "",
+      });
+      // Không tự động đăng nhập sau khi đăng ký
+      // Để user tự đăng nhập
+      console.log('Đăng ký thành công:', response.data);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Đăng ký thất bại');
     }

@@ -455,6 +455,18 @@
       "avatar": "https://i.pravatar.cc/100?u=vinhntph51392@gmail.com",
       "createdAt": "2025-09-08T11:45:11.820Z",
       "isActive": true
+    },
+    {
+      "id": "user_1757731654733",
+      "email": "chodiennan@gmail.com",
+      "password": "vinh2005",
+      "fullName": "Nguyễn Thế vinh",
+      "phone": "0352082923",
+      "role": "host",
+      "address": "",
+      "avatar": "https://i.pravatar.cc/100?u=chodiennan@gmail.com",
+      "createdAt": "2025-09-13T02:47:34.733Z",
+      "isActive": true
     }
   ]
 }

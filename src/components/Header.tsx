@@ -15,10 +15,12 @@ const Header = () => {
     { path: "/host/dashboard", label: "Tổng quan" },
     { path: "/host/room-list", label: "Danh sách phòng" },
     { path: "/host/tenant-list", label: "Người thuê" },
+    { path: "/host/room-status", label: "Trạng thái phòng" },
     { path: "/host/rental-request", label: "Yêu cầu thuê" },
     { path: "/host/contracts", label: "Hợp đồng" },
     { path: "/host/invoices", label: "Hóa đơn" },
     { path: "/host/revenue", label: "Doanh thu" },
+    { path: "/host/create-contract", label: "Tạo hợp đồng" },
   ];
 
   const handleLogout = () => {

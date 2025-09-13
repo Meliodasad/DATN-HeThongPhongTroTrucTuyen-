@@ -5,8 +5,8 @@ import { AuthProvider } from "./contexts/AuthContext";
 import AuthGuard from "./components/AuthGuard";
 
 // Auth pages
-import Login from "./pages/host/auth/Login";
-import Register from "./pages/host/auth/Register";
+import Login from "./pages/host/auth/LoginPage";
+import Register from "./pages/host/auth/RegisterPage";
 
 // Host pages
 import Dashboard from "./pages/host/HostDashboard";
