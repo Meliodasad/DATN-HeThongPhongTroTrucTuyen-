@@ -1,3 +1,5 @@
+// src/pages/host/auth/LoginPage.tsx
+
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn, Home } from 'lucide-react';

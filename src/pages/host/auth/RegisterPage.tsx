@@ -1,3 +1,4 @@
+// src/pages/host/auth/RegisterPage.tsx
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Phone, UserPlus, Home } from 'lucide-react';
