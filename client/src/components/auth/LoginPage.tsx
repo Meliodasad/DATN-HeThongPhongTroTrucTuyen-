@@ -1,29 +1,33 @@
 import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, LogIn, Home } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: 'bac1112005@gmail.com',
+    password: '123456'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const success = await login(formData.email, formData.password);
-    if (success) {
-      navigate(from, { replace: true });
+    const loggedInUser = await login(formData.email, formData.password);
+
+    if (loggedInUser) {
+      if (loggedInUser.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else if (loggedInUser.role === 'host') {
+        navigate('/host/room-list', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
     }
 
     setIsLoading(false);
@@ -33,7 +37,6 @@ const LoginPage: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Demo accounts for testing
   const demoAccounts = [
     { email: 'admin@rentalhub.com', password: 'admin123', role: 'Admin' },
     { email: 'host1@example.com', password: 'host123', role: 'Chủ trọ' },
@@ -47,7 +50,6 @@ const LoginPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
-        {/* Header */}
         <div className="text-center">
           <div className="flex justify-center">
             <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
@@ -57,17 +59,11 @@ const LoginPage: React.FC = () => {
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
             Đăng nhập
           </h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Hệ thống quản lý cho thuê trọ
-          </p>
+          <p className="mt-2 text-sm text-gray-600">Hệ thống quản lý cho thuê trọ</p>
         </div>
 
-    
-
-        {/* Login Form */}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
-            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email
@@ -80,7 +76,6 @@ const LoginPage: React.FC = () => {
                   id="email"
                   name="email"
                   type="email"
-                  autoComplete="email"
                   required
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
@@ -90,7 +85,6 @@ const LoginPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Password */}
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Mật khẩu
@@ -103,7 +97,6 @@ const LoginPage: React.FC = () => {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
                   required
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
@@ -125,7 +118,6 @@ const LoginPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Submit Button */}
           <div>
             <button
               type="submit"
@@ -146,19 +138,33 @@ const LoginPage: React.FC = () => {
             </button>
           </div>
 
-          {/* Register Link */}
           <div className="text-center">
             <p className="text-sm text-gray-600">
               Chưa có tài khoản?{' '}
-              <Link
-                to="/register"
-                className="font-medium text-blue-600 hover:text-blue-500 transition-colors"
-              >
+              <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
                 Đăng ký ngay
               </Link>
             </p>
           </div>
         </form>
+
+        <div className="mt-6">
+          <h4 className="text-sm font-semibold text-gray-700 mb-2">Tài khoản demo:</h4>
+          <div className="space-y-1 text-sm">
+            {demoAccounts.map((acc) => (
+              <div key={acc.email} className="flex justify-between items-center bg-white px-3 py-2 rounded border">
+                <span>{acc.role}</span>
+                <button
+                  type="button"
+                  className="text-blue-600 hover:underline"
+                  onClick={() => fillDemoAccount(acc.email, acc.password)}
+                >
+                  Dùng thử
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -1,15 +1,16 @@
-import type { Review, ReviewStats, ReviewFilters } from '../types/review';
+import type { Review, ReviewStats, ReviewFilters } from '../../types/review';
+import { headers } from '../../utils/config';
 
 class ReviewService {
-  private baseUrl = 'http://localhost:5000';
+  private baseUrl = 'http://localhost:3000';
 
   async getReviews(filters?: ReviewFilters): Promise<Review[]> {
     try {
       // Fetch reviews, rooms, and users
       const [reviewsRes, roomsRes, usersRes] = await Promise.all([
-        fetch(`${this.baseUrl}/reviews`),
-        fetch(`${this.baseUrl}/rooms`),
-        fetch(`${this.baseUrl}/users`)
+        fetch(`${this.baseUrl}/reviews`, { headers }),
+        fetch(`${this.baseUrl}/rooms`, { headers }),
+        fetch(`${this.baseUrl}/users`, { headers })
       ]);
 
       const [reviewsData, roomsData, usersData] = await Promise.all([
@@ -19,15 +20,15 @@ class ReviewService {
       ]);
 
       // Combine data
-      const enrichedReviews = reviewsData.map((review: any) => {
+      const enrichedReviews = reviewsData.data.map((review: any) => {
         // Find tenant by userId (matching tenantId)
-        const tenant = usersData.find((u: any) => u.userId === review.tenantId);
+        const tenant = usersData.data.users.find((u: any) => u.userId === review.tenantId);
         
         // Find room by roomId
-        const room = roomsData.find((r: any) => r.roomId === review.roomId);
+        const room = roomsData.data.rooms.find((r: any) => r.roomId === review.roomId);
         
         // Find host through room's hostId
-        const host = room ? usersData.find((u: any) => u.userId === room.hostId) : null;
+        const host = room ? usersData.data.users.find((u: any) => u.userId === room.hostId) : null;
 
         return {
           ...review,
@@ -94,7 +95,7 @@ class ReviewService {
   async getReviewById(id: string): Promise<Review> {
     try {
       const reviews = await this.getReviews();
-      const review = reviews.find(r => r.id === id);
+      const review = reviews.find(r => r.reviewId === id);
       
       if (!review) {
         throw new Error('Review not found');
@@ -130,6 +131,7 @@ class ReviewService {
     try {
       const response = await fetch(`${this.baseUrl}/reviews/${id}`, {
         method: 'DELETE',
+        headers,
       });
 
       if (!response.ok) {

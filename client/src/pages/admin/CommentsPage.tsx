@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, User, Calendar, MessageSquare, Trash2, Star, MapPin, Home } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
-import { reviewService } from '../../services/reviewService';
 import type { Review, ReviewReplyFormData } from '../../types/review';
 import { Eye } from "lucide-react";
+import { reviewService } from '../services/reviewService';
 
 interface CommentDetailModalProps {
   isOpen: boolean;
@@ -89,7 +89,7 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -575,14 +575,14 @@ const CommentsPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
                       <button 
-                        onClick={() => handleViewDetail(review.id)}
+                        onClick={() => handleViewDetail(review.reviewId)}
                         className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => handleDeleteReview(review.id)}
+                        onClick={() => handleDeleteReview(review.reviewId)}
                         className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors"
                         title="Ẩn đánh giá"
                       >

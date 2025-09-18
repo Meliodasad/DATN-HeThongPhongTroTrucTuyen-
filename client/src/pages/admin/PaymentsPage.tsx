@@ -21,6 +21,7 @@ import {
   Wallet
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
+import { headers } from '../../utils/config';
 
 interface Payment {
   id: string;
@@ -98,7 +99,7 @@ const PaymentDetailModal: React.FC<PaymentDetailModalProps> = ({ isOpen, onClose
   if (!isOpen || !payment) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -317,7 +318,7 @@ const PaymentConfirmationModal: React.FC<PaymentConfirmationModalProps> = ({
   if (!isOpen || !payment) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -464,10 +465,10 @@ const PaymentsPage: React.FC = () => {
       
       // Fetch payments, contracts, rooms, and users
       const [paymentsRes, contractsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:5000/payments'),
-        fetch('http://localhost:5000/contracts'),
-        fetch('http://localhost:5000/rooms'),
-        fetch('http://localhost:5000/users')
+        fetch('http://localhost:3000/payments', { headers }),
+        fetch('http://localhost:3000/contracts', { headers }),
+        fetch('http://localhost:3000/rooms', { headers }),
+        fetch('http://localhost:3000/users', { headers })
       ]);
 
       const [paymentsData, contractsData, roomsData, usersData] = await Promise.all([
@@ -478,15 +479,15 @@ const PaymentsPage: React.FC = () => {
       ]);
 
       // Combine data
-      const enrichedPayments = paymentsData.map((payment: any) => {
+      const enrichedPayments = paymentsData.data.map((payment: any) => {
         // Find tenant by userId (not id)
-        const tenant = usersData.find((u: any) => u.userId === payment.tenantId);
-        
+        const tenant = usersData.data.users.find((u: any) => u.userId === payment.tenantId);
+
         // Find contract by contractId
-        const contract = contractsData.find((c: any) => c.contractId === payment.contractId);
-        
+        const contract = contractsData.data.contracts.find((c: any) => c.contractId === payment.contractId);
+
         // Find room by roomId from contract
-        const room = contract ? roomsData.find((r: any) => r.roomId === contract.roomId) : null;
+        const room = contract ? roomsData.data.rooms.find((r: any) => r.roomId === contract.roomId) : null;
 
         return {
           ...payment,
@@ -530,7 +531,7 @@ const PaymentsPage: React.FC = () => {
         extraNote: note || ''
       };
 
-      const response = await fetch(`http://localhost:5000/payments/${paymentId}`, {
+      const response = await fetch(`http://localhost:3000/payments/${paymentId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

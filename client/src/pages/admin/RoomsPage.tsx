@@ -16,8 +16,8 @@ import {
   ChevronDown
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
-import { roomService } from '../../services/roomService';
 import type { Room, RoomStats, RoomFilters } from '../../types/room';
+import { roomService } from '../services/roomService';
 
 // Room Modal Component (View only)
 interface RoomModalProps {
@@ -126,7 +126,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -427,9 +427,10 @@ const RoomsPage: React.FC = () => {
         roomService.getRoomStats(),
         roomService.getRoomApprovals() // This method needs to be implemented
       ]);
-      setRooms(roomsData);
+      
+      setRooms(roomsData.data.rooms || []);
       setStats(statsData);
-      setRoomApprovals(approvalsData || []);
+      setRoomApprovals(approvalsData.data.data || []);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải dữ liệu phòng trọ');
@@ -788,7 +789,7 @@ const RoomsPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <StatusDropdown
                       currentStatus={room.status}
-                      roomId={room.id}
+                      roomId={room.roomId}
                       onStatusChange={handleStatusChange}
                     />
                   </td>
@@ -831,7 +832,7 @@ const RoomsPage: React.FC = () => {
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => handleDeleteRoom(room.id)}
+                        onClick={() => handleDeleteRoom(room.roomId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa phòng"
                       >

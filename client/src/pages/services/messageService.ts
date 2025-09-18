@@ -1,4 +1,6 @@
-const API_BASE_URL = 'http://localhost:5000';
+import { headers } from "../../utils/config";
+
+const API_BASE_URL = 'http://localhost:3000';
 
 export interface User {
   id: string;
@@ -43,7 +45,7 @@ export interface MessageStats {
 class MessageService {
   private async fetchUsers(): Promise<User[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/users`);
+      const response = await fetch(`${API_BASE_URL}/users`, { headers });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -58,7 +60,7 @@ class MessageService {
 
   private async fetchMessages(): Promise<Message[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/messages`);
+      const response = await fetch(`${API_BASE_URL}/messages`, { headers });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -273,9 +275,7 @@ class MessageService {
 
       const response = await fetch(`${API_BASE_URL}/messages`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(newMessage),
       });
 

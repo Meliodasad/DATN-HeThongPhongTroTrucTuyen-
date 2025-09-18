@@ -15,6 +15,7 @@ export interface Room {
   approvalStatus: 'pending' | 'approved' | 'rejected';
   approvalDate?: string;
   createdAt: string;
+  dateAdded?: any;
   host?: {
     fullName: string;
     email: string;

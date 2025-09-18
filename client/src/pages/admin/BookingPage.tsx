@@ -15,6 +15,7 @@ import {
   Save
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
+import { headers } from '../../utils/config';
 
 interface Booking {
   id: string;
@@ -76,7 +77,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
     try {
       setSaving(true);
       
-      const response = await fetch(`http://localhost:5000/bookings/${booking.id}`, {
+      const response = await fetch(`http://localhost:3000/bookings/${booking.id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +151,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
   const isViewMode = mode === 'view';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -363,9 +364,9 @@ const BookingsPage: React.FC = () => {
       
       // Fetch bookings, rooms, and users
       const [bookingsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:5000/bookings'),
-        fetch('http://localhost:5000/rooms'),
-        fetch('http://localhost:5000/users')
+        fetch('http://localhost:3000/bookings', { headers }),
+        fetch('http://localhost:3000/rooms', { headers }),
+        fetch('http://localhost:3000/users', { headers })
       ]);
 
       const [bookingsData, roomsData, usersData] = await Promise.all([
@@ -375,14 +376,14 @@ const BookingsPage: React.FC = () => {
       ]);
 
       // Combine data with proper mapping based on your database structure
-      const enrichedBookings = bookingsData.map((booking: any) => {
+      const enrichedBookings = bookingsData.data.map((booking: any) => {
         // Find room by roomId (matching your database structure)
-        const room = roomsData.find((r: any) => 
+        const room = roomsData.data.rooms.find((r: any) => 
           r.roomId === booking.roomId || r.id === booking.roomId
         );
         
         // Find tenant by tenantId (matching your database structure)
-        const tenant = usersData.find((u: any) => 
+        const tenant = usersData.data.users.find((u: any) => 
           u.userId === booking.tenantId || u.id === booking.tenantId
         );
 
@@ -437,11 +438,9 @@ const BookingsPage: React.FC = () => {
 
   const handleUpdateStatus = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
     try {
-      const response = await fetch(`http://localhost:5000/bookings/${bookingId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+      const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
+        method: 'PUT',
+        headers,
         body: JSON.stringify({ bookingStatus: status }),
       });
 
@@ -461,7 +460,7 @@ const BookingsPage: React.FC = () => {
     if (!confirm('Bạn có chắc chắn muốn xóa đặt phòng này?')) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/bookings/${bookingId}`, {
+      const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
         method: 'DELETE',
       });
 
@@ -739,14 +738,14 @@ const BookingsPage: React.FC = () => {
                       {booking.bookingStatus === 'pending' && (
                         <>
                           <button 
-                            onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
+                            onClick={() => handleUpdateStatus(booking.bookingId, 'confirmed')}
                             className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
                             title="Xác nhận đặt phòng"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
                           <button 
-                            onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
+                            onClick={() => handleUpdateStatus(booking.bookingId, 'cancelled')}
                             className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                             title="Hủy đặt phòng"
                           >
@@ -762,7 +761,7 @@ const BookingsPage: React.FC = () => {
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => handleDeleteBooking(booking.id)}
+                        onClick={() => handleDeleteBooking(booking.bookingId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa đặt phòng"
                       >

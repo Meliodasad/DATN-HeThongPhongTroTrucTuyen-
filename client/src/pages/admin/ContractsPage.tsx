@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FileText, 
-  User, 
-  Building, 
-  Calendar, 
+import {
+  FileText,
+  User,
+  Building,
+  Calendar,
   DollarSign,
-  CheckCircle, 
-  XCircle, 
+  CheckCircle,
+  XCircle,
   Eye,
   Search,
   MapPin,
@@ -17,6 +17,7 @@ import {
   Home
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
+import { headers } from '../../utils/config';
 
 interface Contract {
   id: string;
@@ -56,7 +57,7 @@ const isValidDate = (dateString: string): boolean => {
 
 const safeFormatDate = (dateString: string): string => {
   if (!isValidDate(dateString)) return 'Ngày không hợp lệ';
-  
+
   try {
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
@@ -66,6 +67,7 @@ const safeFormatDate = (dateString: string): string => {
       minute: '2-digit'
     });
   } catch (error) {
+    console.error(error);
     return 'Ngày không hợp lệ';
   }
 };
@@ -74,19 +76,20 @@ const safeCalculateEndDate = (contractDate: string, duration: number): Date | nu
   if (!isValidDate(contractDate) || !duration || duration <= 0) {
     return null;
   }
-  
+
   try {
     const start = new Date(contractDate);
     const end = new Date(start);
     end.setMonth(end.getMonth() + duration);
-    
+
     // Verify the result is still a valid date
     if (isNaN(end.getTime())) {
       return null;
     }
-    
+
     return end;
   } catch (error) {
+    console.error(error);
     return null;
   }
 };
@@ -122,7 +125,7 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
   const isExpiringSoon = remainingDays <= 30 && remainingDays > 0;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -142,16 +145,15 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
             <div className="bg-gray-50 rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <h4 className="text-lg font-medium text-gray-900">Thông tin hợp đồng</h4>
-                <span className={`px-3 py-1 text-sm font-medium rounded-full ${
-                  isActive 
-                    ? isExpiringSoon 
-                      ? 'bg-yellow-100 text-yellow-800' 
-                      : 'bg-green-100 text-green-800'
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {isActive 
-                    ? isExpiringSoon 
-                      ? 'Sắp hết hạn' 
+                <span className={`px-3 py-1 text-sm font-medium rounded-full ${isActive
+                  ? isExpiringSoon
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
+                  }`}>
+                  {isActive
+                    ? isExpiringSoon
+                      ? 'Sắp hết hạn'
                       : 'Đang hiệu lực'
                     : 'Đã hết hạn'
                   }
@@ -211,8 +213,8 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                   {contract.tenant.avatar ? (
-                    <img 
-                      src={contract.tenant.avatar} 
+                    <img
+                      src={contract.tenant.avatar}
                       alt={contract.tenant.fullName}
                       className="w-16 h-16 rounded-full object-cover"
                     />
@@ -244,8 +246,8 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                   {contract.host.avatar ? (
-                    <img 
-                      src={contract.host.avatar} 
+                    <img
+                      src={contract.host.avatar}
                       alt={contract.host.fullName}
                       className="w-16 h-16 rounded-full object-cover"
                     />
@@ -291,9 +293,8 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
                   </div>
                   <div className="flex-1 h-0.5 bg-gray-300 mx-4"></div>
                   <div className="text-center">
-                    <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${
-                      remainingDays > 0 ? 'bg-yellow-500' : 'bg-red-500'
-                    }`}></div>
+                    <div className={`w-3 h-3 rounded-full mx-auto mb-2 ${remainingDays > 0 ? 'bg-yellow-500' : 'bg-red-500'
+                      }`}></div>
                     <p className="font-medium text-gray-900">Kết thúc dự kiến</p>
                     <p className="text-gray-600">
                       {endDate ? formatDate(endDate.toISOString()) : 'Không xác định'}
@@ -335,12 +336,12 @@ const ContractsPage: React.FC = () => {
   const loadContracts = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch contracts, rooms, and users
       const [contractsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:5000/contracts'),
-        fetch('http://localhost:5000/rooms'),
-        fetch('http://localhost:5000/users')
+        fetch('http://localhost:3000/contracts', { headers }),
+        fetch('http://localhost:3000/rooms', { headers }),
+        fetch('http://localhost:3000/users', { headers })
       ]);
 
       const [contractsData, roomsData, usersData] = await Promise.all([
@@ -350,12 +351,12 @@ const ContractsPage: React.FC = () => {
       ]);
 
       // Combine data
-      const enrichedContracts = contractsData.map((contract: any) => {
-        const room = roomsData.find((r: any) => r.roomId === contract.roomId);
-        const tenant = usersData.find((u: any) => u.id === contract.tenantId);
-        
+      const enrichedContracts = contractsData.data.contracts.map((contract: any) => {
+        const room = roomsData.data.rooms.find((r: any) => r.roomId === contract.roomId);
+        const tenant = usersData.data.users.find((u: any) => u.id === contract.tenantId);
+
         // Find host through room's hostId
-        const host = room ? usersData.find((u: any) => u.id === room.hostId) : null;
+        const host = room ? usersData.data.users.find((u: any) => u.id === room.hostId) : null;
 
         return {
           ...contract,
@@ -376,11 +377,11 @@ const ContractsPage: React.FC = () => {
 
   const filteredContracts = contracts.filter(contract => {
     const matchesSearch = contract.room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contract.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contract.host.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contract.room.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         contract.contractId.toLowerCase().includes(searchTerm.toLowerCase());
-    
+      contract.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.host.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.room.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.contractId.toLowerCase().includes(searchTerm.toLowerCase());
+
     return matchesSearch;
   });
 
@@ -396,7 +397,7 @@ const ContractsPage: React.FC = () => {
 
   const formatDate = (dateString: string) => {
     if (!isValidDate(dateString)) return 'Ngày không hợp lệ';
-    
+
     try {
       return new Date(dateString).toLocaleDateString('vi-VN', {
         year: 'numeric',
@@ -404,6 +405,7 @@ const ContractsPage: React.FC = () => {
         day: 'numeric'
       });
     } catch (error) {
+      console.error(error);
       return 'Ngày không hợp lệ';
     }
   };
@@ -422,7 +424,7 @@ const ContractsPage: React.FC = () => {
   const isExpiringSoon = (startDate: string, duration: number) => {
     const endDate = calculateEndDate(startDate, duration);
     if (!endDate) return false;
-    
+
     const now = new Date();
     const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return daysUntilExpiry <= 30 && daysUntilExpiry > 0;
@@ -431,10 +433,10 @@ const ContractsPage: React.FC = () => {
   const getContractStatus = (contractDate: string, duration: number) => {
     const endDate = calculateEndDate(contractDate, duration);
     if (!endDate) return 'unknown';
-    
+
     const now = new Date();
     const daysUntilExpiry = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (daysUntilExpiry > 30) return 'active';
     if (daysUntilExpiry > 0) return 'expiring';
     return 'expired';
@@ -511,15 +513,17 @@ const ContractsPage: React.FC = () => {
 
       {/* Search */}
       <div className="bg-white p-4 rounded-lg shadow-sm border">
-        <div className="relative w-full">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
-          <input
-            type="text"
-            placeholder="Tìm kiếm theo mã hợp đồng, tên phòng, khách hàng, chủ trọ..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+        <div className="flex flex-col md:flex-row items-center gap-4">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo mã hợp đồng, tên phòng, khách hàng, chủ trọ..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+          </div>
         </div>
       </div>
 
@@ -530,7 +534,7 @@ const ContractsPage: React.FC = () => {
             Danh sách hợp đồng ({filteredContracts.length})
           </h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -565,7 +569,7 @@ const ContractsPage: React.FC = () => {
               {filteredContracts.map((contract) => {
                 const endDate = calculateEndDate(contract.contractDate, contract.duration);
                 const status = getContractStatus(contract.contractDate, contract.duration);
-                
+
                 return (
                   <tr key={contract.id} className={`hover:bg-gray-50 ${status === 'expiring' ? 'bg-orange-50' : ''}`}>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -593,8 +597,8 @@ const ContractsPage: React.FC = () => {
                       <div className="flex items-center">
                         <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                           {contract.tenant.avatar ? (
-                            <img 
-                              src={contract.tenant.avatar} 
+                            <img
+                              src={contract.tenant.avatar}
                               alt={contract.tenant.fullName}
                               className="w-8 h-8 rounded-full object-cover"
                             />
@@ -616,8 +620,8 @@ const ContractsPage: React.FC = () => {
                       <div className="flex items-center">
                         <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                           {contract.host.avatar ? (
-                            <img 
-                              src={contract.host.avatar} 
+                            <img
+                              src={contract.host.avatar}
                               alt={contract.host.fullName}
                               className="w-8 h-8 rounded-full object-cover"
                             />
@@ -655,22 +659,21 @@ const ContractsPage: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                        status === 'active' ? 'bg-green-100 text-green-800' :
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${status === 'active' ? 'bg-green-100 text-green-800' :
                         status === 'expiring' ? 'bg-yellow-100 text-yellow-800' :
-                        status === 'expired' ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
-                      }`}>
+                          status === 'expired' ? 'bg-red-100 text-red-800' :
+                            'bg-gray-100 text-gray-800'
+                        }`}>
                         {status === 'active' ? 'Đang hiệu lực' :
-                         status === 'expiring' ? 'Sắp hết hạn' :
-                         status === 'expired' ? 'Đã hết hạn' :
-                         'Không xác định'}
+                          status === 'expiring' ? 'Sắp hết hạn' :
+                            status === 'expired' ? 'Đã hết hạn' :
+                              'Không xác định'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button 
+                      <button
                         onClick={() => handleViewDetail(contract)}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />

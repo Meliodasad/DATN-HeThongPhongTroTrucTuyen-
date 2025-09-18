@@ -1,555 +1,94 @@
 {
-  "users": [
+  "quan_tri_vien": [
     {
-      "userId": "U001",
-      "fullName": "Nguyễn Văn A",
-      "email": "a@example.com",
-      "phone": "0901234567",
-      "role": "admin",
-      "status": "inactive",
-      "avatar": "https://i.pravatar.cc/150?u=U001",
-      "address": "123 Đường ABC, TP.HCM",
-      "password": "123456",
-      "dob": "1990-05-10T00:00:00Z",
-      "id": "f7b3",
-      "idNumber": ""
-    },
-    {
-      "userId": "U002",
-      "fullName": "Trần Thị B22222222",
-      "email": "b@example.com",
-      "phone": "0902345678",
-      "role": "host",
-      "status": "active",
-      "avatar": "https://i.pravatar.cc/150?u=U002",
-      "address": "456 Đường DEF, Hà Nội",
-      "password": "123456",
-      "dob": "1985-09-20T00:00:00Z",
-      "id": "82c1",
-      "approvalStatus": "approved"
-    },
-    {
-      "userId": "U003",
-      "fullName": "Lê Văn C2222",
-      "email": "c@example.com",
-      "phone": "0903456789",
-      "role": "admin",
-      "status": "active",
-      "avatar": "https://i.pravatar.cc/150?u=U003",
-      "address": "789 Đường XYZ, Đà Nẵng",
-      "password": "123456",
-      "dob": "1995-03-15T00:00:00Z",
-      "id": "fe51"
-    },
-    {
-      "fullName": "Tùng xuân tung",
-      "email": "admin@gmail.com",
-      "phone": "",
-      "password": "123123",
-      "address": "",
-      "avatar": "",
-      "id": "1753856858656",
-      "role": "admin",
-      "status": "active"
-    },
-    {
-      "id": "1753934260262",
-      "fullName": "test",
-      "email": "test@gmail.com",
-      "password": "123123",
-      "phone": "03123213214",
-      "role": "tenant",
-      "status": "active",
-      "createdAt": "2025-07-31T03:57:40.262Z"
-    },
-    {
-      "id": "user_1753939184155",
-      "fullName": "Xuantungf1",
-      "email": "xuantungbui1811@gmail.com",
-      "password": "123123",
-      "phone": "09876544123",
-      "role": "tenant",
-      "status": "active",
-      "createdAt": "2025-07-31T05:19:44.155Z"
+      "id": 1,
+      "ten_dang_nhap": "admin1",
+      "mat_khau": "admin123",
+      "ho_ten": "Quản trị viên 1"
     }
   ],
-  "rooms": [
+  "nguoi_dung": [
     {
-      "roomId": "R001",
-      "roomTitle": "Phòng trọ gần trường",
-      "price": 3000000,
-      "area": 25,
-      "dateAdded": "2025-07-30T10:00:00Z",
-      "location": "Gò Vấp, TP.HCM",
-      "description": "Phòng rộng rãi, có ban công, gần chợ và trường học.",
-      "images": [
-        "https://placehold.co/300x200",
-        "https://placehold.co/300x200"
+      "name": "Trần Thị 222B3232",
+      "email": "thib@gmail.com",
+      "role": "Chủ trọ",
+      "id": "2",
+      "createdAt": "2024-03-20"
+    },
+    {
+      "id": "3",
+      "name": "Lê Văn C",
+      "email": "vanc@gmail.com",
+      "role": "Người dùng",
+      "createdAt": "2024-03-20"
+    },
+    {
+      "id": "54f5",
+      "name": "2131232",
+      "email": "421412412",
+      "role": "Người dùng",
+      "createdAt": "2025-07-09"
+    }
+  ],
+  "phong_tro": [
+    {
+      "id": 1,
+      "tieu_de": "Phòng trọ Q1, sạch đẹp",
+      "dia_chi": "123 Lê Lợi, Q.1, TP.HCM",
+      "gia_thue": 2500000,
+      "dien_tich": 20,
+      "mo_ta": "Phòng có máy lạnh, wifi miễn phí",
+      "hinh_anh": [
+        "phong1a.jpg",
+        "phong1b.jpg"
       ],
-      "roomType": "single",
-      "status": "maintenance",
-      "utilities": [
-        "Wifi",
-        "Điều hòa",
-        "Thang máy"
+      "trang_thai": "con_trong",
+      "chu_tro_id": 2
+    },
+    {
+      "id": 2,
+      "tieu_de": "Phòng trọ Gò Vấp, có gác lửng",
+      "dia_chi": "456 Quang Trung, Gò Vấp, TP.HCM",
+      "gia_thue": 1800000,
+      "dien_tich": 18,
+      "mo_ta": "Phòng rộng rãi, khu an ninh",
+      "hinh_anh": [
+        "phong2a.jpg"
       ],
-      "terms": "Đặt cọc 1 tháng, thanh toán hàng tháng.",
-      "hostId": "U00222",
-      "id": "2844"
-    },
-    {
-      "roomId": "R002",
-      "roomTitle": "Phòng trọ mới xây, đầy đủ nội thất",
-      "price": 3500000,
-      "area": 28,
-      "dateAdded": "2022-07-30T10:00:00Z",
-      "location": "Quận 12, TP.HCM",
-      "description": "Phòng mới xây, có giường, tủ, máy lạnh. Gần bến xe bus.",
-      "images": [
-        "https://placehold.co/300x200",
-        "https://placehold.co/300x200"
-      ],
-      "roomType": "single",
-      "status": "available",
-      "utilities": [
-        "Wifi",
-        "Điều hòa",
-        "Nước nóng"
-      ],
-      "terms": "Đặt cọc 1 tháng, hợp đồng tối thiểu 6 tháng.",
-      "hostId": "U003",
-      "id": "2845"
-    },
-    {
-      "roomId": "R003",
-      "roomTitle": "Phòng trọ giá rẻ, an ninh tốt",
-      "price": 2500000,
-      "dateAdded": "2025-07-30T10:00:00Z",
-      "area": 20,
-      "location": "Bình Thạnh, TP.HCM",
-      "description": "Khu vực an ninh, gần chợ và các tiện ích công cộng.",
-      "images": [
-        "https://placehold.co/300x200",
-        "https://placehold.co/300x200"
-      ],
-      "roomType": "single",
-      "status": "rented",
-      "utilities": [
-        "Wifi",
-        "Giữ xe",
-        "Camera an ninh"
-      ],
-      "terms": "Đặt cọc 1 tháng, thanh toán trước 3 tháng.",
-      "hostId": "U004",
-      "id": "2846"
-    },
-    {
-      "roomId": "R004",
-      "roomTitle": "Phòng trọ cao cấp, view đẹp",
-      "price": 5000000,
-      "dateAdded": "2025-07-30T10:00:00Z",
-      "area": 35,
-      "location": "Quận 1, TP.HCM",
-      "description": "Phòng rộng, nội thất cao cấp, ban công view trung tâm thành phố.",
-      "images": [
-        "https://placehold.co/300x200",
-        "https://placehold.co/300x200"
-      ],
-      "roomType": "double",
-      "status": "available",
-      "utilities": [
-        "Wifi",
-        "Điều hòa",
-        "Thang máy",
-        "Bãi đỗ xe"
-      ],
-      "terms": "Đặt cọc 2 tháng, hợp đồng tối thiểu 1 năm.",
-      "hostId": "U005",
-      "id": "2847"
+      "trang_thai": "da_thue",
+      "chu_tro_id": 2
     }
   ],
-  "bookings": [
+  "don_thue": [
     {
-      "userId": "U001",
-      "bookingId": "B001",
-      "roomId": "R001",
-      "tenantId": "U003",
-      "bookingDate": "2020-07-30T10:00:00Z",
-      "note": "Muốn xem phòng cuối tuần.",
-      "bookingStatus": "confirmed",
-      "id": "f3d9"
-    },
-    {
-      "userId": "U002",
-      "bookingId": "B002",
-      "roomId": "R004",
-      "tenantId": "U003",
-      "bookingDate": "2025-07-30T10:00:00Z",
-      "note": "Muốn xem phòng cuối tuần.",
-      "bookingStatus": "cancelled",
-      "id": "f3d2"
-    },
-    {
-      "userId": "U003",
-      "bookingId": "B003",
-      "roomId": "R003",
-      "tenantId": "U003",
-      "bookingDate": "2025-07-30T10:00:00Z",
-      "note": "Muốn xem phòng cuối tuần.",
-      "bookingStatus": "confirmed",
-      "id": "f3d3"
+      "id": 1,
+      "phong_id": 1,
+      "nguoi_thue_id": 1,
+      "trang_thai": "cho_duyet",
+      "ngay_bat_dau": "2025-07-15",
+      "ngay_ket_thuc": "2025-12-15",
+      "ghi_chu": "Cần phòng cho sinh viên ở lâu dài"
     }
   ],
-  "contracts": [
+  "danh_gia": [
     {
-      "contractId": "C001",
-      "roomId": "R001",
-      "tenantId": "U003",
-      "contractDate": "2025-07-30T10:00:00Z",
-      "duration": 12,
-      "rentPrice": 3000000,
-      "terms": "Thanh toán đầu3232 tháng, báo trước 30 ngày khi chấm dứt.",
-      "id": "4193"
-    },
-    {
-      "contractId": "C002",
-      "roomId": "R002",
-      "tenantId": "U003",
-      "contractDate": "2020-07-30T10:00:00Z",
-      "duration": 6,
-      "rentPrice": 3500000,
-      "terms": "Thanh toán đầu tháng, báo trước 15 ngày khi chấm dứt.",
-      "id": "4194"
-    },
-    {
-      "contractId": "C003",
-      "roomId": "R003",
-      "tenantId": "U003",
-      "contractDate": "2027-07-30T10:00:00Z",
-      "duration": 3,
-      "rentPrice": 2500000,
-      "terms": "Thanh toán đầu tháng, báo trước 7 ngày khi chấm dứt.",
-      "id": "4195"
+      "id": 1,
+      "phong_id": 2,
+      "nguoi_dung_id": 1,
+      "so_sao": 4,
+      "binh_luan": "Phòng sạch sẽ, chủ dễ thương",
+      "ngay_danh_gia": "2025-07-01"
     }
   ],
-  "payments": [
+  "khach_tham_quan": [
     {
-      "userId": "U001",
-      "paymentId": "P001",
-      "tenantId": "U003",
-      "contractId": "C001",
-      "amount": 3000000,
-      "paymentDate": "2025-08-01T00:00:00Z",
-      "paymentStatus": "paid",
-      "extraNote": "Thanh toán qua ngân hàng",
-      "id": "789b"
-    },
-    {
-      "userId": "U002",
-      "paymentId": "P002",
-      "tenantId": "U003",
-      "contractId": "C002",
-      "amount": 3500000,
-      "paymentDate": "2025-08-01T00:00:00Z",
-      "paymentStatus": "pending",
-      "extraNote": "Thanh toán qua ví điện tử",
-      "id": "789c"
-    },
-    {
-      "userId": "U003",
-      "paymentId": "P003",
-      "tenantId": "U003",
-      "contractId": "C003",
-      "amount": 2500000,
-      "paymentDate": "2025-08-01T00:00:00Z",
-      "paymentStatus": "failed",
-      "extraNote": "",
-      "id": "789d"
-    },
-    {
-      "userId": "U004",
-      "paymentId": "P004",
-      "tenantId": "U003",
-      "contractId": "C004",
-      "amount": 4000000,
-      "paymentDate": "2025-08-01T00:00:00Z",
-      "paymentStatus": "paid",
-      "extraNote": "",
-      "id": "789e"
-    },
-    {
-      "userId": "U005",
-      "paymentId": "P005",
-      "tenantId": "U003",
-      "contractId": "C005",
-      "amount": 5000000,
-      "paymentDate": "2025-08-01T00:00:00Z",
-      "paymentStatus": "paid",
-      "extraNote": "Thanh toán bằng tiền mặt",
-      "id": "789f"
-    }
-  ],
-  "messages": [
-    {
-      "messageId": "M001",
-      "tenantId": "U003",
-      "hostId": "U002",
-      "message": "Phòng còn trống không?",
-      "time": "2025-07-29T08:30:00Z",
-      "id": "4d32",
-      "isRead": true
-    },
-    {
-      "messageId": "M002",
-      "tenantId": "U003",
-      "hostId": "U001",
-      "message": "Phòng đã được đặt rồi.",
-      "time": "2025-07-29T09:00:00Z",
-      "id": "4d33",
-      "isRead": true
-    },
-    {
-      "messageId": "M003",
-      "tenantId": "U003",
-      "hostId": "U002",
-      "message": "Có thể xem phòng vào cuối tuần này không?",
-      "time": "2025-07-29T10:00:00Z",
-      "id": "4d34",
-      "isRead": true
-    },
-    {
-      "id": "1753976891143",
-      "messageId": "MSG1753976891143",
-      "hostId": "U001",
-      "tenantId": "U003",
-      "receiverId": "U001",
-      "message": "sacc",
-      "time": "2025-07-31T15:48:11.142Z",
-      "isRead": true
-    },
-    {
-      "id": "1753976939680",
-      "messageId": "MSG1753976939680",
-      "hostId": "U001",
-      "tenantId": "U003",
-      "receiverId": "U001",
-      "message": "sadda",
-      "time": "2025-07-31T15:48:59.680Z",
-      "isRead": true
-    },
-    {
-      "id": "6417",
-      "messageId": "MSG1754018583540",
-      "tenantId": "U001",
-      "hostId": "fe51",
-      "message": "ok",
-      "time": "2025-08-01T03:23:03.540Z",
-      "isRead": false
-    },
-    {
-      "id": "11cb",
-      "messageId": "MSG1754018591490",
-      "tenantId": "U001",
-      "hostId": "fe51",
-      "message": "ok",
-      "time": "2025-08-01T03:23:11.490Z",
-      "isRead": false
-    },
-    {
-      "id": "a1e1",
-      "messageId": "MSG1754018603862",
-      "tenantId": "U001",
-      "hostId": "fe51",
-      "message": "a",
-      "time": "2025-08-01T03:23:23.862Z",
-      "isRead": false
-    },
-    {
-      "id": "bc20",
-      "messageId": "MSG1754018819423",
-      "tenantId": "U001",
-      "hostId": "fe51",
-      "message": "ok nhe",
-      "time": "2025-08-01T03:26:59.423Z",
-      "isRead": false
-    }
-  ],
-  "room_requests": [
-    {
-      "requestId": "RQ001",
-      "roomId": "R001",
-      "tenantId": "U003",
-      "note": "Tôi muốn thuê trong 6 tháng.",
-      "requestDate": "2025-07-29T08:00:00Z",
-      "requestStatus": "pending",
-      "id": "3b12"
-    }
-  ],
-  "room_approvals": [
-    {
-      "approvalId": "A001",
-      "roomId": "R001",
-      "approvalStatus": "approved",
-      "approvalDate": "2025-07-29T12:00:00Z",
-      "note": "Phòng đạt yêu cầu.",
-      "adminId": "U001",
-      "id": "34a2"
-    },
-    {
-      "approvalId": "A002",
-      "roomId": "R001",
-      "approvalStatus": "approved",
-      "approvalDate": "2025-07-29T12:00:00Z",
-      "note": "Phòng đạt yêu cầu.",
-      "adminId": "U001",
-      "id": "34a2"
-    },
-    {
-      "approvalId": "A003",
-      "roomId": "R001",
-      "approvalStatus": "approved",
-      "approvalDate": "2025-07-29T12:00:00Z",
-      "note": "Phòng đạt yêu cầu.",
-      "adminId": "U001",
-      "id": "34a2"
-    },
-    {
-      "id": "b570",
-      "approvalId": "A1753931160391",
-      "roomId": "R003",
-      "approvalStatus": "approved",
-      "approvalDate": "2025-07-31T03:06:00.391Z",
-      "note": "Phòng đạt yêu cầu.",
-      "adminId": "U001"
-    },
-    {
-      "id": "b3f4",
-      "approvalId": "A1753975742584",
-      "roomId": "R002",
-      "approvalStatus": "approved",
-      "approvalDate": "2025-07-31T15:29:02.584Z",
-      "note": "Phòng đạt yêu cầu.",
-      "adminId": "U001"
-    }
-  ],
-  "statistics": [
-    {
-      "date": "2025-07-30",
-      "totalUsers": 3,
-      "totalRooms": 1,
-      "totalRevenue": 3000000,
-      "totalBookings": 1,
-      "totalContracts": 1,
-      "newUsers": 1,
-      "activeUsers": 3,
-      "id": "c603"
-    }
-  ],
-  "transactions": [
-    {
-      "transactionId": "T001",
-      "senderId": "U003",
-      "receiverId": "U002",
-      "amount": 3000000,
-      "content": "Thanh toán tiền thuê phòng",
-      "method": "bank",
-      "time": "2025-08-01T00:00:00Z",
-      "id": "6c34"
-    }
-  ],
-  "search_logs": [
-    {
-      "logId": "SL001",
-      "userId": "U003",
-      "roomType": "single",
-      "location": "Gò Vấp",
-      "price": 3000000,
-      "area": 25,
-      "utilities": [
-        "Wifi",
-        "Điều hòa"
-      ],
-      "status": "available",
-      "keyword": "phòng trọ gần trường",
-      "searchTime": "2025-07-28T09:00:00Z",
-      "id": "d6b8"
-    }
-  ],
-  "reviews": [
-    {
-      "reviewId": "RV001",
-      "roomId": "R001",
-      "tenantId": "U003",
-      "review": "Phòng sạch sẽ, chủ nhà thân thiện.",
-      "rating": 5,
-      "reviewDate": "2025-07-30T09:00:00Z",
-      "id": "9f17",
-      "status": "approved"
-    },
-    {
-      "reviewId": "RV002",
-      "roomId": "R002",
-      "tenantId": "U003",
-      "review": "Phòng đẹp nhưng giá hơi cao.",
-      "rating": 4,
-      "reviewDate": "2025-07-30T09:30:00Z",
-      "id": "9f18",
-      "status": "pending"
-    }
-  ],
-  "export_logs": [
-    {
-      "logId": "EL001",
-      "userId": "U001",
-      "exportType": "pdf",
-      "time": "2025-07-30T10:00:00Z",
-      "content": "Báo cáo doanh thu tháng 7",
-      "id": "64c5"
-    }
-  ],
-  "reports": [
-    {
-      "reportId": "RP001",
-      "reporterId": "U003",
-      "roomId": "R001",
-      "reason": "Phòng không đúng mô tả",
-      "status": "pending",
-      "reportDate": "2025-07-30T10:00:00Z",
-      "adminNote": "",
-      "id": "d4a9"
-    }
-  ],
-  "roles": [
-    {
-      "roleId": "RL001",
-      "userId": "U002",
-      "role": "host",
-      "status": "active",
-      "assignedAt": "2025-07-01T00:00:00Z",
-      "id": "d9f7"
-    }
-  ],
-  "roomStats": [
-    {
-      "statId": "RS001",
-      "totalRooms": 1,
-      "available": 1,
-      "rented": 0,
-      "maintenance": 0,
-      "updatedAt": "2025-07-30T10:00:00Z",
-      "id": "f19b"
-    }
-  ],
-  "notifications": [
-    {
-      "notificationId": "N001",
-      "receiverId": "U003",
-      "title": "Xác nhận đặt phòng",
-      "message": "Yêu cầu đặt phòng của bạn đã được chấp nhận.",
-      "type": "booking",
-      "status": "unread",
-      "createdAt": "2025-07-30T11:00:00Z",
-      "id": "c672"
+      "id": 1,
+      "dia_chi_ip": "192.168.1.100",
+      "thoi_gian_truy_cap": "2025-07-09T09:00:00",
+      "phong_quan_tam": [
+        1,
+        2
+      ]
     }
   ]
 }

@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Building, 
-  Calendar, 
-  CreditCard, 
-  TrendingUp, 
+import {
+  Users,
+  Building,
+  Calendar,
+  CreditCard,
+  TrendingUp,
   TrendingDown,
-  UserPlus,
   Home
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
+import { headers } from '../../utils/config';
 
 interface DashboardStats {
   totalUsers: number;
@@ -40,13 +40,16 @@ const DashboardPage: React.FC = () => {
     try {
       setLoading(true);
       
-      // Fetch data from multiple endpoints
+      const API_URL = 'http://localhost:3000';
+
+      // Fetch data từ nhiều endpoint
       const [usersRes, roomsRes, bookingsRes, paymentsRes] = await Promise.all([
-        fetch('/http://localhost:5000/users'),
-        fetch('/http://localhost:5000/rooms'),
-        fetch('/http://localhost:5000/bookings'),
-        fetch('/http://localhost:5000/payments')
+        fetch(`${API_URL}/users`, { headers }),
+        fetch(`${API_URL}/rooms`, { headers }),
+        fetch(`${API_URL}/bookings`, { headers }),
+        fetch(`${API_URL}/payments`, { headers })
       ]);
+
 
       const [users, rooms, bookings, payments] = await Promise.all([
         usersRes.json(),
@@ -55,23 +58,23 @@ const DashboardPage: React.FC = () => {
         paymentsRes.json()
       ]);
 
-      // Calculate stats
-      const totalRevenue = payments.reduce((sum: number, payment: any) => 
+      // Tính toán thống kê
+      const totalRevenue = payments.data.data.reduce((sum: number, payment: any) =>
         payment.paymentStatus === 'completed' ? sum + payment.amount : sum, 0
       );
 
       const currentMonth = new Date().getMonth();
-      const newUsersThisMonth = users.filter((user: any) => 
-        new Date(user.createdAt).getMonth() === currentMonth
+      const newUsersThisMonth = users.data.users.filter((u: any) =>
+        new Date(u.createdAt).getMonth() === currentMonth
       ).length;
 
-      const rentedRooms = rooms.filter((room: any) => room.status === 'rented').length;
-      const occupancyRate = rooms.length > 0 ? (rentedRooms / rooms.length) * 100 : 0;
+      const rentedRooms = rooms.data.rooms.filter((r: any) => r.status === 'rented').length;
+      const occupancyRate = rooms.data.pagination.totalRooms > 0 ? (rentedRooms / rooms.data.pagination.totalRooms) * 100 : 0;
 
       setStats({
-        totalUsers: users.length,
-        totalRooms: rooms.length,
-        totalBookings: bookings.length,
+        totalUsers: users.data.pagination.totalUsers,
+        totalRooms: rooms.data.pagination.totalRooms,
+        totalBookings: bookings.data.pagination.totalBookings,
         totalRevenue,
         newUsersThisMonth,
         occupancyRate
@@ -163,8 +166,8 @@ const DashboardPage: React.FC = () => {
                   {card.title}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {typeof card.value === 'number' && card.title !== 'Doanh thu' 
-                    ? card.value.toLocaleString() 
+                  {typeof card.value === 'number' && card.title !== 'Doanh thu'
+                    ? card.value.toLocaleString()
                     : card.value
                   }
                 </p>
@@ -175,11 +178,10 @@ const DashboardPage: React.FC = () => {
                   {card.changeType === 'decrease' && (
                     <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
                   )}
-                  <span className={`text-sm ${
-                    card.changeType === 'increase' ? 'text-green-600' :
+                  <span className={`text-sm ${card.changeType === 'increase' ? 'text-green-600' :
                     card.changeType === 'decrease' ? 'text-red-600' :
-                    'text-gray-600'
-                  }`}>
+                      'text-gray-600'
+                    }`}>
                     {card.change}
                   </span>
                 </div>
@@ -190,87 +192,6 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Hoạt động gần đây</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <UserPlus className="w-4 h-4 text-green-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Người dùng mới đăng ký</p>
-                  <p className="text-sm text-gray-500">2 phút trước</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <Building className="w-4 h-4 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Phòng trọ mới được đăng</p>
-                  <p className="text-sm text-gray-500">15 phút trước</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-                  <Calendar className="w-4 h-4 text-yellow-600" />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Đặt phòng mới</p>
-                  <p className="text-sm text-gray-500">1 giờ trước</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Quick Stats */}
-        <div className="bg-white rounded-lg shadow-sm border">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Thống kê nhanh</h3>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Tỷ lệ lấp đầy</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {stats.occupancyRate.toFixed(1)}%
-                </span>
-              </div>
-              
-              <div className="w-full bg-gray-200 rounded-full h-2">
-                <div 
-                  className="bg-blue-600 h-2 rounded-full" 
-                  style={{ width: `${stats.occupancyRate}%` }}
-                ></div>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Người dùng mới tháng này</span>
-                <span className="text-sm font-medium text-green-600">
-                  +{stats.newUsersThisMonth}
-                </span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Phòng trống</span>
-                <span className="text-sm font-medium text-gray-900">
-                  {stats.totalRooms - Math.round(stats.totalRooms * stats.occupancyRate / 100)}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

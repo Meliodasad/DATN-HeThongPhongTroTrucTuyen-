@@ -1,11 +1,12 @@
 import type { CreateUserData, UpdateUserData, User, UserFilters, UserStats } from "../types/user";
+import { headers } from "../../utils/config";
 
 class UserService {
-  private baseUrl = 'http://localhost:5000';
+  private baseUrl = 'http://localhost:3000';
 
   async getUsers(filters?: UserFilters): Promise<User[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/users`);
+      const response = await fetch(`${this.baseUrl}/users`, { headers });
       if (!response.ok) {
         throw new Error('Failed to fetch users');
       }
@@ -14,32 +15,32 @@ class UserService {
       // Apply filters
       if (filters) {
         if (filters.role && filters.role !== 'all') {
-          users = users.filter((user: User) => user.role === filters.role);
+          users = users.data.users.filter((user: User) => user.role === filters.role);
         }
         if (filters.status && filters.status !== 'all') {
-          users = users.filter((user: User) => user.status === filters.status);
+          users = users.data.users.filter((user: User) => user.status === filters.status);
         }
         if (filters.searchTerm) {
           const searchLower = filters.searchTerm.toLowerCase();
-          users = users.filter((user: User) => 
+          users = users.data.users.filter((user: User) => 
             user.fullName.toLowerCase().includes(searchLower) ||
             user.email.toLowerCase().includes(searchLower) ||
             (user.phone && user.phone.includes(filters.searchTerm!))
           );
         }
         if (filters.dateFrom) {
-          users = users.filter((user: User) => 
+          users = users.data.users.filter((user: User) => 
             new Date(user.createdAt) >= new Date(filters.dateFrom!)
           );
         }
         if (filters.dateTo) {
-          users = users.filter((user: User) => 
+          users = users.data.users.filter((user: User) => 
             new Date(user.createdAt) <= new Date(filters.dateTo!)
           );
         }
       }
 
-      return users.sort((a: User, b: User) => 
+      return users.data.users.sort((a: User, b: User) => 
         new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
     } catch (error) {
@@ -50,7 +51,8 @@ class UserService {
 
   async getUserById(id: string): Promise<User> {
     try {
-      const response = await fetch(`${this.baseUrl}/users/${id}`);
+      
+      const response = await fetch(`${this.baseUrl}/users/${id}`, { headers });
       if (!response.ok) {
         throw new Error('User not found');
       }
@@ -92,10 +94,8 @@ class UserService {
   async updateUser(id: string, userData: UpdateUserData): Promise<User> {
     try {
       const response = await fetch(`${this.baseUrl}/users/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: 'PUT',
+        headers,
         body: JSON.stringify(userData),
       });
 
@@ -114,6 +114,7 @@ class UserService {
     try {
       const response = await fetch(`${this.baseUrl}/users/${id}`, {
         method: 'DELETE',
+        headers
       });
 
       if (!response.ok) {

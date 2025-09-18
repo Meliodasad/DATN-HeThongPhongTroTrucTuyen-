@@ -24,8 +24,7 @@ import {
   X
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
-import { messageService } from '../../services/messageService';
-import type { Conversation, MessageStats } from '../../services/messageService';
+import { messageService, type Conversation, type MessageStats } from '../services/messageService';
 
 const ContactsPage: React.FC = () => {
   // All useState hooks first
