@@ -115,3 +115,15 @@
 .dropdown-menu button {
   cursor: pointer;
 }
+
+@media (max-width: 768px) {
+  .header-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .menu a {
+    display: block;
+    margin: 5px 0;
+  }
+}

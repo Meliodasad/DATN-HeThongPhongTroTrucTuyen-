@@ -18,7 +18,7 @@ const SidebarRight = () => {
       try {
         const response = await fetch('http://localhost:3000/rooms');
         const data = await response.json();
-        setRooms(data.slice().reverse().slice(0, 5)); // Lấy 5 bài mới nhất
+        setRooms(data.slice().reverse().slice(0, 5)); 
       } catch (error) {
         console.error('Lỗi khi tải tin mới:', error);
       }
