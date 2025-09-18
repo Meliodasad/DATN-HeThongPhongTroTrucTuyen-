@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { CheckCircle, XCircle, AlertCircle, Info, X } from 'lucide-react';
 
@@ -38,10 +39,9 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
     
     setToasts(prev => [...prev, newToast]);
     
-    // Auto remove after 5 seconds
     setTimeout(() => {
       setToasts(prev => prev.filter(toast => toast.id !== id));
-    }, 5000);
+    }, 3000);
   };
 
   const removeToast = (id: string) => {
