@@ -6,14 +6,17 @@ import './index.css';
 import App from './App';
 import { AuthProvider } from './contexts/AuthContext';
 import { ToastProvider } from './contexts/ToastContext';
+import { SearchProvider } from './contexts/SearchContext';
 
 createRoot(document.getElementById('root')!).render(
   <BrowserRouter>
-  <ToastProvider>
-    <AuthProvider>
-      <App />
-    </AuthProvider>
-  </ToastProvider>
-</BrowserRouter>
+    <ToastProvider>
+      <AuthProvider>
+        <SearchProvider>
+          <App />
+        </SearchProvider>
+      </AuthProvider>
+    </ToastProvider>
+  </BrowserRouter>
 
 );

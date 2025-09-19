@@ -49,6 +49,8 @@ import RoomStatus from './pages/host/RoomStatus';
 import RentalRequest from './pages/host/RentalRequest';
 import ContractList from './pages/host/ContractList';
 import RoomList from './pages/host/RoomList';
+import ContractCheckout from './pages/user/ContractCheckout';
+import ResultPage from './pages/user/ResultPage';
 
 function App() {
   return (
@@ -117,6 +119,8 @@ function App() {
                 <Route path="booking/:roomId" element={<BookingForm />} />
                 <Route path="contracts/:id" element={<ContractDetail />} />
                 <Route path="my-account" element={<MyAccount />} />
+                <Route path="/payments/contract/:contractId" element={<ContractCheckout />} />
+                <Route path="/success-page" element={<ResultPage />} />
                 <Route
                   path="my-bookings"
                   element={

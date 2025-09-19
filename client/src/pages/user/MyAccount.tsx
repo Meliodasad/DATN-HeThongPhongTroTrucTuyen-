@@ -1,59 +1,108 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
-import "../../css/MyAccount.css"
+import '../../css/MyAccount.css';
 import { userService } from '../../services/userService';
-import { headers } from '../../utils/config';
+import { headers as baseHeaders } from '../../utils/config';
+import { useNavigate, useLocation } from 'react-router-dom'; 
 
-interface Contract {
-  id: string;
-  tenantId: string;
+type ContractStatus = 'pending' | 'active' | 'expired' | 'terminated';
+
+type ApiContract = {
+  _id: string;
+  contractId: string;
+  bookingId?: string;
   roomId: string;
+  tenantId: string;
   startDate: string;
   endDate?: string;
-  status: 'pending' | 'accepted' | 'rejected' | 'ended';
-}
+  duration?: number;          // tháng
+  rentPrice?: number;         // tổng kỳ thuê
+  terms?: string;
+  status: ContractStatus;
+  createdAt?: string;
+  updatedAt?: string;
+  roomInfo?: {
+    roomId: string;
+    roomTitle: string;
+    price?: { value: number; unit: string }; // có thể có / hoặc không
+    location?: string;
+    images?: string[];
+    hostId?: string;
+  };
+};
 
-interface Room {
-  id: string;
+type Row = {
+  id: string;                // dùng contractId
+  contractId: string;
+  roomId: string;
   roomTitle: string;
-  price: number;
-  address: string;
-  images?: string;
-}
+  image: string;
+  monthlyPrice: number;      // giá / tháng
+  totalPrice: number;        // rentPrice tổng
+  startDate: string;
+  endDate?: string;
+  status: ContractStatus;
+};
 
 const MyAccount: React.FC = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
-  const [contracts, setContracts] = useState<Contract[]>([]);
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const [showChangePassword, setShowChangePassword] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [message, setMessage] = useState("");
+  const location = useLocation(); 
+  const authHeaders = React.useMemo(() => {
+    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
+    return token ? { ...baseHeaders, Authorization: `Bearer ${token}` } : baseHeaders;
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         if (!user?.id) return;
 
+        // Hồ sơ
         const resUser: any = await userService.getUserById(user.id);
         setProfile(resUser.data);
 
-        const resContracts = await axios.get(`http://localhost:3000/contracts?tenantId=${user.id}`, { headers });
-        const userContracts = resContracts.data.filter(
-          (c: Contract) => c.status === 'accepted' || c.status === 'ended'
-        );
-        setContracts(userContracts);
+        // Hợp đồng của tenant
+        const res = await axios.get('http://localhost:3000/contracts/tenant', {
+          headers: authHeaders,
+        });
 
-        const roomIds = userContracts.map((c: Contract) => c.roomId);
-        if (roomIds.length > 0) {
-          const resRooms = await axios.get(`http://localhost:3000/rooms?id=${roomIds.join('&id=')}`);
-          setRooms(resRooms.data);
-        }
+        const list: ApiContract[] =
+          res.data?.data?.contracts ??
+          res.data?.contracts ??
+          res.data ??
+          [];
+
+        const adapted: Row[] = list.map((c) => {
+          const img =
+            (c.roomInfo?.images && c.roomInfo.images[0]) ||
+            '/default-room.jpg';
+          const monthly = typeof c.roomInfo?.price?.value === 'number'
+            ? c.roomInfo!.price!.value
+            : (typeof c.rentPrice === 'number' && c.duration ? Math.floor(c.rentPrice / Math.max(c.duration, 1)) : 0);
+          const total = typeof c.rentPrice === 'number'
+            ? c.rentPrice!
+            : monthly * (c.duration || 1);
+
+          return {
+            id: c.contractId || c._id,
+            contractId: c.contractId || c._id,
+            roomId: c.roomId,
+            roomTitle: c.roomInfo?.roomTitle || c.roomId,
+            image: img,
+            monthlyPrice: monthly || 0,
+            totalPrice: total || 0,
+            startDate: c.startDate,
+            endDate: c.endDate,
+            status: c.status,
+          };
+        });
+
+        setRows(adapted);
       } catch (err) {
         console.error('Lỗi tải dữ liệu:', err);
       } finally {
@@ -62,30 +111,16 @@ const MyAccount: React.FC = () => {
     };
 
     fetchData();
-  }, [user]);
+  }, [user, authHeaders]);
 
-  const getRoomInfo = (roomId: string) => rooms.find(r => r.id === roomId);
+  const handlePay = (contractId: string, amount: number) => {
+    // tuỳ flow của bạn:
+    // 1) Điều hướng tới trang thanh toán riêng:
+    navigate(`/payments/contract/${contractId}`, { state: { amount } });
 
-  const handleChangePassword = async () => {
-    if (newPassword !== confirmPassword) {
-      setMessage("Mật khẩu mới không khớp!");
-      return;
-    }
-
-    if (currentPassword !== profile.password) {
-      setMessage("Mật khẩu hiện tại không đúng!");
-      return;
-    }
-
-    try {
-      await axios.patch(`http://localhost:3000/users/${user.id}`, {
-        password: newPassword
-      });
-      setMessage("Đổi mật khẩu thành công!");
-      setShowChangePassword(false);
-    } catch (error) {
-      setMessage("Lỗi đổi mật khẩu!");
-    }
+    // 2) Hoặc call API tạo payment rồi điều hướng (nếu đã có paymentService)
+    // await paymentService.createPayment({ contractId, amount })
+    // navigate('/payments/checkout/:paymentId')
   };
 
   if (loading) return <div className="loading-text">Loading...</div>;
@@ -101,12 +136,19 @@ const MyAccount: React.FC = () => {
         />
         <h2 className="myaccount-name">{profile.fullName}</h2>
         <p className="myaccount-phone">📞 {profile.phone || 'Chưa cập nhật'}</p>
-        <p className="myaccount-balance">Số dư: {profile.balance?.toLocaleString() || 0} VND</p>
+        <p className="myaccount-balance">Số dư: {profile.balance?.toLocaleString('vi-VN') || 0} VND</p>
 
         <ul className="myaccount-menu">
           <li className="active">Thông tin cá nhân</li>
-          <li onClick={() => setShowChangePassword(true)}>Đổi mật khẩu</li>
+          <li onClick={() => {/* mở modal đổi mật khẩu */}}>Đổi mật khẩu</li>
           <li>Nạp tiền</li>
+            <li
+            onClick={() => navigate('/my-bookings')}
+            className={location.pathname === '/my-bookings' ? 'active' : ''}
+            title="Xem các booking của tôi"
+          >
+            My - Booking
+          </li>
         </ul>
       </div>
 
@@ -136,43 +178,55 @@ const MyAccount: React.FC = () => {
         </div>
 
         <div className="myaccount-history">
-          <h3>Lịch sử phòng đã thuê</h3>
+          <h3>Lịch sử hợp đồng</h3>
           <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
                   <th>Hình ảnh</th>
                   <th>Phòng</th>
-                  <th>Giá thuê</th>
+                  <th>Giá / tháng</th>
+                  <th>Tổng kỳ thuê</th>
                   <th>Ngày bắt đầu</th>
                   <th>Ngày kết thúc</th>
                   <th>Trạng thái</th>
+                  <th>Hành động</th>
                 </tr>
               </thead>
               <tbody>
-                {contracts.length > 0 ? (
-                  contracts.map((c) => {
-                    const room = getRoomInfo(c.roomId);
-                    return (
-                      <tr key={c.id}>
-                        <td>
-                          <img
-                            src={room?.images || '/default-room.jpg'}
-                            alt={room?.roomTitle || 'Phòng'}
-                            className="room-img"
-                          />
-                        </td>
-                        <td>{room?.roomTitle || 'N/A'}</td>
-                        <td>{room?.price?.toLocaleString() || 0} VND</td>
-                        <td>{new Date(c.startDate).toLocaleDateString()}</td>
-                        <td>{c.endDate ? new Date(c.endDate).toLocaleDateString() : '-'}</td>
-                        <td className={`status ${c.status}`}>{c.status}</td>
-                      </tr>
-                    );
-                  })
+                {rows.length > 0 ? (
+                  rows.map((r) => (
+                    <tr key={r.id}>
+                      <td>
+                        <img
+                          src={r.image}
+                          alt={r.roomTitle}
+                          className="room-img"
+                        />
+                      </td>
+                      <td>{r.roomTitle}</td>
+                      <td>{r.monthlyPrice.toLocaleString('vi-VN')} VND</td>
+                      <td>{r.totalPrice.toLocaleString('vi-VN')} VND</td>
+                      <td>{new Date(r.startDate).toLocaleDateString('vi-VN')}</td>
+                      <td>{r.endDate ? new Date(r.endDate).toLocaleDateString('vi-VN') : '-'}</td>
+                      <td className={`status ${r.status}`}>{r.status}</td>
+                      <td>
+                        {r.status === 'pending' ? (
+                          <button
+                            className="btn-pay"
+                            onClick={() => handlePay(r.contractId, r.totalPrice)}
+                          >
+                            Thanh toán
+                          </button>
+                        ) : (
+                          <span className="muted">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
                 ) : (
                   <tr>
-                    <td colSpan={6} className="no-data">Chưa có lịch sử thuê phòng</td>
+                    <td colSpan={8} className="no-data">Chưa có hợp đồng</td>
                   </tr>
                 )}
               </tbody>
@@ -181,36 +235,7 @@ const MyAccount: React.FC = () => {
         </div>
       </div>
 
-      {showChangePassword && (
-        <div className="modal-overlay">
-          <div className="modal">
-            <h3>Đổi mật khẩu</h3>
-            {message && <p className="message">{message}</p>}
-            <input
-              type="password"
-              placeholder="Mật khẩu hiện tại"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Mật khẩu mới"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-            />
-            <input
-              type="password"
-              placeholder="Xác nhận mật khẩu mới"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <div className="modal-actions">
-              <button onClick={handleChangePassword} className="btn-confirm">Xác nhận</button>
-              <button onClick={() => setShowChangePassword(false)} className="btn-cancel">Hủy</button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal đổi mật khẩu*/}
     </div>
   );
 };

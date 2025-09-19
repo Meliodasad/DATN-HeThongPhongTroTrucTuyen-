@@ -74,7 +74,7 @@ app.get('/api/health', (req, res) => {
 // Error Handler Middleware
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = 3000;
 // 404 Handler
 app.use('*', (req, res) => {
   res.status(404).json({

@@ -147,24 +147,6 @@ const LoginPage: React.FC = () => {
             </p>
           </div>
         </form>
-
-        <div className="mt-6">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Tài khoản demo:</h4>
-          <div className="space-y-1 text-sm">
-            {demoAccounts.map((acc) => (
-              <div key={acc.email} className="flex justify-between items-center bg-white px-3 py-2 rounded border">
-                <span>{acc.role}</span>
-                <button
-                  type="button"
-                  className="text-blue-600 hover:underline"
-                  onClick={() => fillDemoAccount(acc.email, acc.password)}
-                >
-                  Dùng thử
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

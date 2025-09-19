@@ -29,8 +29,8 @@ const contractSchema = new mongoose.Schema({
   note: String, // ghi chú thêm nếu có
   status: {
     type: String,
-    enum: ['active','expired', 'terminated'],
-    default: 'active'
+    enum: ['active','expired', 'terminated', 'pending'],
+    default: 'pending'
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }

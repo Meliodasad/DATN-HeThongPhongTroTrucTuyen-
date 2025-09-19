@@ -69,14 +69,12 @@ const RegisterPage: React.FC = () => {
       });
       console.log(result);
 
-      if (result && result.userId) {
-        console.log('Đăng ký thành công với userId:', result.userId);
-        // Lưu userId vào localStorage nếu cần
-        localStorage.setItem('registeredUserId', result.userId);
-        navigate('/login');
-      } else {
-        setErrors({ general: 'Đăng ký không thành công. Vui lòng thử lại.' });
-      }
+    if (result) {
+          navigate('/login');
+        } else {
+          setErrors({ general: 'Đăng ký không thành công. Vui lòng thử lại.' });
+        }
+
     } catch (error) {
       console.error('Registration error:', error);
       setErrors({ general: 'Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại.' });

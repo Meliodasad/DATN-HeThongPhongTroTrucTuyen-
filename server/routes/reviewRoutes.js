@@ -14,7 +14,7 @@ const { protect, authorize } = require('../middleware/auth');
 router.post('/', protect, authorize('tenant'), createReview);
 
 // Lấy đánh giá của 1 phòng
-router.get('/room/:roomId', getRoomReviews);
+router.get('/:roomId', getRoomReviews);
 
 // Lấy tất cả đánh giá (host và admin)
 router.get('/', protect, authorize('admin','host'), getAllReviews);

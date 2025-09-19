@@ -79,3 +79,9 @@ button:focus-visible {
   }
 }
 
+.price-area p.active,
+.area-area p.active {
+  font-weight: bold;
+  color: #d32f2f; /* màu nổi bật */
+  cursor: pointer;
+}

@@ -75,7 +75,7 @@ const ContractDetail = () => {
       end: endIso,
       durationText: months ? `${months} tháng` : "—",
       terms: contract.terms || "",
-      rent: contract.rentPrice || contract.roomInfo?.price?.value || 0,
+      rent: contract.roomInfo?.price?.value || 0,
       rentUnit: contract.roomInfo?.price?.unit || "VNĐ/tháng",
       room: contract.roomInfo,
       tenant: contract.tenantInfo,

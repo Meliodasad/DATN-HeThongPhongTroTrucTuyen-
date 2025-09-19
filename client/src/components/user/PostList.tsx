@@ -2,30 +2,34 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PostCard from './PostCard';
 import { headers } from '../../utils/config';
+import { useSearch } from '../../contexts/SearchContext';
 
 interface Room {
-  id: string;
+   _id: string;
   roomId: string;
-  title: string;
+  roomTitle: string;
   description: string;
-  price: number;
+  price: { value: number; unit: string };
   images: string[];
-  address: string;
-  area?: number;
-  author: {
-    id: string;
-    fullName: string;
-    phone: string;
-    avatarUrl?: string;
-  };
+  location: string;
+  area: number;
+  status: string;
+  roomType: string;
+  utilities: string[];
+  createdAt: string;
+  updatedAt: string;
 }
+
 
 const PostList = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const { searchRoom } = useSearch();
+
   useEffect(() => {
-    fetch('http://localhost:3000/rooms', { headers })
+    const params = new URLSearchParams(searchRoom as any).toString();
+    fetch(`http://localhost:3000/rooms?${params}`, { headers })
       .then((res) => res.json())
       .then((data) => {
         setRooms(data?.data?.rooms || []);
@@ -35,7 +39,7 @@ const PostList = () => {
         console.error('Lỗi khi tải danh sách phòng:', error);
         setLoading(false);
       });
-  }, []);
+  }, [searchRoom]);
 
   if (loading) return <div>Đang tải danh sách phòng...</div>;
 
@@ -47,7 +51,19 @@ const PostList = () => {
           key={room.roomId}
           style={{ textDecoration: 'none', color: 'inherit' }}
         >
-          <PostCard {...room} area={room.area ?? 0} />
+          <PostCard
+          title={room.roomTitle}
+          price={room.price}
+          area={room.area}
+          address={room.location}
+          images={room.images}
+          description={room.description}
+          status={room.status}
+          roomType={room.roomType}
+          utilities={room.utilities}
+          createdAt={room.createdAt}
+        />
+
         </Link>
       ))}
     </div>

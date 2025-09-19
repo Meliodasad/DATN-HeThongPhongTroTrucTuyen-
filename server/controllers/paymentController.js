@@ -26,25 +26,21 @@ exports.paymentResult = async (req, res) => {
         .select('userId fullName email phone')
         .lean();
     }
-    const payload = {
-      paymentId: payment.paymentId,
-      contractId: payment.contractId,
-      tenantId: payment.tenantId,
-      amount: payment.amount,
-      paymentStatus: payment.paymentStatus,         
-      vnpTxnRef: payment.vnpTxnRef,
-      vnpResponseCode: payment.vnpResponseCode,    
-      vnpBankCode: payment.vnpBankCode,
-      paidAt: payment.paidAt,
-      createdAt: payment.createdAt,
-      tenant,
-      clientStatus: status || null
-    };
+    if (status === 'success' && payment.contractId) {
+      await Contract.findOneAndUpdate(
+        { contractId: payment.contractId },
+        { status: 'active', updatedAt: new Date() },
+        { new: true }
+      );
+    }
 
-    return res.json({ success: true, data: payload });
+    const page = status === 'success' ? 'success-page' : 'fail-page';
+    return res.redirect(302, `http://localhost:5173/${page}?ref=${encodeURIComponent(ref)}`);
   } catch (err) {
     console.error('Lỗi paymentResult:', err);
-    return res.status(500).json({ success: false, message: 'Lỗi server' });
+      const redirectUrl = `http://localhost:5173/fail-page?ref=${encodeURIComponent(ref)}`;
+    return res.redirect(302, redirectUrl);
+    // return res.status(500).json({ success: false, message: 'Lỗi server' });
   }
 };
 exports.createVnpayPayment = async (req, res) => {
@@ -71,7 +67,7 @@ exports.createVnpayPayment = async (req, res) => {
     const baseUrl = process.env.CLIENT_URL?.replace(/\/+$/, '') || `${req.protocol}://${req.get('host')}`;
 
     const payUrl = await vnpay.buildPaymentUrl({
-      vnp_Amount: amount * 100,
+      vnp_Amount: amount,
       vnp_TxnRef: vnpTxnRef,
       vnp_OrderInfo: `Thanh toán hợp đồng ${contractId}`,
       vnp_IpAddr: clientIp,

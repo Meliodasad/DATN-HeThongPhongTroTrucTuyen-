@@ -20,4 +20,6 @@ router.get('/', protect, getPayments);
 
 router.put('/:id', protect, updatePayment);
 
+// router.get('/vnpay/ipn', vnpayIpn);
+
 module.exports = router;

@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import '../../css/Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { useSearch } from '../../contexts/SearchContext';
 
 const Header = () => {
   const { user, logout } = useAuth();
+  const { setSearchRoom } = useSearch();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -34,7 +36,10 @@ const Header = () => {
             src="https://phongtro123.com/images/logo-phongtro.svg"
             alt="Logo"
             className="logo"
-            onClick={() => navigate('/')}
+            onClick={() => {
+              navigate('/');
+              setSearchRoom({});
+            }}
           />
           <input
             type="text"
@@ -59,7 +64,7 @@ const Header = () => {
                   alt="avatar"
                   className="w-8 h-8 rounded-full"
                 />
-                <span className="text-white">{user.username}</span>
+                <span className="text-white">{user?.username}</span>
               </div>
 
               {showDropdown && (
@@ -90,13 +95,13 @@ const Header = () => {
 
       <nav className="header-nav">
         <div className="nav-links">
-          <a href="#">Phòng trọ</a>
-          <a href="#">Nhà nguyên căn</a>
-          <a href="#">Căn hộ</a>
-          <a href="#">Ở ghép</a>
-          <a href="#">Mặt bằng</a>
-          <a href="#">Blog</a>
-          <a href="#">Bảng giá dịch vụ</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'room' }))}>Phòng trọ</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'house' }))}>Nhà nguyên căn</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'apartment' }))}>Căn hộ</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'shared' }))}>Ở ghép</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'commercial' }))}>Mặt bằng</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'blog' }))}>Blog</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'service_price' }))}>Bảng giá dịch vụ</a>
         </div>
       </nav>
     </header>

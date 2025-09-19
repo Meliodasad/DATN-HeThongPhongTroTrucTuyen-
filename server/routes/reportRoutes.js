@@ -22,7 +22,7 @@ router.get('/my-reports', protect, getMyReports);
 router.get('/', protect, authorize('admin','host'), getAllReports);
 
 // Lấy báo cáo cụ thể theo ID (admin)
-router.get('/:id', protect, authorize('admin','host'), getReportById);
+router.get('/:id', protect,  getReportById);
 
 // Cập nhật trạng thái report (admin)
 router.put('/:id', protect, authorize('admin','host'), updateReportStatus);

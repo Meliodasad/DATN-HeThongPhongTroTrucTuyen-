@@ -7,7 +7,7 @@ const router = express.Router();
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private (Admin only)
-router.get('/', protect, authorize('admin'), async (req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
     const { page = 1, limit = 10, role, status } = req.query;
     const skip = (parseInt(page) - 1) * parseInt(limit);
@@ -43,7 +43,7 @@ router.get('/', protect, authorize('admin'), async (req, res, next) => {
 // @desc    Get single user
 // @route   GET /api/users/:id
 // @access  Private (Admin only)
-router.get('/:id', protect, authorize('admin'), async (req, res, next) => {
+router.get('/:id', protect,  async (req, res, next) => {
   try {
     const user = await User.findOne({ userId: req.params.id }).select('-password');
 

@@ -2,6 +2,236 @@ const Contract = require('../models/Contract');
 const Room = require('../models/Room');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
+
+/**
+ * GET /api/contracts/host
+ * Lấy hợp đồng theo hostId (hostId lấy từ token).
+ * - host: chỉ xem hợp đồng của các phòng mình sở hữu
+ * - admin: có thể truyền ?hostId=... để xem hộ, nếu không truyền thì dùng userId của mình
+ * Hỗ trợ filter: status, roomId, tenantId, contractId; phân trang: page, limit
+ */
+exports.getContractsByHost = async (req, res) => {
+  try {
+    // role check
+    if (!['host', 'admin'].includes(req.user.role)) {
+      return res.status(403).json({ success: false, message: 'Chỉ host hoặc admin được phép' });
+    }
+
+    // hostId lấy từ token; admin có thể override qua query
+    const qHostId = req.query.hostId;
+    const hostId = req.user.role === 'host' ? req.user.userId : (qHostId || req.user.userId);
+
+    // paging
+    const page  = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 200);
+    const skip  = (page - 1) * limit;
+
+    // filters
+    const { status, roomId, tenantId, contractId } = req.query;
+
+    // pipeline:
+    // 1) bắt đầu từ Contract
+    // 2) join Room theo roomId
+    // 3) match room.hostId === hostId + các filter khác
+    // 4) join User (tenant) + Booking
+    // 5) project các field cần thiết
+    // 6) sort + paginate (facet)
+    const pipeline = [
+      // join Room
+      {
+        $lookup: {
+          from: 'rooms',
+          localField: 'roomId',
+          foreignField: 'roomId',
+          as: 'room',
+        },
+      },
+      { $unwind: '$room' },
+
+      // filter theo host và các tiêu chí
+      {
+        $match: {
+          'room.hostId': hostId,
+          ...(status ? { status } : {}),
+          ...(roomId ? { roomId } : {}),
+          ...(tenantId ? { tenantId } : {}),
+          ...(contractId ? { contractId } : {}),
+        },
+      },
+
+      // join tenant
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'tenantId',
+          foreignField: 'userId',
+          as: 'tenant',
+          pipeline: [
+            { $project: { _id: 0, userId: 1, fullName: 1, email: 1, phone: 1 } },
+          ],
+        },
+      },
+      { $unwind: { path: '$tenant', preserveNullAndEmptyArrays: true } },
+
+      // join booking
+      {
+        $lookup: {
+          from: 'bookings',
+          localField: 'bookingId',
+          foreignField: 'bookingId',
+          as: 'booking',
+          pipeline: [
+            { $project: { _id: 0, bookingId: 1, startDate: 1, endDate: 1, status: 1 } },
+          ],
+        },
+      },
+      { $unwind: { path: '$booking', preserveNullAndEmptyArrays: true } },
+
+      // project
+      {
+        $project: {
+          _id: 0,
+          contractId: 1,
+          bookingId: 1,
+          roomId: 1,
+          tenantId: 1,
+          startDate: 1,
+          endDate: 1,
+          duration: 1,
+          rentPrice: 1,
+          terms: 1,
+          note: 1,
+          status: 1,
+          createdAt: 1,
+          updatedAt: 1,
+          roomInfo: {
+            roomId: '$room.roomId',
+            roomTitle: '$room.roomTitle',
+            location: '$room.location',
+            price: '$room.price',
+            images: '$room.images',
+            hostId: '$room.hostId',
+          },
+          tenantInfo: '$tenant',
+          bookingInfo: '$booking',
+        },
+      },
+
+      // sort mới nhất
+      { $sort: { createdAt: -1 } },
+
+      // facet: tách total + data trang
+      {
+        $facet: {
+          total: [{ $count: 'count' }],
+          data: [{ $skip: skip }, { $limit: limit }],
+        },
+      },
+      {
+        $project: {
+          data: 1,
+          total: { $ifNull: [{ $arrayElemAt: ['$total.count', 0] }, 0] },
+        },
+      },
+    ];
+
+    const agg = await Contract.aggregate(pipeline);
+    const first = agg[0] || { data: [], total: 0 };
+    const total = first.total || 0;
+    const data = first.data || [];
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        contracts: data,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          totalContracts: total,
+        },
+      },
+    });
+  } catch (error) {
+    console.error('[getContractsByHost] Error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Lỗi khi lấy hợp đồng theo host',
+      error: error.message,
+    });
+  }
+};
+
+exports.getContractsByTenant = async (req, res) => {
+  try {
+    const page  = Math.max(parseInt(req.query.page) || 1, 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit) || 10, 1), 200);
+    const skip  = (page - 1) * limit;
+
+    const { status } = req.query;
+
+    // Nếu là tenant: chỉ được xem hợp đồng của chính mình
+    // Nếu là host/admin: có thể truyền ?tenantId=... để xem hộ
+    const qTenantId = req.query.tenantId;
+    const tenantId =
+      req.user.role === 'tenant'
+        ? req.user.userId
+        : (qTenantId || req.user.userId); // host/admin có thể bỏ trống -> xem theo userId của họ nếu muốn
+
+    // Tenant KHÔNG được xem người khác
+    if (req.user.role === 'tenant' && qTenantId && qTenantId !== req.user.userId) {
+      return res.status(403).json({ success: false, message: 'Không có quyền xem hợp đồng của người khác' });
+    }
+
+    const filter = { tenantId };
+    if (status) filter.status = status;
+
+    const [total, contracts] = await Promise.all([
+      Contract.countDocuments(filter),
+      Contract.find(filter)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .lean()
+    ]);
+
+    // Populate thủ công roomInfo + bookingInfo
+    const roomIds = [...new Set(contracts.map(c => c.roomId))];
+    const bookingIds = [...new Set(contracts.map(c => c.bookingId).filter(Boolean))];
+
+    const [rooms, bookings] = await Promise.all([
+      Room.find({ roomId: { $in: roomIds } })
+        .select('roomId roomTitle location price images hostId')
+        .lean(),
+      Booking.find({ bookingId: { $in: bookingIds } })
+        .select('bookingId startDate endDate status')
+        .lean()
+    ]);
+
+    const roomMap = new Map(rooms.map(r => [r.roomId, r]));
+    const bookingMap = new Map(bookings.map(b => [b.bookingId, b]));
+
+    const data = contracts.map(c => ({
+      ...c,
+      roomInfo: roomMap.get(c.roomId) || null,
+      bookingInfo: bookingMap.get(c.bookingId) || null
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        contracts: data,
+        pagination: {
+          currentPage: page,
+          totalPages: Math.ceil(total / limit),
+          totalContracts: total
+        }
+      }
+    });
+  } catch (error) {
+    console.error('[getContractsByTenant] Error:', error);
+    res.status(500).json({ success: false, message: 'Lỗi khi lấy hợp đồng theo tenant', error: error.message });
+  }
+};
 // Tạo hợp đồng mới
 exports.createContract = async (req, res, next) => {
   try {

@@ -26,6 +26,7 @@ interface AuthContextType {
 
 interface RegisterData {
   fullName: string;
+  username?: string;
   email: string;
   password: string;
   phone?: string;
@@ -135,7 +136,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         createdAt: new Date().toISOString()
       };
 
-      const createResponse = await fetch('http://localhost:3000/users', {
+      const createResponse = await fetch('http://localhost:3000/auth/register', {
         method: 'POST',
         headers,
         body: JSON.stringify(newUser),

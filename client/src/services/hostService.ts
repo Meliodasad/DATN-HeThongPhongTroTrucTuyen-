@@ -17,17 +17,78 @@ api.interceptors.request.use((config) => {
 });
 
 export const hostService = {
+
+    updateRoomStatus: async (
+    roomId: string,
+    status: 'available' | 'rented' | 'maintenance'
+  ) => {
+    const token = localStorage.getItem('token');
+
+    const res = await fetch(`http://localhost:3000/rooms/${roomId}/status`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    const json = await res.json();
+    if (!res.ok) {
+      throw new Error(json?.message || 'Cập nhật trạng thái thất bại');
+    }
+    return json?.data; 
+  },
+
+   approveBooking: async (bookingId: string) => {
+    const token =localStorage.getItem('token');
+    if (!token) throw new Error('Chưa đăng nhập');
+
+    const res = await fetch(`http://localhost:3000/bookings/${bookingId}/approve`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'Duyệt booking thất bại');
+    }
+    return data;
+  },
+
+  rejectBooking: async (bookingId: string, reason?: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) throw new Error('Chưa đăng nhập');
+
+    const res = await fetch(`http://localhost:3000/bookings/${bookingId}/reject`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ reason }),
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(data.message || 'Từ chối booking thất bại');
+    }
+    return data;
+  },
   // 1. Cập nhật thông tin cá nhân
   getProfile: () => api.get(`/auth/me`),
   updateProfile: (data: any) => api.put(`/auth/profile`, data),
 
   // 2. Quản lý trạng thái phòng
   getRoomStatus: () => api.get(`/approvals`),
-  updateRoomStatus: (roomId: number, status: string) =>
-    api.put(`/approvals/${roomId}`, { status }),
+  // updateRoomStatus: (roomId: number, status: string) =>
+  //   api.put(`/approvals/${roomId}`, { status }),
 
   // 3. Duyệt yêu cầu thuê phòng
-  getRentalRequests: () => api.get(`/requests`),
+  getRentalRequests: () => api.get(`/bookings/host`),
   approveRentalRequest: (id: string) =>
     api.patch(`/rentalRequests/${id}`, { status: "đã duyệt" }),
   rejectRentalRequest: (id: string) =>
@@ -37,7 +98,7 @@ export const hostService = {
   createContract: (data: any) => api.post(`/contracts`, data),
 
   // QUẢN LÝ HỢP ĐỒNG
-  getContracts: () => api.get(`/contracts`),
+  getContracts: () => api.get(`/contracts/host`),
   getContractsByRoom: (roomId: string) => api.get(`/contracts?roomId=${roomId}`),
   getContractById: (id: string) => api.get(`/contracts/${id}`),
   deleteContract: (id: string) => api.delete(`/contracts/${id}`),
