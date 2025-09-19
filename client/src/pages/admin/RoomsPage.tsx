@@ -430,7 +430,8 @@ const RoomsPage: React.FC = () => {
       
       setRooms(roomsData.data.rooms || []);
       setStats(statsData);
-      setRoomApprovals(approvalsData.data.data || []);
+      setRoomApprovals(approvalsData.data || []);
+      console.log('Room Approvals:', roomApprovals);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải dữ liệu phòng trọ');
@@ -441,11 +442,20 @@ const RoomsPage: React.FC = () => {
 
   // Enhanced rooms with approval status
   const roomsWithApproval = useMemo(() => {
-    return rooms.map(room => ({
+  return rooms.map(room => {
+    const a = roomApprovals.find(x => x.roomId === (room.roomId));
+    const st = (a?.status ?? a?.approvalStatus ?? 'pending') as Room['approvalStatus'];
+    
+    return {
       ...room,
-      approvalStatus: getRoomApprovalStatus(room.roomId || room.id, roomApprovals)
-    }));
-  }, [rooms, roomApprovals]);
+      approvalId: a?.approvalId,
+      approvalStatus: st,
+      approvalNote: a?.note
+    };
+  });
+ 
+}, [rooms, roomApprovals]);
+
 
   const filteredRooms = useMemo(() => {
     return roomsWithApproval.filter(room => {

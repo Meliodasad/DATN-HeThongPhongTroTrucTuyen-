@@ -68,7 +68,7 @@ interface Booking {
   tenantId: string;
   bookingDate: string;
   note: string;
-  bookingStatus: "pending" | "confirmed" | "cancelled";
+  bookingStatus: "pending" | "approved" | "rejected";
   approvalStatus: "approved" | "rejected" | "waiting"; // 👈 Thêm dòng này
   createdAt: string;
   room: {

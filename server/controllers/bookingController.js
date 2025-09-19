@@ -320,26 +320,19 @@ exports.getMyBookings = async (req, res) => {
 exports.updateBookingStatus = async (req, res) => {
   try {
     const { bookingId } = req.params;
+    const { bookingStatus } = req.body;
 
-    // Tìm booking theo bookingId (là chuỗi như BKG-23913175)
-    const booking = await Booking.findOne({ bookingId: bookingId });
+    
+
+    const booking = await Booking.findOneAndUpdate(
+      { bookingId },
+      { $set: { bookingStatus, updatedAt: new Date() } },
+      { new: true, runValidators: true, context: 'query' }
+    );
 
     if (!booking) {
-      return res.status(404).json({
-        success: false,
-        message: 'Booking không tồn tại'
-      });
+      return res.status(404).json({ success: false, message: 'Booking không tồn tại' });
     }
-
-    // Cập nhật trạng thái nếu được gửi lên từ client
-    if (req.body.status) {
-      booking.status = req.body.status;
-    }
-
-    // Cập nhật thời gian cập nhật
-    booking.updatedAt = new Date();
-
-    await booking.save();
 
     res.status(200).json({
       success: true,
@@ -347,9 +340,6 @@ exports.updateBookingStatus = async (req, res) => {
       data: booking
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: 'Lỗi server: ' + err.message
-    });
+    res.status(500).json({ success: false, message: 'Lỗi server: ' + err.message });
   }
 };

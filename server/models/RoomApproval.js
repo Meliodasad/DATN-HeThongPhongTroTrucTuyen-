@@ -5,6 +5,7 @@ const approvalSchema = new mongoose.Schema({
     type: String,
     unique: true
   },
+  note: { type: String },
   roomId: {
     type: String, // roomId tự định nghĩa trong Rooms
     required: true,

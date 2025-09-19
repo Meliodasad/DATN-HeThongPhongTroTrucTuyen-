@@ -133,10 +133,9 @@ export const roomService = {
           body: JSON.stringify({
             approvalId: `A${Date.now()}`,
             roomId: roomId,
-            approvalStatus: status,
-            approvalDate: new Date().toISOString(),
+            status: status,
             note: status === 'approved' ? 'Phòng đạt yêu cầu.' : 'Phòng không đạt yêu cầu.',
-            adminId: 'U001' // You might want to get this from auth context
+            requestedBy: 'U001' 
           }),
         });
 

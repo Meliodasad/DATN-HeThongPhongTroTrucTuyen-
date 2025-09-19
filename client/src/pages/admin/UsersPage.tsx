@@ -45,7 +45,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId }) => {
     try {
       setLoading(true);
       const userData = await userService.getUserById(userId);
-      setUser(userData);
+      setUser(userData.data);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải thông tin người dùng');

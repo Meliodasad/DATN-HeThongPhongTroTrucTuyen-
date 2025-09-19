@@ -24,7 +24,7 @@ interface Booking {
   tenantId: string;
   bookingDate: string;
   note: string;
-  bookingStatus: 'pending' | 'confirmed' | 'cancelled';
+  bookingStatus: 'pending' | 'approved' | 'rejected' | 'cancelled' ;
   createdAt?: string;
   room: {
     roomTitle: string;
@@ -120,18 +120,18 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'approved': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Đã xác nhận';
+      case 'approved': return 'Đã xác nhận';
       case 'pending': return 'Chờ xác nhận';
-      case 'cancelled': return 'Đã hủy';
+      case 'rejected': return 'Đã hủy';
       default: return 'Không xác định';
     }
   };
@@ -290,8 +290,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="pending">Chờ xác nhận</option>
-                  <option value="confirmed">Đã xác nhận</option>
-                  <option value="cancelled">Đã hủy</option>
+                  <option value="approved">Đã xác nhận</option>
+                  <option value="rejected">Đã hủy</option>
                 </select>
               )}
             </div>
@@ -347,7 +347,7 @@ const BookingsPage: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<'view' >('view');
@@ -436,7 +436,7 @@ const BookingsPage: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const handleUpdateStatus = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
+  const handleUpdateStatus = async (bookingId: string, status: 'approved' | 'rejected') => {
     try {
       const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
         method: 'PUT',
@@ -448,7 +448,7 @@ const BookingsPage: React.FC = () => {
         throw new Error('Failed to update booking status');
       }
 
-      success('Thành công', `${status === 'confirmed' ? 'Xác nhận' : 'Hủy'} đặt phòng thành công`);
+      success('Thành công', `${status === 'approved' ? 'Xác nhận' : 'Hủy'} đặt phòng thành công`);
       await loadBookings();
     } catch (err) {
       console.error(err);
@@ -493,18 +493,18 @@ const BookingsPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'approved': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Đã xác nhận';
+      case 'approved': return 'Đã xác nhận';
       case 'pending': return 'Chờ xác nhận';
-      case 'cancelled': return 'Đã hủy';
+      case 'rejected': return 'Đã hủy';
       default: return 'Không xác định';
     }
   };
@@ -530,8 +530,8 @@ const BookingsPage: React.FC = () => {
   const stats = {
     total: bookings.length,
     pending: bookings.filter(b => b.bookingStatus === 'pending').length,
-    confirmed: bookings.filter(b => b.bookingStatus === 'confirmed').length,
-    cancelled: bookings.filter(b => b.bookingStatus === 'cancelled').length
+    confirmed: bookings.filter(b => b.bookingStatus === 'approved').length,
+    cancelled: bookings.filter(b => b.bookingStatus === 'rejected').length
   };
 
   if (loading) {
@@ -617,8 +617,8 @@ const BookingsPage: React.FC = () => {
           >
             <option value="all">Tất cả trạng thái</option>
             <option value="pending">Chờ xác nhận</option>
-            <option value="confirmed">Đã xác nhận</option>
-            <option value="cancelled">Đã hủy</option>
+            <option value="approved">Đã xác nhận</option>
+            <option value="rejected">Đã hủy</option>
           </select>
         </div>
       </div>
@@ -738,14 +738,14 @@ const BookingsPage: React.FC = () => {
                       {booking.bookingStatus === 'pending' && (
                         <>
                           <button 
-                            onClick={() => handleUpdateStatus(booking.bookingId, 'confirmed')}
+                            onClick={() => handleUpdateStatus(booking.bookingId, 'approved')}
                             className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
                             title="Xác nhận đặt phòng"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
                           <button 
-                            onClick={() => handleUpdateStatus(booking.bookingId, 'cancelled')}
+                            onClick={() => handleUpdateStatus(booking.bookingId, 'rejected')}
                             className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                             title="Hủy đặt phòng"
                           >

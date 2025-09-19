@@ -26,7 +26,7 @@ router.get('/my-bookings', protect, getMyBookings);
 // Cập nhật trạng thái booking
 router.put('/:bookingId', protect, authorize('host', 'admin'), updateBookingStatus);
 
-router.delete('/:bookingId', protect, deleteBooking);
+router.delete('/:bookingId', protect, authorize('admin') , deleteBooking);
 router.put('/:id/approve', protect, authorize('host', 'admin'), approveBooking);
 router.put('/:id/reject',  protect, authorize('host', 'admin'), rejectBooking);
 module.exports = router;
