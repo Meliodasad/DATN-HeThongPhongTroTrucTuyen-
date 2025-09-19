@@ -71,10 +71,10 @@ const BookingForm = () => {
       tenantId: currentUserId,
       roomId: room.id,
       extendMonths,
-      note: note.trim(), // lưu ghi chú
+      note: note.trim(), 
       status: 'pending',
       createdAt: new Date().toISOString(),
-      requestType: 'booking', // đánh dấu là yêu cầu thuê
+      requestType: 'booking', 
     };
 
     try {
