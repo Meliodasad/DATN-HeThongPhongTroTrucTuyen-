@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, User, Phone, UserPlus, Home } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 
-
 const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
     fullName: '',
@@ -23,31 +22,44 @@ const RegisterPage: React.FC = () => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.fullName.trim()) newErrors.fullName = 'Vui lòng nhập họ tên';
+
+    if (!formData.fullName.trim()) {
+      newErrors.fullName = 'Vui lòng nhập họ tên';
+    }
+
     if (!formData.email.trim()) {
       newErrors.email = 'Vui lòng nhập email';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Email không hợp lệ';
     }
+
     if (!formData.password) {
       newErrors.password = 'Vui lòng nhập mật khẩu';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
     }
+
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
     }
+
     if (formData.phone && !/^[0-9]{10,11}$/.test(formData.phone)) {
       newErrors.phone = 'Số điện thoại không hợp lệ';
     }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateForm()) return;
+    
+    if (!validateForm()) {
+      return;
+    }
+
     setIsLoading(true);
+
     const success = await register({
       fullName: formData.fullName,
       email: formData.email,
@@ -55,7 +67,11 @@ const RegisterPage: React.FC = () => {
       phone: formData.phone || undefined,
       role: formData.role
     });
-    if (success) navigate('/login');
+
+    if (success) {
+      navigate('/login');
+    }
+
     setIsLoading(false);
   };
 
@@ -67,137 +83,226 @@ const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="register-card">
-        <div className="register-header">
-          <div className="register-logo">
-            <Home className="register-logo-icon" />
+    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <div className="flex justify-center">
+            <div className="w-16 h-16 bg-green-600 rounded-full flex items-center justify-center">
+              <Home className="w-8 h-8 text-white" />
+            </div>
           </div>
-          <h2 className="register-title">Đăng ký tài khoản</h2>
-          <p className="register-subtitle">Tham gia hệ thống quản lý cho thuê trọ</p>
+          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+            Đăng ký tài khoản
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Tham gia hệ thống quản lý cho thuê trọ
+          </p>
         </div>
 
-        <form className="register-form" onSubmit={handleSubmit}>
-          {/* Họ tên */}
-          <div className="register-field">
-            <label>Họ và tên *</label>
-            <div className="register-input-wrapper">
-              <User className="register-icon" />
-              <input
-                type="text"
-                value={formData.fullName}
-                onChange={(e) => handleInputChange('fullName', e.target.value)}
-                className={`register-input ${errors.fullName ? 'error' : ''}`}
-                placeholder="Nhập họ và tên"
-              />
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
+            <div>
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
+                Họ và tên *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="fullName"
+                  name="fullName"
+                  type="text"
+                  required
+                  value={formData.fullName}
+                  onChange={(e) => handleInputChange('fullName', e.target.value)}
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.fullName ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  placeholder="Nhập họ và tên"
+                />
+              </div>
+              {errors.fullName && (
+                <p className="mt-1 text-sm text-red-600">{errors.fullName}</p>
+              )}
             </div>
-            {errors.fullName && <p className="register-error">{errors.fullName}</p>}
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                Email *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.email ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  placeholder="Nhập email"
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+                Số điện thoại
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.phone ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  placeholder="Nhập số điện thoại"
+                />
+              </div>
+              {errors.phone && (
+                <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                Loại tài khoản *
+              </label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={(e) => handleInputChange('role', e.target.value as 'host' | 'tenant')}
+                className="block w-full px-3 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+              >
+                <option value="tenant">Người thuê trọ</option>
+                <option value="host">Chủ trọ</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                Mật khẩu *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="password"
+                  name="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.password ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  placeholder="Nhập mật khẩu"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+              {errors.password && (
+                <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">
+                Xác nhận mật khẩu *
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
+                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                  }`}
+                  placeholder="Nhập lại mật khẩu"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400 hover:text-gray-600" />
+                  )}
+                </button>
+              </div>
+              {errors.confirmPassword && (
+                <p className="mt-1 text-sm text-red-600">{errors.confirmPassword}</p>
+              )}
+            </div>
           </div>
 
-          {/* Email */}
-          <div className="register-field">
-            <label>Email *</label>
-            <div className="register-input-wrapper">
-              <Mail className="register-icon" />
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className={`register-input ${errors.email ? 'error' : ''}`}
-                placeholder="Nhập email"
-              />
-            </div>
-            {errors.email && <p className="register-error">{errors.email}</p>}
-          </div>
-
-          {/* Số điện thoại */}
-          <div className="register-field">
-            <label>Số điện thoại</label>
-            <div className="register-input-wrapper">
-              <Phone className="register-icon" />
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className={`register-input ${errors.phone ? 'error' : ''}`}
-                placeholder="Nhập số điện thoại"
-              />
-            </div>
-            {errors.phone && <p className="register-error">{errors.phone}</p>}
-          </div>
-
-          {/* Loại tài khoản */}
-          <div className="register-field">
-            <label>Loại tài khoản *</label>
-            <select
-              value={formData.role}
-              onChange={(e) => handleInputChange('role', e.target.value as 'host' | 'tenant')}
-              className="register-select"
+          <div>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <option value="tenant">Người thuê trọ</option>
-              <option value="host">Chủ trọ</option>
-            </select>
+              {isLoading ? (
+                <div className="flex items-center">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Đang đăng ký...
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <UserPlus className="w-4 h-4 mr-2" />
+                  Đăng ký
+                </div>
+              )}
+            </button>
           </div>
 
-          {/* Mật khẩu */}
-          <div className="register-field">
-            <label>Mật khẩu *</label>
-            <div className="register-input-wrapper">
-              <Lock className="register-icon" />
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                className={`register-input ${errors.password ? 'error' : ''}`}
-                placeholder="Nhập mật khẩu"
-              />
-              <button
-                type="button"
-                className="register-eye-btn"
-                onClick={() => setShowPassword(!showPassword)}
+          <div className="text-center">
+            <p className="text-sm text-gray-600">
+              Đã có tài khoản?{' '}
+              <Link
+                to="/login"
+                className="font-medium text-green-600 hover:text-green-500 transition-colors"
               >
-                {showPassword ? <EyeOff /> : <Eye />}
-              </button>
-            </div>
-            {errors.password && <p className="register-error">{errors.password}</p>}
+                Đăng nhập ngay
+              </Link>
+            </p>
           </div>
-
-          {/* Xác nhận mật khẩu */}
-          <div className="register-field">
-            <label>Xác nhận mật khẩu *</label>
-            <div className="register-input-wrapper">
-              <Lock className="register-icon" />
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
-                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                className={`register-input ${errors.confirmPassword ? 'error' : ''}`}
-                placeholder="Nhập lại mật khẩu"
-              />
-              <button
-                type="button"
-                className="register-eye-btn"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? <EyeOff /> : <Eye />}
-              </button>
-            </div>
-            {errors.confirmPassword && <p className="register-error">{errors.confirmPassword}</p>}
-          </div>
-
-          {/* Nút đăng ký */}
-          <button type="submit" className="register-btn" disabled={isLoading}>
-            {isLoading ? 'Đang đăng ký...' : (
-              <>
-                <UserPlus className="register-btn-icon" /> Đăng ký
-              </>
-            )}
-          </button>
-
-          {/* Link đăng nhập */}
-          <p className="register-login-text">
-            Đã có tài khoản? <Link to="/login">Đăng nhập ngay</Link>
-          </p>
         </form>
       </div>
     </div>
