@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useToastContext } from './ToastContext';
 
 interface User {
+  username: ReactNode;
   id: string;
   fullName: string;
   phone: string;
