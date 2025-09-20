@@ -3,7 +3,10 @@ const { protect, authorize } = require('../middleware/auth');
 const {
   createPayment,
   getPayments,
-  updatePayment
+  updatePayment,
+  createVnpayPayment,
+  vnpayReturn,
+  paymentResult
 } = require('../controllers/paymentController');
 
 const router = express.Router();
@@ -11,8 +14,13 @@ const router = express.Router();
 // @route   POST /api/payments
 // @desc    Tạo thanh toán mới (chỉ Host/Admin)
 // @access  Private
-router.post('/', protect, authorize('host', 'admin'), createPayment);
+router.post('/', protect, authorize('host', 'admin','tenant'), createPayment);
 
+
+router.post('/vnpay/create', protect, createVnpayPayment);
+router.get('/vnpay/return', vnpayReturn);
+
+router.get('/payment-result', paymentResult);
 // @route   GET /api/payments
 // @desc    Lấy danh sách thanh toán, phân quyền theo vai trò (Tenant, Host, Admin)
 // @access  Private
