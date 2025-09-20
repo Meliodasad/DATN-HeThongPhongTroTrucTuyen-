@@ -26,6 +26,7 @@ interface AuthContextType {
 
 interface RegisterData {
   fullName: string;
+  username?: string;
   email: string;
   password: string;
   phone?: string;
@@ -110,51 +111,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const register = async (userData: RegisterData): Promise<boolean> => {
-    try {
-      setLoading(true);
-      const response = await fetch('http://localhost:3000/users', {headers});
-      if (!response.ok) throw new Error('Failed to fetch users');
-      const users = await response.json();
+  try {
+    setLoading(true);
 
-      const existingUser = users.data.users.find((u: any) => u.email === userData.email);
-      if (existingUser) {
-        error('Lỗi đăng ký', 'Email đã được sử dụng');
-        return false;
-      }
-
-      const maxIndex = users.data.users
-        .map((u: any) => u.id)
-        .filter((id: string) => id && id.startsWith('u'))
-        .map((id: string) => parseInt(id.replace('u', ''), 10))
-        .reduce((a: number, b: number) => Math.max(a, b), 0);
-
-      const newUser = {
-        id: `u${maxIndex + 1}`,
-        ...userData,
-        status: 'active',
+    const response = await fetch("http://localhost:3000/auth/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        fullName: userData.fullName,
+        email: userData.email,
+        password: userData.password,
+        phone: userData.phone,
+        role: userData.role,
+        status: "active",
         createdAt: new Date().toISOString()
-      };
+      })
+    });
 
-      const createResponse = await fetch('http://localhost:3000/users', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(newUser),
-      });
-
-      if (!createResponse.ok) {
-        throw new Error('Failed to create user');
-      }
-
-      success('Thành công', 'Đăng ký tài khoản thành công! Vui lòng đăng nhập.');
-      return true;
-    } catch (err) {
-      console.error('Register error:', err);
-      error('Lỗi', 'Không thể đăng ký. Vui lòng thử lại.');
-      return false;
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error("Failed to register");
     }
-  };
+
+    success("Thành công", "Đăng ký tài khoản thành công! Vui lòng đăng nhập.");
+    return true;
+  } catch (err) {
+    console.error("Register error:", err);
+    error("Lỗi", "Không thể đăng ký. Vui lòng thử lại.");
+    return false;
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const logout = () => {
     setUser(null);

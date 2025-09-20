@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import '../../css/UserProfile.css';
 
+
 import type { User } from '../../types/user';
-import { userService } from '../services/userService';
 import { roomService } from '../services/roomService';
+import { userService } from '../services/userService';
 
 interface Room {
   id: string;

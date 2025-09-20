@@ -1,54 +1,56 @@
 // src/App.tsx
-import React from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
-import ProtectedRoute from "./components/common/ProtectedRoute";
+import React from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import ProtectedRoute from './components/common/ProtectedRoute';
+
+// Shared
+import Header from './components/user/Header';
+import Footer from './components/user/Footer';
 
 // Auth
-import LoginPage from "./components/auth/LoginPage";
-import RegisterPage from "./components/auth/RegisterPage";
+import LoginPage from './components/auth/LoginPage';
+import RegisterPage from './components/auth/RegisterPage';
 
 // Client Pages
-import HomePage from "./pages/user/HomePage";
-import PostDetail from "./pages/user/PostDetail";
-import UserProfile from "./pages/user/UserProfile";
-import MyBookingsPage from "./pages/user/MyBookingsPage";
-import MyContracts from "./pages/user/MyContracts";
-import BookingRequests from "./pages/user/BookingRequests";
-import ContractDetail from "./pages/user/ContractDetail";
-import MyAccount from "./pages/user/MyAccount";
-import BookingForm from "./pages/user/BookingForm";
+import HomePage from './pages/user/HomePage';
+import PostDetail from './pages/user/PostDetail';
+import UserProfile from './pages/user/UserProfile';
+import BookingForm from './components/user/BookingForm';
+import MyBookingsPage from './pages/user/MyBookingsPage';
+import MyContracts from './pages/user/MyContracts';
+import BookingRequests from './pages/user/BookingRequests';
+import ContractDetail from './pages/user/ContractDetail';
+import MyAccount from './pages/user/MyAccount';
 
 // Admin Pages
-import Layout from "./components/layout/Layout";
-import DashboardPage from "./pages/admin/DashboardPage";
-import UsersPage from "./pages/admin/UsersPage";
-import RoomsPage from "./pages/admin/RoomsPage";
-import BookingsPage from "./pages/admin/BookingPage";
-import ContractsPage from "./pages/admin/ContractsPage";
-import PaymentsPage from "./pages/admin/PaymentsPage";
-import ReviewsPage from "./pages/admin/ReviewsPage";
-import MessagesPage from "./pages/admin/MessagesPage";
-import ContactsPage from "./pages/admin/ContactsPage";
-import ReportsPage from "./pages/admin/ReportsPage";
-import SettingsPage from "./pages/admin/SettingsPage";
+import Layout from './components/layout/Layout';
+import DashboardPage from './pages/admin/DashboardPage';
+import UsersPage from './pages/admin/UsersPage';
+import RoomsPage from './pages/admin/RoomsPage';
+import BookingsPage from './pages/admin/BookingPage';
+import ContractsPage from './pages/admin/ContractsPage';
+import PaymentsPage from './pages/admin/PaymentsPage';
+import ReviewsPage from './pages/admin/ReviewsPage';
+import MessagesPage from './pages/admin/MessagesPage';
+import ContactsPage from './pages/admin/ContactsPage';
+import ReportsPage from './pages/admin/ReportsPage';
+import SettingsPage from './pages/admin/SettingsPage';
 
 // Host Pages
-import Dashboard from "./pages/host/Dashboard";
-import Profile from "./pages/host/Profile";
-import UpdateProfile from "./pages/host/UpdateProfile";
-import CreateRoom from "./pages/host/CreateRoom";
-import UpdateRoom from "./pages/host/UpdateRoom";
-import CreateContract from "./pages/host/CreateContract";
-import ContractDetailHost from "./pages/host/ContractDetail";
-import RoomStatus from "./pages/host/RoomStatus";
-import RentalRequest from "./pages/host/RentalRequest";
-import ContractList from "./pages/host/ContractList";
-import RoomList from "./pages/host/RoomList";
-
-// Layout
-import HomepageLayout from "./components/layout/HomePageLayout";
-import Header from "./components/layout/Header";
-import Footer from "./components/layout/Footer";
+import Dashboard from './pages/host/Dashboard';
+import Profile from './pages/host/Profile';
+import UpdateProfile from './pages/host/UpdateProfile';
+import CreateRoom from './pages/host/CreateRoom';
+import UpdateRoom from './pages/host/UpdateRoom';
+import CreateContract from './pages/host/CreateContract';
+import ContractDetailHost from './pages/host/ContractDetail';
+import RoomStatus from './pages/host/RoomStatus';
+import RentalRequest from './pages/host/RentalRequest';
+import ContractList from './pages/host/ContractList';
+import RoomList from './pages/host/RoomList';
+import ContractCheckout from './pages/user/ContractCheckout';
+import ResultPage from './pages/user/ResultPage';
+import HomepageLayout from './components/layout/HomePageLayout';
 
 function App() {
   return (
@@ -61,7 +63,7 @@ function App() {
       <Route
         path="/admin/*"
         element={
-          <ProtectedRoute requiredRoles={["admin"]}>
+          <ProtectedRoute requiredRoles={['admin']}>
             <Layout />
           </ProtectedRoute>
         }
@@ -84,7 +86,7 @@ function App() {
       <Route
         path="/host/*"
         element={
-          <ProtectedRoute requiredRoles={["host"]}>
+          <ProtectedRoute requiredRoles={['host']}>
             <HomepageLayout />
           </ProtectedRoute>
         }
@@ -107,7 +109,7 @@ function App() {
       <Route
         path="/*"
         element={
-          <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
             <Header />
             <main style={{ flex: 1 }}>
               <Routes>
@@ -117,10 +119,12 @@ function App() {
                 <Route path="booking/:roomId" element={<BookingForm />} />
                 <Route path="contracts/:id" element={<ContractDetail />} />
                 <Route path="my-account" element={<MyAccount />} />
+                <Route path="/payments/contract/:contractId" element={<ContractCheckout />} />
+                <Route path="/success-page" element={<ResultPage />} />
                 <Route
                   path="my-bookings"
                   element={
-                    <ProtectedRoute requiredRoles={["tenant", "host"]}>
+                    <ProtectedRoute requiredRoles={['tenant', 'host']}>
                       <MyBookingsPage />
                     </ProtectedRoute>
                   }
@@ -128,7 +132,7 @@ function App() {
                 <Route
                   path="my-contracts"
                   element={
-                    <ProtectedRoute requiredRoles={["tenant", "host"]}>
+                    <ProtectedRoute requiredRoles={['tenant', 'host']}>
                       <MyContracts />
                     </ProtectedRoute>
                   }
@@ -136,7 +140,7 @@ function App() {
                 <Route
                   path="booking-requests"
                   element={
-                    <ProtectedRoute requiredRoles={["host"]}>
+                    <ProtectedRoute requiredRoles={['host']}>
                       <BookingRequests />
                     </ProtectedRoute>
                   }
