@@ -2,6 +2,24 @@ const Report = require('../models/Report');
 const User = require('../models/User');
 const Room = require('../models/Room');
 
+exports.getReportsByRoom = async (req, res) => {
+  try {
+    const { roomId } = req.params;
+
+    // Kiểm tra phòng có tồn tại không (tùy chọn)
+    const room = await Room.findOne({ roomId });
+    if (!room) {
+      return res.status(404).json({ success: false, message: 'Phòng không tồn tại' });
+    }
+
+    // Lấy danh sách báo cáo của phòng này
+    const reports = await Report.find({ roomId });
+    res.status(200).json({ success: true, data: reports });
+  } catch (error) {
+    console.error('Lỗi khi lấy báo cáo theo roomId:', error);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
 // [POST] Tạo báo cáo mới
 exports.createReport = async (req, res) => {
   try {

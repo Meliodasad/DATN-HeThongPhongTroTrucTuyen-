@@ -51,6 +51,7 @@ import ContractList from './pages/host/ContractList';
 import RoomList from './pages/host/RoomList';
 import ContractCheckout from './pages/user/ContractCheckout';
 import ResultPage from './pages/user/ResultPage';
+import UserReport from './pages/admin/UserReport';
 
 function App() {
   return (
@@ -80,6 +81,7 @@ function App() {
         <Route path="contacts" element={<ContactsPage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="user-report" element={<UserReport />} />
       </Route>
 
       {/* Host */}

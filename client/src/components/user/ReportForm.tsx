@@ -96,7 +96,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ roomId }) => {
     const load = async () => {
       try {
         const res = await fetch(
-          `http://localhost:3000/reports/${encodeURIComponent(roomId)}`,
+          `http://localhost:3000/reports/room/${encodeURIComponent(roomId)}`,
           { headers }
         );
         const json: { success: boolean; data?: Array<ReportApiA | ReportApiB> } = await res.json();
@@ -129,9 +129,8 @@ const ReportForm: React.FC<ReportFormProps> = ({ roomId }) => {
     // { roomId, reason, reportDate, /* reporterId?: string (nếu cần) */ }
     const payload: any = {
       roomId,
-      reason: `${type.toUpperCase()}: ${message.trim()}`,
-      reportDate: new Date().toISOString(),
-      // reporterId: reporterIdFromAuth
+      title: type,
+      description: `${type.toUpperCase()}: ${message.trim()}`,
     };
 
     setLoading(true);
@@ -197,9 +196,9 @@ const ReportForm: React.FC<ReportFormProps> = ({ roomId }) => {
           Loại phản ánh:
           <select value={type} onChange={(e) => setType(e.target.value)} required>
             <option value="">-- Chọn loại --</option>
-            <option value="report">Phản ánh chất lượng phòng</option>
-            <option value="support">Yêu cầu hỗ trợ từ hệ thống</option>
-            <option value="owner">Phản ánh chủ trọ</option>
+            <option value="Phản ánh chất lượng phòng">Phản ánh chất lượng phòng</option>
+            <option value="Yêu cầu hỗ trợ từ hệ thống">Yêu cầu hỗ trợ từ hệ thống</option>
+            <option value="Phản ánh chủ trọ">Phản ánh chủ trọ</option>
           </select>
         </label>
 

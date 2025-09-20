@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Calendar, MessageSquare, Trash2, Star, MapPin, Home } from 'lucide-react';
+import { X, User, Calendar, MessageSquare, Trash2, Star, MapPin, Home, XCircle, Check, CheckCircle } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
 import { reviewService } from '../../services/reviewService';
 import type { Review, ReviewReplyFormData } from '../../types/review';
@@ -11,10 +11,10 @@ interface CommentDetailModalProps {
   reviewId: string | null;
 }
 
-const CommentDetailModal: React.FC<CommentDetailModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  reviewId 
+const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
+  isOpen,
+  onClose,
+  reviewId
 }) => {
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(false);
@@ -29,7 +29,7 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
 
   const loadReview = async () => {
     if (!reviewId) return;
-    
+
     try {
       setLoading(true);
       const reviewData = await reviewService.getReviewById(reviewId);
@@ -117,8 +117,8 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                       {review.tenant.avatar ? (
-                        <img 
-                          src={review.tenant.avatar} 
+                        <img
+                          src={review.tenant.avatar}
                           alt={review.tenant.fullName}
                           className="w-12 h-12 rounded-full object-cover"
                         />
@@ -141,8 +141,8 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
                 <div className="mb-4 p-4 bg-white rounded-lg border">
                   <div className="flex items-start gap-4">
                     {review.room.images && review.room.images.length > 0 && (
-                      <img 
-                        src={review.room.images[0]} 
+                      <img
+                        src={review.room.images[0]}
                         alt={review.room.roomTitle}
                         className="w-20 h-20 rounded-lg object-cover"
                       />
@@ -187,8 +187,8 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
                   <p className="text-sm text-gray-600 mb-1">Chủ trọ:</p>
                   <div className="flex items-center gap-2">
                     {review.room.host.avatar ? (
-                      <img 
-                        src={review.room.host.avatar} 
+                      <img
+                        src={review.room.host.avatar}
                         alt={review.room.host.fullName}
                         className="w-8 h-8 rounded-full object-cover"
                       />
@@ -214,9 +214,8 @@ const CommentDetailModal: React.FC<CommentDetailModalProps> = ({
                       <div key={reply.id} className="bg-gray-50 rounded-lg p-4 ml-8 border-l-4 border-blue-200">
                         <div className="flex items-start justify-between">
                           <div className="flex items-center gap-3">
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                              reply.isAdmin ? 'bg-blue-100' : 'bg-gray-200'
-                            }`}>
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${reply.isAdmin ? 'bg-blue-100' : 'bg-gray-200'
+                              }`}>
                               <User className={`w-4 h-4 ${reply.isAdmin ? 'text-blue-600' : 'text-gray-500'}`} />
                             </div>
                             <div>
@@ -321,25 +320,22 @@ const CommentsPage: React.FC = () => {
 
   const filteredReviews = reviews.filter(review => {
     const matchesSearch = review.review.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        review.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        review.room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        review.room.location.toLowerCase().includes(searchTerm.toLowerCase());
+      review.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.room.location.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesRating = ratingFilter === 'all' || review.rating === ratingFilter;
-    
+
     return matchesSearch && matchesRating;
   });
 
-  const handleToggleVisibility = async (id: string, currentHidden: boolean) => {
-    const action = currentHidden ? 'hiện' : 'ẩn';
-    if (!confirm(`Bạn có chắc chắn muốn ${action} đánh giá này?`)) return;
-
+  const updateReviewStatus = async (id: string, isApproved: boolean) => {
     try {
-      await reviewService.toggleReviewVisibility(id);
-      success('Thành công', `${currentHidden ? 'Hiện' : 'Ẩn'} đánh giá thành công`);
+      await reviewService.updateReviewStatus(id, isApproved);
+      success('Thành công', `${isApproved ? 'Duyệt' : 'Hủy duyệt'} đánh giá thành công`);
       await loadData();
     } catch (err) {
       console.error(err);
-      error('Lỗi', `Không thể ${action} đánh giá`);
+      error('Lỗi', `Không thể ${isApproved ? 'duyệt' : 'hủy duyệt'} đánh giá`);
     }
   };
 
@@ -351,7 +347,7 @@ const CommentsPage: React.FC = () => {
   const handleCloseDetailModal = () => {
     setIsDetailModalOpen(false);
     setSelectedReviewId(null);
-    loadData(); 
+    loadData();
   };
 
   const renderStars = (rating: number) => {
@@ -488,7 +484,7 @@ const CommentsPage: React.FC = () => {
         <div className="px-6 py-4 border-b border-gray-200">
           <h3 className="text-lg font-medium text-gray-900">Danh sách đánh giá ({filteredReviews.length})</h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -520,8 +516,8 @@ const CommentsPage: React.FC = () => {
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                         {review.tenant.avatar ? (
-                          <img 
-                            src={review.tenant.avatar} 
+                          <img
+                            src={review.tenant.avatar}
                             alt={review.tenant.fullName}
                             className="w-10 h-10 rounded-full object-cover"
                           />
@@ -538,8 +534,8 @@ const CommentsPage: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-start gap-3">
                       {review.room.images && review.room.images.length > 0 && (
-                        <img 
-                          src={review.room.images[0]} 
+                        <img
+                          src={review.room.images[0]}
                           alt={review.room.roomTitle}
                           className="w-12 h-12 rounded-lg object-cover"
                         />
@@ -574,14 +570,29 @@ const CommentsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
-                      <button 
+                      {review.isApproved ? (
+                        <button
+                          onClick={() => updateReviewStatus(review.reviewId, false)}
+                          className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          title="Hủy Duyệt"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </button>
+                      ) : (<button
+                        onClick={() => updateReviewStatus(review.reviewId, true)}
+                        className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                        title="Duyệt"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                      </button>)}
+                      <button
                         onClick={() => handleViewDetail(review.reviewId)}
-                        className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors" 
+                        className="text-blue-600 hover:text-blue-900 p-2 rounded-lg hover:bg-blue-50 transition-colors"
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteReview(review.reviewId)}
                         className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors"
                         title="Ẩn đánh giá"

@@ -5,7 +5,8 @@ const {
   getReportById,
   updateReportStatus,
   getMyReports,
-  deleteReport
+  deleteReport,
+  getReportsByRoom
 } = require('../controllers/reportController');
 
 const { protect, authorize } = require('../middleware/auth');
@@ -28,5 +29,8 @@ router.get('/:id', protect,  getReportById);
 router.put('/:id', protect, authorize('admin','host'), updateReportStatus);
 // Xóa báo cáo (admin)
 router.delete('/:id', protect, authorize('admin'), deleteReport);
+
+// Lấy báo cáo theo roomId
+router.get('/room/:roomId', protect, getReportsByRoom);
 
 module.exports = router;

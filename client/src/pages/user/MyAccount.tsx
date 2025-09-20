@@ -5,6 +5,7 @@ import '../../css/MyAccount.css';
 import { userService } from '../../services/userService';
 import { headers as baseHeaders } from '../../utils/config';
 import { useNavigate, useLocation } from 'react-router-dom'; 
+import { Save, X } from 'lucide-react'; // Import icons for the dialog
 
 type ContractStatus = 'pending' | 'active' | 'expired' | 'terminated';
 
@@ -45,13 +46,26 @@ type Row = {
   status: ContractStatus;
 };
 
+type PasswordFormData = {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+};
+
 const MyAccount: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState<any>(null);
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false);
+  const [formData, setFormData] = useState<PasswordFormData>({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
   const location = useLocation(); 
+  
   const authHeaders = React.useMemo(() => {
     const token = localStorage.getItem('access_token') || localStorage.getItem('token');
     return token ? { ...baseHeaders, Authorization: `Bearer ${token}` } : baseHeaders;
@@ -123,6 +137,61 @@ const MyAccount: React.FC = () => {
     // navigate('/payments/checkout/:paymentId')
   };
 
+  const handleInputChange = (field: keyof PasswordFormData, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleChangePassword = async () => {
+    if (formData.newPassword !== formData.confirmPassword) {
+      alert('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    if (formData.newPassword.length < 6) {
+      alert('Mật khẩu mới phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:3000/auth/password`, {
+        method: 'PUT',
+        headers: authHeaders,
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Đổi mật khẩu thất bại');
+      }
+
+      alert('Đổi mật khẩu thành công');
+      setFormData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
+      setShowPasswordDialog(false);
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || 'Không thể đổi mật khẩu');
+    }
+  };
+
+  const closePasswordDialog = () => {
+    setShowPasswordDialog(false);
+    setFormData({
+      currentPassword: '',
+      newPassword: '',
+      confirmPassword: ''
+    });
+  };
+
   if (loading) return <div className="loading-text">Loading...</div>;
   if (!profile) return <div className="loading-text">Không tìm thấy thông tin tài khoản</div>;
 
@@ -140,9 +209,9 @@ const MyAccount: React.FC = () => {
 
         <ul className="myaccount-menu">
           <li className="active">Thông tin cá nhân</li>
-          <li onClick={() => {/* mở modal đổi mật khẩu */}}>Đổi mật khẩu</li>
+          <li onClick={() => setShowPasswordDialog(true)}>Đổi mật khẩu</li>
           <li>Nạp tiền</li>
-            <li
+          <li
             onClick={() => navigate('/my-bookings')}
             className={location.pathname === '/my-bookings' ? 'active' : ''}
             title="Xem các booking của tôi"
@@ -235,7 +304,80 @@ const MyAccount: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal đổi mật khẩu*/}
+      {/* Password Change Dialog */}
+      {showPasswordDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Đổi mật khẩu</h3>
+              <button
+                onClick={closePasswordDialog}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mật khẩu hiện tại
+                </label>
+                <input
+                  type="password"
+                  value={formData.currentPassword}
+                  onChange={(e) => handleInputChange('currentPassword', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Nhập mật khẩu hiện tại"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Mật khẩu mới
+                </label>
+                <input
+                  type="password"
+                  value={formData.newPassword}
+                  onChange={(e) => handleInputChange('newPassword', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Nhập mật khẩu mới (ít nhất 6 ký tự)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Xác nhận mật khẩu mới
+                </label>
+                <input
+                  type="password"
+                  value={formData.confirmPassword}
+                  onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Nhập lại mật khẩu mới"
+                />
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={handleChangePassword}
+                  disabled={!formData.currentPassword || !formData.newPassword || !formData.confirmPassword}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  <Save className="w-4 h-4" />
+                  Đổi mật khẩu
+                </button>
+                <button
+                  onClick={closePasswordDialog}
+                  className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400 transition-colors"
+                >
+                  Hủy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

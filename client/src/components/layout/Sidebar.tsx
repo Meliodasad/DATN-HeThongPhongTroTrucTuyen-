@@ -27,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     { icon: FileText, label: 'Hợp đồng', path: '/admin/contracts' },
     { icon: CreditCard, label: 'Thanh toán', path: '/admin/payments' },
     { icon: Star, label: 'Đánh giá', path: '/admin/reviews' },
+    { icon: Star, label: 'Báo cáo người dùng', path: '/admin/user-report' },
     // { icon: MessageSquare, label: 'Tin nhắn', path: '/admin/messages' },
     { icon: Phone, label: 'Liên hệ', path: '/admin/contacts' },
     { icon: BarChart3, label: 'Báo cáo', path: '/admin/reports' },

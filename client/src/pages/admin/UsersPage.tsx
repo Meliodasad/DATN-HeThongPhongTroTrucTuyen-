@@ -14,7 +14,8 @@ import {
   XCircle,
   Clock,
   X,
-  ChevronDown
+  ChevronDown,
+  LockOpen
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
 import { userService } from '../../services/userService';
@@ -670,6 +671,15 @@ const UsersPage: React.FC = () => {
                           title="Vô hiệu hóa"
                         >
                           <XCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                      {user.status === 'inactive' && (
+                        <button
+                          onClick={() => handleUpdateStatus(user.userId, 'active')}
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-red-50"
+                          title="Hủy khóa tài khoản"
+                        >
+                          <LockOpen className="w-4 h-4" />
                         </button>
                       )}
                       <button

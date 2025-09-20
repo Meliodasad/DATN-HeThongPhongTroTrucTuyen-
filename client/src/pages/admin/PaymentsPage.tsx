@@ -502,6 +502,7 @@ const PaymentsPage: React.FC = () => {
       setPayments(enrichedPayments);
     } catch (err) {
       console.error(err);
+      loadPayments()
       error('Lỗi', 'Không thể tải danh sách thanh toán');
     } finally {
       setLoading(false);
@@ -827,24 +828,6 @@ const PaymentsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
-                      {payment.paymentStatus === 'pending' && (
-                        <>
-                          <button 
-                            onClick={() => handleConfirmPayment(payment)}
-                            className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
-                            title="Xác nhận thanh toán"
-                          >
-                            <CheckCircle className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={() => handleUpdateStatus(payment.id, 'overdue')}
-                            className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
-                            title="Đánh dấu quá hạn"
-                          >
-                            <XCircle className="w-4 h-4" />
-                          </button>
-                        </>
-                      )}
                       <button 
                         onClick={() => handleViewDetail(payment)}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
