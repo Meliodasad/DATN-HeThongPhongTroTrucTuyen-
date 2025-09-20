@@ -45,7 +45,10 @@ exports.getSingleApproval = async (req, res) => {
 // Cập nhật trạng thái approval
 exports.updateApprovalStatus = async (req, res) => {
   try {
-    // console.log(`🔄 Cập nhật approvalId: ${req.params.id}, Trạng thái mới: ${req.body.status}`);
+    const {status}= req.body;
+    if(!['approved','rejected']){
+      return res.status(400).json({success:false, error:'Trạng thái ko hợp lệ'})
+    }
 
     const approval = await Approval.findOneAndUpdate(
       { approvalId: req.params.id },
@@ -64,5 +67,45 @@ exports.updateApprovalStatus = async (req, res) => {
   } catch (err) {
     // console.error('❌ Lỗi khi cập nhật approval:', err.message);
     res.status(500).json({ success: false, error: 'Server Error' });
+  }
+};
+exports.addApproval = async (req, res) => {
+  try {
+    const {
+      approvalId,          // optional, nếu không truyền sẽ auto APPxxx
+      roomId,              // required
+      status = 'pending',  // 'pending' | 'approved' | 'rejected'
+      note,                // ✅ mới thêm
+      requestedBy          // optional: nếu có auth thì lấy từ req.user
+    } = req.body;
+
+    if (!roomId) {
+      return res.status(400).json({ success: false, error: 'Thiếu roomId' });
+    }
+    if (!['pending','approved','rejected'].includes(status)) {
+      return res.status(400).json({ success: false, error: 'Trạng thái không hợp lệ' });
+    }
+
+    const requester = req.user?._id || requestedBy;
+    if (!requester) {
+      return res.status(400).json({ success: false, error: 'Thiếu requestedBy' });
+    }
+
+    const doc = await Approval.create({
+      approvalId,   // nếu không có, pre('save') sẽ tự sinh APP001...
+      roomId,
+      status,
+      note,         // ✅ lưu note
+      requestedBy: requester,
+      requestedAt: new Date()
+    });
+
+    const populated = await Approval.findById(doc._id)
+      .populate('requestedBy', 'name email');
+
+    return res.status(201).json({ success: true, data: populated });
+  } catch (err) {
+    console.error('addApproval error:', err);
+    return res.status(500).json({ success: false, error: 'Server Error' });
   }
 };
