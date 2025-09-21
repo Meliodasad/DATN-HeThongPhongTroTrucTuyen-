@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const roleSchema = new mongoose.Schema({
   roleId: {
     type: String,
-    unique: true
+    unique: true,
+    immutable: true  
   },
   userId: {
     type: String,

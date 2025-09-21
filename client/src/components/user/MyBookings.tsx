@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import '../../css/MyBookings.css';
 import { useAuth } from '../../contexts/AuthContext';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 // Kiểu dữ liệu FE sau khi chuẩn hoá
 type BookingItem = {
@@ -45,8 +45,8 @@ const MyBookings: React.FC = () => {
   const fetchData = async () => {
       try {
         const [bookRes, roomRes] = await Promise.all([
-          fetch(`http://localhost:3000/bookings/my-bookings`, { headers }),
-          fetch(`http://localhost:3000/rooms`, { headers }),
+          fetch(`http://localhost:3000/bookings/my-bookings`, { headers: buildHeaders() }),
+          fetch(`http://localhost:3000/rooms`, { headers: buildHeaders() }),
         ]);
 
         const bookJson = await bookRes.json();
@@ -124,7 +124,7 @@ const MyBookings: React.FC = () => {
       // (Nếu bạn dùng "room_requests" thì đổi endpoint tại đây)
       const res = await fetch(`http://localhost:3000/bookings/${id}`, {
         method: 'DELETE',
-        headers, // nên chứa Authorization
+        headers: buildHeaders(), // nên chứa Authorization
       });
 
       if (!res.ok) {

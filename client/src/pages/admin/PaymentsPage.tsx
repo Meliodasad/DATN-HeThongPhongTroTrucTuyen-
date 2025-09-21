@@ -21,7 +21,7 @@ import {
   Wallet
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 interface Payment {
   id: string;
@@ -465,10 +465,10 @@ const PaymentsPage: React.FC = () => {
       
       // Fetch payments, contracts, rooms, and users
       const [paymentsRes, contractsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:3000/payments', { headers }),
-        fetch('http://localhost:3000/contracts', { headers }),
-        fetch('http://localhost:3000/rooms', { headers }),
-        fetch('http://localhost:3000/users', { headers })
+        fetch('http://localhost:3000/payments', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/contracts', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/rooms', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/users', { headers: buildHeaders() })
       ]);
 
       const [paymentsData, contractsData, roomsData, usersData] = await Promise.all([

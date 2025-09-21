@@ -24,7 +24,7 @@ const reviewRoutes = require('./routes/reviewRoutes');
 const reportRoutes = require('./routes/reportRoutes');
 const roleRoutes = require('./routes/roleRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
-
+const invoiceRoutes = require('./routes/invoiceRoutes');
 const app = express();
 app.use(cors());
 // Connect to Database
@@ -60,7 +60,7 @@ app.use('/reviews', reviewRoutes);
 app.use('/reports', reportRoutes);
 app.use('/roles', roleRoutes);
 app.use('/notifications', notificationRoutes);
-
+app.use('/invoices', invoiceRoutes);
 // Health Check
 app.get('/api/health', (req, res) => {
   res.status(200).json({

@@ -5,7 +5,8 @@ const notificationSchema = new mongoose.Schema({
   notificationId: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    immutable: true  
   },
   receiverId: { // userId hoặc bất kỳ định danh string nào
     type: String,

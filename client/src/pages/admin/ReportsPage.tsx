@@ -10,7 +10,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 interface ReportData {
   userStats: {
@@ -61,10 +61,10 @@ const ReportsPage: React.FC = () => {
       
       // Fetch data from multiple endpoints
       const [usersRes, roomsRes, paymentsRes, contractsRes] = await Promise.all([
-        fetch('http://localhost:3000/users', { headers }),
-        fetch('http://localhost:3000/rooms', { headers }),
-        fetch('http://localhost:3000/payments', { headers }),
-        fetch('http://localhost:3000/contracts', { headers })
+        fetch('http://localhost:3000/users', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/rooms', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/payments', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/contracts', { headers: buildHeaders() })
       ]);
 
       const [users, rooms, payments, contracts] = await Promise.all([

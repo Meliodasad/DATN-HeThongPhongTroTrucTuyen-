@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FormEvent, useMemo } from 'react';
 import '../../css/ReportForm.css';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 type ReportApiA = {
   _id: string;
@@ -97,7 +97,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ roomId }) => {
       try {
         const res = await fetch(
           `http://localhost:3000/reports/room/${encodeURIComponent(roomId)}`,
-          { headers }
+          { headers: buildHeaders() }
         );
         const json: { success: boolean; data?: Array<ReportApiA | ReportApiB> } = await res.json();
         const arr = Array.isArray(json?.data) ? json.data : [];
@@ -137,7 +137,7 @@ const ReportForm: React.FC<ReportFormProps> = ({ roomId }) => {
     try {
       const response = await fetch('http://localhost:3000/reports', {
         method: 'POST',
-        headers,
+        headers: buildHeaders(),
         body: JSON.stringify(payload),
       });
 

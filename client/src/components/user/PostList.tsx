@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import PostCard from './PostCard';
-import { headers } from '../../utils/config';
 import { useSearch } from '../../contexts/SearchContext';
+import { buildHeaders } from '../../utils/config';
 
 interface Room {
    _id: string;
@@ -29,7 +29,7 @@ const PostList = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(searchRoom as any).toString();
-    fetch(`http://localhost:3000/rooms?${params}`, { headers })
+    fetch(`http://localhost:3000/rooms?${params}`, { headers: buildHeaders() })
       .then((res) => res.json())
       .then((data) => {
         setRooms(data?.data?.rooms || []);

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, 
-  User,  
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Calendar,
+  User,
+  Clock,
+  CheckCircle,
+  XCircle,
   Eye,
   Search,
   MapPin,
@@ -15,7 +15,7 @@ import {
   Save
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 interface Booking {
   id: string;
@@ -24,7 +24,7 @@ interface Booking {
   tenantId: string;
   bookingDate: string;
   note: string;
-  bookingStatus: 'pending' | 'approved' | 'rejected' | 'cancelled' ;
+  bookingStatus: 'pending' | 'approved' | 'rejected' | 'cancelled';
   createdAt?: string;
   room: {
     roomTitle: string;
@@ -76,7 +76,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
 
     try {
       setSaving(true);
-      
+
       const response = await fetch(`http://localhost:3000/bookings/${booking.id}`, {
         method: 'PATCH',
         headers: {
@@ -205,8 +205,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
               <h4 className="font-medium text-gray-900 mb-4">Thông tin phòng trọ</h4>
               <div className="flex items-start gap-4">
                 {booking.room.images && booking.room.images.length > 0 && (
-                  <img 
-                    src={booking.room.images[0]} 
+                  <img
+                    src={booking.room.images[0]}
                     alt={booking.room.roomTitle}
                     className="w-20 h-20 rounded-lg object-cover"
                   />
@@ -242,8 +242,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                   {booking.tenant.avatar ? (
-                    <img 
-                      src={booking.tenant.avatar} 
+                    <img
+                      src={booking.tenant.avatar}
                       alt={booking.tenant.fullName}
                       className="w-16 h-16 rounded-full object-cover"
                     />
@@ -350,23 +350,27 @@ const BookingsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'view' >('view');
+  const [modalMode, setModalMode] = useState<'view'>('view');
 
   const { success, error } = useToastContext();
 
   useEffect(() => {
-    loadBookings();
+    try {
+      loadBookings();
+    } catch (error) {
+      loadBookings();
+    }
   }, []);
 
   const loadBookings = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch bookings, rooms, and users
       const [bookingsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:3000/bookings', { headers }),
-        fetch('http://localhost:3000/rooms', { headers }),
-        fetch('http://localhost:3000/users', { headers })
+        fetch('http://localhost:3000/bookings', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/rooms', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/users', { headers: buildHeaders() })
       ]);
 
       const [bookingsData, roomsData, usersData] = await Promise.all([
@@ -378,12 +382,12 @@ const BookingsPage: React.FC = () => {
       // Combine data with proper mapping based on your database structure
       const enrichedBookings = bookingsData.data.map((booking: any) => {
         // Find room by roomId (matching your database structure)
-        const room = roomsData.data.rooms.find((r: any) => 
+        const room = roomsData.data.rooms.find((r: any) =>
           r.roomId === booking.roomId || r.id === booking.roomId
         );
-        
+
         // Find tenant by tenantId (matching your database structure)
-        const tenant = usersData.data.users.find((u: any) => 
+        const tenant = usersData.data.users.find((u: any) =>
           u.userId === booking.tenantId || u.id === booking.tenantId
         );
 
@@ -398,11 +402,11 @@ const BookingsPage: React.FC = () => {
             images: room.images || [],
             area: room.area,
             roomType: room.roomType
-          } : { 
-            roomTitle: 'Phòng không tìm thấy', 
-            location: 'Không xác định', 
-            price: 0, 
-            images: [] 
+          } : {
+            roomTitle: 'Phòng không tìm thấy',
+            location: 'Không xác định',
+            price: 0,
+            images: []
           },
           tenant: tenant ? {
             fullName: tenant.fullName || 'Khách hàng không xác định',
@@ -410,9 +414,9 @@ const BookingsPage: React.FC = () => {
             phone: tenant.phone,
             avatar: tenant.avatar,
             userId: tenant.userId
-          } : { 
-            fullName: 'Khách hàng không tìm thấy', 
-            email: 'unknown@example.com' 
+          } : {
+            fullName: 'Khách hàng không tìm thấy',
+            email: 'unknown@example.com'
           }
         };
       });
@@ -428,11 +432,11 @@ const BookingsPage: React.FC = () => {
 
   const filteredBookings = bookings.filter(booking => {
     const matchesSearch = booking.room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        booking.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        booking.room.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        (booking.bookingId && booking.bookingId.toLowerCase().includes(searchTerm.toLowerCase()));
+      booking.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.room.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (booking.bookingId && booking.bookingId.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || booking.bookingStatus === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -440,7 +444,7 @@ const BookingsPage: React.FC = () => {
     try {
       const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
         method: 'PUT',
-        headers,
+        headers: buildHeaders(),
         body: JSON.stringify({ bookingStatus: status }),
       });
 
@@ -462,7 +466,7 @@ const BookingsPage: React.FC = () => {
     try {
       const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
         method: 'DELETE',
-        headers,
+        headers: buildHeaders(),
       });
 
       if (!response.ok) {
@@ -610,7 +614,7 @@ const BookingsPage: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
@@ -631,7 +635,7 @@ const BookingsPage: React.FC = () => {
             Danh sách đặt phòng ({filteredBookings.length})
           </h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -670,8 +674,8 @@ const BookingsPage: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-start gap-3">
                       {booking.room.images && booking.room.images.length > 0 && (
-                        <img 
-                          src={booking.room.images[0]} 
+                        <img
+                          src={booking.room.images[0]}
                           alt={booking.room.roomTitle}
                           className="w-12 h-12 rounded-lg object-cover"
                         />
@@ -694,8 +698,8 @@ const BookingsPage: React.FC = () => {
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                         {booking.tenant.avatar ? (
-                          <img 
-                            src={booking.tenant.avatar} 
+                          <img
+                            src={booking.tenant.avatar}
                             alt={booking.tenant.fullName}
                             className="w-10 h-10 rounded-full object-cover"
                           />
@@ -754,14 +758,14 @@ const BookingsPage: React.FC = () => {
                           </button>
                         </>
                       )} */}
-                      <button 
+                      <button
                         onClick={() => handleViewBooking(booking)}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={() => handleDeleteBooking(booking.bookingId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa đặt phòng"

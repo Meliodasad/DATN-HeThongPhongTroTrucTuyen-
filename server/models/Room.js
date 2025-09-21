@@ -5,7 +5,8 @@ const roomSchema = new mongoose.Schema({
   roomId: {
     type: String,
     unique: true,
-    default: generateRoomId
+    default: generateRoomId,
+    immutable: true 
   },
   roomTitle: {
     type: String,

@@ -6,7 +6,9 @@ const {
   updatePayment,
   createVnpayPayment,
   vnpayReturn,
-  paymentResult
+  paymentResult,
+  createVnpayInvoice,
+  vnpayReturnInvoice
 } = require('../controllers/paymentController');
 
 const router = express.Router();
@@ -14,6 +16,10 @@ router.post('/', protect, authorize('host', 'admin', 'tenant'), createPayment);
 router.post('/vnpay/create', protect, createVnpayPayment);
 
 router.get('/vnpay/return', vnpayReturn);
+router.post('/vnpay/createInvoice', protect, createVnpayInvoice);
+
+router.get('/vnpay/returnInvoice', vnpayReturnInvoice);
+
 
 router.get('/payment-result', paymentResult);
 router.get('/', protect, getPayments);

@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 const SettingsPage: React.FC = () => {
   const { user } = useAuth();
@@ -60,7 +60,7 @@ const SettingsPage: React.FC = () => {
   try {
     const response = await fetch(`http://localhost:3000/users/${user?.id}`, {
       method: 'PUT',
-      headers,
+      headers: buildHeaders(),
       body: JSON.stringify({
         fullName: formData.fullName,
         email: formData.email,
@@ -90,7 +90,7 @@ const SettingsPage: React.FC = () => {
   try {
     const response = await fetch(`http://localhost:3000/auth/password`, {
       method: 'PUT',
-      headers,
+      headers: buildHeaders(),
       body: JSON.stringify({
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,

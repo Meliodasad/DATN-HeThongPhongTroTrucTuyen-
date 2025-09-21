@@ -17,7 +17,7 @@ import {
   Home
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 interface Contract {
   id: string;
@@ -337,9 +337,9 @@ const ContractsPage: React.FC = () => {
 
       // Fetch contracts, rooms, and users
       const [contractsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:3000/contracts', { headers }),
-        fetch('http://localhost:3000/rooms', { headers }),
-        fetch('http://localhost:3000/users', { headers })
+        fetch('http://localhost:3000/contracts', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/rooms', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/users', { headers: buildHeaders() })
       ]);
 
       const [contractsData, roomsData, usersData] = await Promise.all([

@@ -4,7 +4,8 @@ const contractSchema = new mongoose.Schema({
   contractId: { 
     type: String, 
     required: true,
-    unique: true
+    unique: true,
+    immutable: true  
    },
   bookingId: {
     type: String,

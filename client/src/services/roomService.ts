@@ -1,6 +1,7 @@
 // roomService.ts - Add method to get room approvals
 
-import { headers } from "../utils/config";
+import { buildHeaders } from "../utils/config";
+
 
 const API_BASE = 'http://localhost:3000';
 
@@ -9,7 +10,7 @@ export const roomService = {
 
   async getRoomApprovals() {
     try {
-      const response = await fetch(`${API_BASE}/approvals`, { headers });
+      const response = await fetch(`${API_BASE}/approvals`, { headers: buildHeaders() });
       if (!response.ok) {
         throw new Error('Failed to fetch room approvals');
       }
@@ -39,7 +40,7 @@ export const roomService = {
         url += `?${queryParams.toString()}`;
       }
 
-      const response = await fetch(url, { headers });
+      const response = await fetch(url, { headers: buildHeaders() });
       if (!response.ok) {
         throw new Error('Failed to fetch rooms');
       }
@@ -52,7 +53,7 @@ export const roomService = {
 
   async getRoomById(roomId: string) {
     try {
-      const response = await fetch(`${API_BASE}/rooms/${roomId}`, { headers });
+      const response = await fetch(`${API_BASE}/rooms/${roomId}`, { headers: buildHeaders() });
       if (!response.ok) {
         throw new Error('Failed to fetch room');
       }
@@ -113,7 +114,7 @@ export const roomService = {
         // Update existing approval
         const response = await fetch(`${API_BASE}/approvals/${existingApproval.approvalId}`, {
           method: 'PUT',
-          headers,
+          headers: buildHeaders(),
           body: JSON.stringify({
             ...existingApproval,
             status: status,
@@ -129,7 +130,7 @@ export const roomService = {
         // Create new approval
         const response = await fetch(`${API_BASE}/approvals`, {
           method: 'POST',
-          headers,
+          headers: buildHeaders(),
           body: JSON.stringify({
             approvalId: `A${Date.now()}`,
             roomId: roomId,
@@ -154,7 +155,7 @@ export const roomService = {
     try {
       const response = await fetch(`${API_BASE}/rooms/${roomId}`, {
         method: 'PUT',
-        headers,
+        headers: buildHeaders(),
         body: JSON.stringify(updates),
       });
 
@@ -172,7 +173,7 @@ export const roomService = {
     try {
       const response = await fetch(`${API_BASE}/rooms/${roomId}`, {
         method: 'DELETE',
-        headers,
+        headers: buildHeaders(),
       });
 
       if (!response.ok) {

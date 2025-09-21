@@ -1,4 +1,4 @@
-import { headers } from "../utils/config";
+import { buildHeaders } from "../utils/config";
 
 const API_BASE_URL = 'http://localhost:3000';
 
@@ -45,7 +45,7 @@ export interface MessageStats {
 class MessageService {
   private async fetchUsers(): Promise<User[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/users`, { headers });
+      const response = await fetch(`${API_BASE_URL}/users`, { headers: buildHeaders() });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -60,7 +60,7 @@ class MessageService {
 
   private async fetchMessages(): Promise<Message[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/messages`, { headers });
+      const response = await fetch(`${API_BASE_URL}/messages`, { headers: buildHeaders() });
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -275,7 +275,7 @@ class MessageService {
 
       const response = await fetch(`${API_BASE_URL}/messages`, {
         method: 'POST',
-        headers,
+        headers: buildHeaders(),
         body: JSON.stringify(newMessage),
       });
 

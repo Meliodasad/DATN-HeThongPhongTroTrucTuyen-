@@ -5,6 +5,7 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    immutable: true  
   },
   roomId: {
     type: String, // Tham chiếu tới roomId (không phải _id)

@@ -470,6 +470,7 @@ const RoomsPage: React.FC = () => {
       return matchesSearch && matchesType && matchesStatus && matchesApproval;
     });
   }, [roomsWithApproval, filters]);
+console.log(filteredRooms);
 
   const handleViewRoom = (roomId: string) => {
     setSelectedRoomId(roomId);
@@ -793,7 +794,7 @@ const RoomsPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm font-medium text-green-600">
                       <DollarSign className="w-4 h-4 mr-1" />
-                      {formatPrice(room.price)}
+                      {formatPrice(room.price.value)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

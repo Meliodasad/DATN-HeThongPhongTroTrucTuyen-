@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import '../../css/SidebarRight.css';
 import { useSearch } from '../../contexts/SearchContext';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 interface Room {
   id: string;
@@ -21,7 +21,7 @@ const SidebarRight = () => {
     const fetchRooms = async () => {
       try {
         // const params = new URLSearchParams(searchRoom as any).toString();
-        const response = await fetch(`http://localhost:3000/rooms`, { headers });
+        const response = await fetch(`http://localhost:3000/rooms`, { headers: buildHeaders() });
         const data = await response.json();
         setRooms(data.slice().reverse().slice(0, 5)); // Lấy 5 bài mới nhất
       } catch (error) {

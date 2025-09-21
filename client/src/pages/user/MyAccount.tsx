@@ -3,9 +3,11 @@ import axios from 'axios';
 import { useAuth } from '../../contexts/AuthContext';
 import '../../css/MyAccount.css';
 import { userService } from '../../services/userService';
-import { headers as baseHeaders } from '../../utils/config';
-import { useNavigate, useLocation } from 'react-router-dom'; 
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Save, X } from 'lucide-react'; // Import icons for the dialog
+import { buildHeaders } from '../../utils/config';
+import { InvoiceListDialog } from './InvoiceListDialog';
+import { paymentService } from '../../services/paymentService';
 
 type ContractStatus = 'pending' | 'active' | 'expired' | 'terminated';
 
@@ -64,12 +66,9 @@ const MyAccount: React.FC = () => {
     newPassword: '',
     confirmPassword: ''
   });
-  const location = useLocation(); 
-  
-  const authHeaders = React.useMemo(() => {
-    const token = localStorage.getItem('access_token') || localStorage.getItem('token');
-    return token ? { ...baseHeaders, Authorization: `Bearer ${token}` } : baseHeaders;
-  }, []);
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,7 +81,7 @@ const MyAccount: React.FC = () => {
 
         // Hợp đồng của tenant
         const res = await axios.get('http://localhost:3000/contracts/tenant', {
-          headers: authHeaders,
+          headers: buildHeaders(),
         });
 
         const list: ApiContract[] =
@@ -125,7 +124,7 @@ const MyAccount: React.FC = () => {
     };
 
     fetchData();
-  }, [user, authHeaders]);
+  }, [user]);
 
   const handlePay = (contractId: string, amount: number) => {
     // tuỳ flow của bạn:
@@ -158,7 +157,7 @@ const MyAccount: React.FC = () => {
     try {
       const response = await fetch(`http://localhost:3000/auth/password`, {
         method: 'PUT',
-        headers: authHeaders,
+        headers: buildHeaders(),
         body: JSON.stringify({
           currentPassword: formData.currentPassword,
           newPassword: formData.newPassword,
@@ -195,6 +194,28 @@ const MyAccount: React.FC = () => {
   if (loading) return <div className="loading-text">Loading...</div>;
   if (!profile) return <div className="loading-text">Không tìm thấy thông tin tài khoản</div>;
 
+  const onPay = async (value: any) => {
+    try {
+      setLoading(true);
+
+      const data: any = await paymentService.createVnpayPaymentInvoi({
+        tenantId: value.userId,
+        contractId: value.contractId,
+        amount: value.amount,
+        extraNote: value.note,
+        invoiceId: value.invoiceId,
+      });
+      // // Redirect user sang VNPay
+      console.log(data.data.payUrl);
+
+      window.location.href = data.data.payUrl;
+    } catch (e: any) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="myaccount-container">
       <div className="myaccount-sidebar">
@@ -211,6 +232,7 @@ const MyAccount: React.FC = () => {
           <li className="active">Thông tin cá nhân</li>
           <li onClick={() => setShowPasswordDialog(true)}>Đổi mật khẩu</li>
           <li>Nạp tiền</li>
+          <li onClick={() => setIsDialogOpen(true)}>Thanh toán hóa đơn</li>
           <li
             onClick={() => navigate('/my-bookings')}
             className={location.pathname === '/my-bookings' ? 'active' : ''}
@@ -317,7 +339,7 @@ const MyAccount: React.FC = () => {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -378,6 +400,12 @@ const MyAccount: React.FC = () => {
           </div>
         </div>
       )}
+
+      {isDialogOpen && <InvoiceListDialog
+        isOpen={isDialogOpen}
+        onClose={() => setIsDialogOpen(false)}
+        onPayment={onPay}
+      />}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import '../../css/ReviewSection.css';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 type ReviewApi = {
   isApproved: boolean;
@@ -46,7 +46,7 @@ const ReviewSection = ({ roomId }: { roomId: string }) => {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/reviews/${encodeURIComponent(roomId)}`, { headers });
+        const res = await fetch(`http://localhost:3000/reviews/${encodeURIComponent(roomId)}`, { headers: buildHeaders() });
         const json: { success: boolean; count?: number; data?: ReviewApi[] } = await res.json();
         const arr = Array.isArray(json?.data) ? json.data : [];
         const mapped = arr.map(mapApiToUI);
@@ -85,7 +85,7 @@ const ReviewSection = ({ roomId }: { roomId: string }) => {
     try {
       const res = await fetch(`http://localhost:3000/reviews`, {
         method: 'POST',
-        headers,
+        headers: buildHeaders(),
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error('Gửi đánh giá thất bại');

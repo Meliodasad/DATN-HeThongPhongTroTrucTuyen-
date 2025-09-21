@@ -1,6 +1,7 @@
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const Contract = require('../models/Contract');
+const Invoice = require('../models/Invoice');
 const vnpay = require('../config/vnpay');
 
 function makeTxnRef() {
@@ -34,6 +35,13 @@ exports.paymentResult = async (req, res) => {
       );
     }
 
+      if (status === 'success' && payment.invoiceId) {
+      await Invoice.findOneAndUpdate(
+        { invoiceId: payment.invoiceId },
+        { status: 'paid', updatedAt: new Date() }
+      );
+    }
+
     const page = status === 'success' ? 'success-page' : 'fail-page';
     return res.redirect(302, `http://localhost:5173/${page}?ref=${encodeURIComponent(ref)}`);
   } catch (err) {
@@ -45,7 +53,7 @@ exports.paymentResult = async (req, res) => {
 };
 exports.createVnpayPayment = async (req, res) => {
   try {
-    const { tenantId, contractId, amount, extraNote } = req.body;
+    const { tenantId, contractId, amount, extraNote, invoiceId } = req.body;
 
     const tenant = await User.findOne({ userId: tenantId });
     if (!tenant) return res.status(404).json({ success: false, message: 'Tenant không tồn tại' });
@@ -53,6 +61,12 @@ exports.createVnpayPayment = async (req, res) => {
     const contract = await Contract.findOne({ contractId });
     if (!contract) return res.status(404).json({ success: false, message: 'Hợp đồng không tồn tại' });
 
+    if (invoiceId) {
+      const inv = await Invoice.findOne({ invoiceId }).lean();
+      if (!inv) {
+        return res.status(404).json({ success: false, message: 'Invoice không tồn tại' });
+      }
+    }
     const vnpTxnRef = makeTxnRef();
     const payment = await Payment.create({
       tenantId,
@@ -60,6 +74,7 @@ exports.createVnpayPayment = async (req, res) => {
       amount,
       extraNote,
       vnpTxnRef,
+      invoiceId: invoiceId || undefined, 
       paymentStatus: 'pending'
     });
 
@@ -90,18 +105,128 @@ exports.createVnpayPayment = async (req, res) => {
   }
 };
 
+exports.createVnpayInvoice= async (req, res) => {
+  try {
+    const { tenantId, contractId, amount, extraNote, invoiceId } = req.body;
+
+    const tenant = await User.findOne({ userId: tenantId });
+    if (!tenant) return res.status(404).json({ success: false, message: 'Tenant không tồn tại' });
+
+    const contract = await Contract.findOne({ contractId });
+    if (!contract) return res.status(404).json({ success: false, message: 'Hợp đồng không tồn tại' });
+
+    if (invoiceId) {
+      const inv = await Invoice.findOne({ invoiceId }).lean();
+      if (!inv) {
+        return res.status(404).json({ success: false, message: 'Invoice không tồn tại' });
+      }
+    }
+    const vnpTxnRef = makeTxnRef();
+    const payment = await Payment.create({
+      tenantId,
+      contractId,
+      amount,
+      extraNote,
+      vnpTxnRef,
+      invoiceId: invoiceId || undefined, 
+      paymentStatus: 'pending'
+    });
+
+    const clientIp = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress || '127.0.0.1';
+    const baseUrl = process.env.CLIENT_URL?.replace(/\/+$/, '') || `${req.protocol}://${req.get('host')}`;
+
+    const payUrl = await vnpay.buildPaymentUrl({
+      vnp_Amount: amount,
+      vnp_TxnRef: vnpTxnRef,
+      vnp_OrderInfo: `Thanh toán hóa đơn cho hợp đồng ${contractId}`,
+      vnp_IpAddr: clientIp,
+      vnp_ReturnUrl: `${baseUrl}/payments/vnpay/returnInvoice`,
+      vnp_Locale: 'vn',
+      vnp_OrderType: 'other'
+    });
+
+    res.json({
+      success: true,
+      data: {
+        paymentId: payment.paymentId,
+        vnpTxnRef,
+        payUrl
+      }
+    });
+  } catch (err) {
+    console.error('Lỗi tạo VNPay payment:', err);
+    res.status(500).json({ success: false, message: 'Lỗi server' });
+  }
+};
+exports.vnpayReturnInvoice = async (req, res) => {
+  try {
+    const verify = await vnpay.verifyReturnUrl(req.query);
+    const { vnp_TxnRef, vnp_ResponseCode} = req.query;
+    if (!vnp_TxnRef) return res.status(400).send('Thiếu vnp_TxnRef');
+
+    if (verify.isSuccess && vnp_ResponseCode === '00') {
+      // cập nhật Payment
+      const paid = await Payment.findOne(
+          { vnpTxnRef: vnp_TxnRef }
+        ).select('paymentId tenantId contractId invoiceId amount paymentStatus vnpTxnRef')
+        .lean();
+
+      // Nếu có invoice → set paid
+      if (paid?.invoiceId) {
+        await Invoice.findOneAndUpdate(
+          { invoiceId: paid.invoiceId },
+          { status: 'paid', updatedAt: new Date() }
+        );
+      }
+    return res.redirect(302, `http://localhost:5173/success-page`);
+    } else {
+      await Payment.findOneAndUpdate(
+        { vnpTxnRef: vnp_TxnRef },
+        { paymentStatus: 'failed', vnpResponseCode: vnp_ResponseCode }
+      );
+        return res.redirect(302, `http://localhost:5173/fail-page`);
+    }
+  } catch (err) {
+    console.error('Lỗi verify return:', err);
+    res.status(500).send('Lỗi verify');
+  }
+};
+
 exports.vnpayReturn = async (req, res) => {
   try {
     const verify = await vnpay.verifyReturnUrl(req.query);
     const { vnp_TxnRef, vnp_ResponseCode, vnp_BankCode } = req.query;
-
     if (!vnp_TxnRef) return res.status(400).send('Thiếu vnp_TxnRef');
 
     if (verify.isSuccess && vnp_ResponseCode === '00') {
-      await Payment.findOneAndUpdate(
+      // cập nhật Payment
+      const paid = await Payment.findOneAndUpdate(
         { vnpTxnRef: vnp_TxnRef },
-        { paymentStatus: 'paid', vnpResponseCode: vnp_ResponseCode, vnpBankCode: vnp_BankCode, paidAt: new Date() }
+        {
+          paymentStatus: 'paid',
+          vnpResponseCode: vnp_ResponseCode,
+          vnpBankCode: vnp_BankCode,
+          paidAt: new Date()
+        },
+        { new: true }
       );
+
+      // Nếu có contract → active
+      if (paid?.contractId) {
+        await Contract.findOneAndUpdate(
+          { contractId: paid.contractId },
+          { status: 'active', updatedAt: new Date() }
+        );
+      }
+
+      // Nếu có invoice → set paid
+      if (paid?.invoiceId) {
+        await Invoice.findOneAndUpdate(
+          { invoiceId: paid.invoiceId },
+          { status: 'paid', updatedAt: new Date() }
+        );
+      }
+
       return res.redirect(`/payments/payment-result?status=success&ref=${vnp_TxnRef}`);
     } else {
       await Payment.findOneAndUpdate(

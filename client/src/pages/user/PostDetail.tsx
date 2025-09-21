@@ -6,7 +6,7 @@ import '../../css/PostDetail.css';
 import ReviewSection from '../../components/user/ReviewSection';
 import ReportForm from '../../components/user/ReportForm';
 import { useAuth } from '../../contexts/AuthContext';
-import { headers } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 interface Room {
   id: string;
@@ -79,7 +79,7 @@ const PostDetail = () => {
       setLoading(true);
       try {
         // 1) lấy phòng
-        const roomRes = await fetch(`http://localhost:3000/rooms/${id}`, { headers });
+        const roomRes = await fetch(`http://localhost:3000/rooms/${id}`, { headers: buildHeaders() });
         if (!roomRes.ok) throw new Error('Không tìm thấy phòng');
         const roomJson: any = await roomRes.json();
         const roomData: Room = roomJson?.data;
@@ -87,7 +87,7 @@ const PostDetail = () => {
         setRoom(roomData);
 
         // 2) lấy user host theo hostId (thường là userId)
-        const hostRes = await fetch(`http://localhost:3000/users/${roomData.hostId}`, { headers });
+        const hostRes = await fetch(`http://localhost:3000/users/${roomData.hostId}`, { headers: buildHeaders() });
         if (!hostRes.ok) throw new Error('Không tìm thấy người đăng');
         const hostJson: { success: boolean; data?: UserApi } = await hostRes.json();
 

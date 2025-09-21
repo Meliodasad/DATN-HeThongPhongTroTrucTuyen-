@@ -6,7 +6,8 @@ const reviewSchema = new mongoose.Schema({
     type: String,
     unique: true,
     required: true,
-    default: () => 'rev' + Date.now().toString().slice(-5) // ví dụ: rev12345
+    default: () => 'rev' + Date.now().toString().slice(-5), // ví dụ: rev12345
+    immutable: true  
   },
   roomId: {
     type: String,

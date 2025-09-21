@@ -5,8 +5,8 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
-    email: 'bac1112005@gmail.com',
-    password: '123456'
+    email: 'admin@gmail.com',
+    password: 'admin11'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

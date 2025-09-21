@@ -192,9 +192,9 @@ const getRooms = async (req, res, next) => {
     
     if (minPrice || maxPrice) {
       if (minPrice || maxPrice) {
-        query['price.monthly'] = {};
-        if (minPrice) query['price.monthly'].$gte = parseInt(minPrice);
-        if (maxPrice) query['price.monthly'].$lte = parseInt(maxPrice);
+        query['price.value'] = {};
+        if (minPrice) query['price.value'].$gte = parseInt(minPrice);
+        if (maxPrice) query['price.value'].$lte = parseInt(maxPrice);
       }
 
     }

@@ -2,8 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useToastContext } from './ToastContext';
-import { headers } from '../utils/config';
 import type { User } from '../types/user';
+import { buildHeaders } from '../utils/config';
 
 // interface User {
 //   id: string;
@@ -87,13 +87,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const userData: User = {
+        ...foundUser,
         id: foundUser.userId,
-        fullName: foundUser.fullName,
-        email: foundUser.email,
-        phone: foundUser.phone,
-        role: foundUser.role,
-        status: foundUser.status,
-        avatar: foundUser.avatar
       };
 
       setUser(userData);
@@ -113,7 +108,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/users', {headers});
+      const response = await fetch('http://localhost:3000/users', {headers: buildHeaders()});
       if (!response.ok) throw new Error('Failed to fetch users');
       const users = await response.json();
 
@@ -138,7 +133,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const createResponse = await fetch('http://localhost:3000/auth/register', {
         method: 'POST',
-        headers,
+        headers: buildHeaders(),
         body: JSON.stringify(newUser),
       });
 

@@ -5,7 +5,8 @@ const messageSchema = new mongoose.Schema({
   messageId: {
     type: String,
     unique: true,
-    default: generateMessageId // Tự động sinh msg001, msg002...
+    default: generateMessageId,
+    immutable: true  
   },
   tenantId: {
     type: String, // VD: "user004"

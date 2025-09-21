@@ -9,6 +9,7 @@ export type CreateVnpayPayload = {
     contractId: string;
     amount: number; // VND (chưa *100)
     extraNote?: string;
+    invoiceId?: string;
 };
 
 
@@ -28,6 +29,19 @@ export const paymentService = {
 
         const res = await axios.post<CreateVnpayResponse>(
             `${API_BASE}/payments/vnpay/create`,
+            data,
+            { headers }
+        );
+        return res.data;
+    },
+    async createVnpayPaymentInvoi(data: CreateVnpayPayload, token?: string) {
+        const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+        const t = token || localStorage.getItem('access_token') || localStorage.getItem('token');
+        if (t) headers.Authorization = `Bearer ${t}`;
+
+
+        const res = await axios.post<CreateVnpayResponse>(
+            `${API_BASE}/payments/vnpay/createInvoice`,
             data,
             { headers }
         );

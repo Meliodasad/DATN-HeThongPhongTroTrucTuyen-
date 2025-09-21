@@ -4,7 +4,8 @@ const reportSchema = new mongoose.Schema({
   reportId: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
+    immutable: true  
   },
   reporterId: {
     type: String, // userId từ bảng Users

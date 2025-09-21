@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../../css/BookingForm.css';
 import { useAuth } from '../../contexts/AuthContext';
-import { headers as baseHeaders } from '../../utils/config';
+import { buildHeaders } from '../../utils/config';
 
 interface Room {
   id: string;           // FE id (có thể là roomId)
@@ -32,21 +32,13 @@ const BookingForm: React.FC = () => {
   const [hasActiveContract, setHasActiveContract] = useState(false);
   const [hasAnyContract, setHasAnyContract] = useState(false);
 
-  // Tạo headers có Authorization
-  const authHeaders = React.useMemo(() => {
-    const token = localStorage.getItem('token');
-    return token
-      ? { ...baseHeaders, Authorization: `Bearer ${token}` }
-      : baseHeaders;
-  }, []);
-
   useEffect(() => {
     const fetchRoom = async () => {
       if (!roomIdParam) return;
       try {
         // BE chạy PORT=5000
         const res = await fetch(`http://localhost:3000/rooms/${roomIdParam}`, {
-          headers: authHeaders,
+          headers: buildHeaders()
         });
         const json = await res.json();
         // Chuẩn hoá: chấp nhận {data: {...}} hoặc trả phẳng
@@ -69,7 +61,7 @@ const BookingForm: React.FC = () => {
       if (!currentUserId) return;
       try {
         const res = await fetch(`http://localhost:3000/contracts?tenantId=${currentUserId}`, {
-          headers: authHeaders,
+          headers: buildHeaders()
         });
         const json = await res.json();
         const list: Contract[] = json?.data?.contracts ?? json?.data ?? [];
@@ -83,7 +75,7 @@ const BookingForm: React.FC = () => {
 
     fetchRoom();
     fetchContracts();
-  }, [roomIdParam, currentUserId, authHeaders]);
+  }, [roomIdParam, currentUserId]);
 
   // helper: tạo startDate (00:00) & endDate (+extendMonths)
   const buildDates = (months: number) => {

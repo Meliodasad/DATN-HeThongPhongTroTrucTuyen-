@@ -1,5 +1,5 @@
 import type { Review, ReviewStats, ReviewFilters } from '../types/review';
-import { headers } from '../utils/config';
+import { buildHeaders } from '../utils/config';
 
 class ReviewService {
   private baseUrl = 'http://localhost:3000';
@@ -8,9 +8,9 @@ class ReviewService {
     try {
       // Fetch reviews, rooms, and users
       const [reviewsRes, roomsRes, usersRes] = await Promise.all([
-        fetch(`${this.baseUrl}/reviews`, { headers }),
-        fetch(`${this.baseUrl}/rooms`, { headers }),
-        fetch(`${this.baseUrl}/users`, { headers })
+        fetch(`${this.baseUrl}/reviews`, { headers: buildHeaders() }),
+        fetch(`${this.baseUrl}/rooms`, { headers: buildHeaders() }),
+        fetch(`${this.baseUrl}/users`, { headers: buildHeaders() })
       ]);
 
       const [reviewsData, roomsData, usersData] = await Promise.all([
@@ -112,7 +112,7 @@ class ReviewService {
     try {
       const response = await fetch(`${this.baseUrl}/reviews/${id}/approve`, {
         method: 'PUT',
-        headers,
+        headers: buildHeaders(),
         body: JSON.stringify({ isApproved }),
       });
 
@@ -129,7 +129,7 @@ class ReviewService {
     try {
       const response = await fetch(`${this.baseUrl}/reviews/${id}`, {
         method: 'DELETE',
-        headers,
+        headers: buildHeaders(),
       });
 
       if (!response.ok) {

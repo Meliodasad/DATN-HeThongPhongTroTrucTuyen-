@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { hostService } from "../../services/hostService";
 import { useNavigate } from "react-router-dom";
-import { FileText, Search, Eye, Trash2, Filter } from "lucide-react";
+import { FileText, Search, Eye, Trash2, Filter, Edit } from "lucide-react";
+import InvoiceManagementDialog from "./InvoiceManagementDialog";
 
 type ApiContract = {
   _id: string;
@@ -96,6 +97,7 @@ const mapContracts = (list: ApiContract[]): ContractRow[] => {
       terms: c.terms ?? "",
       status: c.status ?? "",
       location: c.roomInfo?.location ?? "",
+      tenantId: c.tenantId ?? "",
     };
   });
 };
@@ -103,7 +105,8 @@ const mapContracts = (list: ApiContract[]): ContractRow[] => {
 const ContractList = () => {
   const [contracts, setContracts] = useState<ContractRow[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [showDialog, setShowDialog] = useState(false);
+  const [item, setItem] = useState<any>(null);
   // lọc
   const [filterRoomId, setFilterRoomId] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -171,11 +174,11 @@ const ContractList = () => {
       // Nếu trang hiện tại rỗng sau khi xoá -> lùi 1 trang (nếu có)
       const totalAfter = (filterRoomId || keyword)
         ? after.filter((c) => {
-            const roomOk = filterRoomId ? c.roomId === filterRoomId : true;
-            const kw = keyword.trim().toLowerCase();
-            const kwOk = kw ? `${c.tenantName} ${c.phone} ${c.roomId} ${c.location} ${c.title}`.toLowerCase().includes(kw) : true;
-            return roomOk && kwOk;
-          }).length
+          const roomOk = filterRoomId ? c.roomId === filterRoomId : true;
+          const kw = keyword.trim().toLowerCase();
+          const kwOk = kw ? `${c.tenantName} ${c.phone} ${c.roomId} ${c.location} ${c.title}`.toLowerCase().includes(kw) : true;
+          return roomOk && kwOk;
+        }).length
         : after.length;
 
       const totalPagesAfter = Math.max(1, Math.ceil(totalAfter / pageSize));
@@ -335,6 +338,23 @@ const ContractList = () => {
                           <span>Xem</span>
                         </button>
                         <button
+                          onClick={() => {
+                            console.log(c);
+                            
+                            setItem({
+                              contractId: c.id,
+                              roomId: c.roomId,
+                              userId: c.tenantId,
+                            })
+                            setShowDialog(true)
+                          }}
+                          className="flex items-center gap-1 text-blue-600 hover:text-blue-900"
+                          title="Hóa đơn"
+                        >
+                          <Edit className="w-4 h-4" />
+                          <span>Hóa đơn</span>
+                        </button>
+                        <button
                           onClick={() => handleDelete(c.id)}
                           className="flex items-center gap-1 text-red-600 hover:text-red-900"
                           title="Xóa hợp đồng"
@@ -359,22 +379,20 @@ const ContractList = () => {
               <button
                 disabled={!canPrev}
                 onClick={() => canPrev && setPage((p) => Math.max(1, p - 1))}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition ${
-                  canPrev
-                    ? "bg-white hover:bg-gray-100 text-gray-700 border-gray-300"
-                    : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-sm border transition ${canPrev
+                  ? "bg-white hover:bg-gray-100 text-gray-700 border-gray-300"
+                  : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                  }`}
               >
                 Trước
               </button>
               <button
                 disabled={!canNext}
                 onClick={() => canNext && setPage((p) => Math.min(totalPages, p + 1))}
-                className={`px-3 py-1.5 rounded-lg text-sm border transition ${
-                  canNext
-                    ? "bg-white hover:bg-gray-100 text-gray-700 border-gray-300"
-                    : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
-                }`}
+                className={`px-3 py-1.5 rounded-lg text-sm border transition ${canNext
+                  ? "bg-white hover:bg-gray-100 text-gray-700 border-gray-300"
+                  : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                  }`}
               >
                 Sau
               </button>
@@ -382,6 +400,16 @@ const ContractList = () => {
           </div>
         </div>
       )}
+      {showDialog && <InvoiceManagementDialog
+        isOpen={showDialog}
+        onClose={() => setShowDialog(false)}
+        contractId={item.contractId}
+        roomId={item.roomId}
+        userId={item.userId}
+        onInvoiceCreated={(invoice: any) => {
+          console.log('Invoice created:', invoice);
+        }}
+      />}
     </div>
   );
 };

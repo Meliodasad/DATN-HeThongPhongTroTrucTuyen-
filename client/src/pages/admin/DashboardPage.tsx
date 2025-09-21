@@ -9,8 +9,7 @@ import {
   Home
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-import { headers } from '../../utils/config';
-
+import { buildHeaders } from '../../utils/config';
 interface DashboardStats {
   totalUsers: number;
   totalRooms: number;
@@ -44,10 +43,10 @@ const DashboardPage: React.FC = () => {
 
       // Fetch data từ nhiều endpoint
       const [usersRes, roomsRes, bookingsRes, paymentsRes] = await Promise.all([
-        fetch(`${API_URL}/users`, { headers }),
-        fetch(`${API_URL}/rooms`, { headers }),
-        fetch(`${API_URL}/bookings`, { headers }),
-        fetch(`${API_URL}/payments`, { headers })
+        fetch(`${API_URL}/users`, { headers: buildHeaders() }),
+        fetch(`${API_URL}/rooms`, { headers: buildHeaders() }),
+        fetch(`${API_URL}/bookings`, { headers: buildHeaders() }),
+        fetch(`${API_URL}/payments`, { headers: buildHeaders() })
       ]);
 
 
