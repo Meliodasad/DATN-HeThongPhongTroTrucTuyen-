@@ -20,6 +20,7 @@ const { Title, Text } = Typography;
 const cx = classNames.bind(styles);
 
 function Dashboard() {
+    // State cơ bản
     const [loading, setLoading] = useState(true);
     const [stats, setStats] = useState({
         totalUsers: 0,
@@ -31,6 +32,8 @@ function Dashboard() {
         transactionGrowth: 0,
         revenueGrowth: 0,
     });
+
+    // Data cho bảng và chart
     const [postsData, setPostsData] = useState([]);
     const [recentTransactions, setRecentTransactions] = useState([]);
     const [topUsers, setTopUsers] = useState([]);
@@ -40,8 +43,9 @@ function Dashboard() {
             try {
                 setLoading(true);
                 const res = await requestGetAdminStats();
+
                 if (res && res.metadata) {
-                    // Update statistics
+                    // TODO: có thể tách riêng các phần setState ra custom hook nếu sau này logic phức tạp hơn
                     setStats({
                         totalUsers: res.metadata.totalUsers || 0,
                         totalPosts: res.metadata.totalPosts || 0,
@@ -53,13 +57,8 @@ function Dashboard() {
                         revenueGrowth: res.metadata.revenueGrowth || 0,
                     });
 
-                    // Update posts data for chart
                     setPostsData(res.metadata.postsData || []);
-
-                    // Update recent transactions
                     setRecentTransactions(res.metadata.recentTransactions || []);
-
-                    // Update top users
                     setTopUsers(res.metadata.topUsers || []);
                 }
             } catch (error) {
@@ -68,10 +67,11 @@ function Dashboard() {
                 setLoading(false);
             }
         };
+
         fetchData();
     }, []);
 
-    // Column chart config
+    // Config cho biểu đồ cột
     const columnConfig = {
         data: postsData,
         xField: 'date',
@@ -79,27 +79,18 @@ function Dashboard() {
         color: '#1a237e',
         label: {
             position: 'middle',
-            style: {
-                fill: '#FFFFFF',
-                opacity: 0.6,
-            },
+            style: { fill: '#FFFFFF', opacity: 0.6 },
         },
         xAxis: {
-            label: {
-                autoHide: true,
-                autoRotate: false,
-            },
+            label: { autoHide: true, autoRotate: false },
         },
         meta: {
-            date: {
-                alias: 'Ngày',
-            },
-            posts: {
-                alias: 'Số tin',
-            },
+            date: { alias: 'Ngày' },
+            posts: { alias: 'Số tin' },
         },
     };
 
+    // Cấu hình cột bảng giao dịch
     const transactionColumns = [
         {
             title: 'Người dùng',
@@ -122,6 +113,7 @@ function Dashboard() {
             render: (amount) => (
                 <div className={cx('amount-cell')}>
                     <DollarOutlined className={cx('amount-icon')} />
+                    {/* TODO: cân nhắc format thành VND chuẩn (Intl.NumberFormat) */}
                     <span>{(amount / 1000).toLocaleString()}k VND</span>
                 </div>
             ),
@@ -142,21 +134,9 @@ function Dashboard() {
             key: 'status',
             render: (status) => {
                 const statusConfig = {
-                    completed: {
-                        color: 'success',
-                        icon: <CheckCircleOutlined />,
-                        text: 'Thành công',
-                    },
-                    pending: {
-                        color: 'warning',
-                        icon: <ClockCircleOutlined />,
-                        text: 'Đang xử lý',
-                    },
-                    failed: {
-                        color: 'error',
-                        icon: <CloseCircleOutlined />,
-                        text: 'Thất bại',
-                    },
+                    completed: { color: 'success', icon: <CheckCircleOutlined />, text: 'Thành công' },
+                    pending: { color: 'warning', icon: <ClockCircleOutlined />, text: 'Đang xử lý' },
+                    failed: { color: 'error', icon: <CloseCircleOutlined />, text: 'Thất bại' },
                 };
 
                 const config = statusConfig[status] || {
@@ -192,9 +172,12 @@ function Dashboard() {
 
     return (
         <div className={cx('wrapper')}>
+            {/* TODO: Thêm breadcrumb hoặc tiêu đề trang để dễ định hướng */}
             <div className={cx('header')}></div>
 
+            {/* Các thẻ thống kê */}
             <Row gutter={[16, 16]}>
+                {/* Người dùng */}
                 <Col xs={24} sm={12} lg={6}>
                     <Card className={cx('stat-card')} bordered={false}>
                         <div className={cx('stat-icon', 'users')}>
@@ -214,6 +197,8 @@ function Dashboard() {
                         <Progress percent={75} showInfo={false} strokeColor="#1a237e" />
                     </Card>
                 </Col>
+
+                {/* Tin đăng */}
                 <Col xs={24} sm={12} lg={6}>
                     <Card className={cx('stat-card')} bordered={false}>
                         <div className={cx('stat-icon', 'posts')}>
@@ -233,6 +218,8 @@ function Dashboard() {
                         <Progress percent={60} showInfo={false} strokeColor="#0d47a1" />
                     </Card>
                 </Col>
+
+                {/* Giao dịch */}
                 <Col xs={24} sm={12} lg={6}>
                     <Card className={cx('stat-card')} bordered={false}>
                         <div className={cx('stat-icon', 'transactions')}>
@@ -252,6 +239,8 @@ function Dashboard() {
                         <Progress percent={45} showInfo={false} strokeColor="#1565c0" />
                     </Card>
                 </Col>
+
+                {/* Doanh thu */}
                 <Col xs={24} sm={12} lg={6}>
                     <Card className={cx('stat-card')} bordered={false}>
                         <div className={cx('stat-icon', 'revenue')}>
@@ -274,6 +263,7 @@ function Dashboard() {
                 </Col>
             </Row>
 
+            {/* Bảng giao dịch + Top user */}
             <Row gutter={[16, 16]} className={cx('content-row')}>
                 <Col xs={24} lg={16}>
                     <Card title="Lịch sử nạp tiền" className={cx('table-card')} loading={loading} bordered={false}>
@@ -313,6 +303,7 @@ function Dashboard() {
                 </Col>
             </Row>
 
+            {/* Biểu đồ tin đăng */}
             <Row gutter={[16, 16]} className={cx('content-row')}>
                 <Col xs={24}>
                     <Card

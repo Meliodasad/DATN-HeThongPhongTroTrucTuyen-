@@ -5,9 +5,11 @@ const modelUser = require('../models/users.model');
 const { Created, OK } = require('../core/success.response');
 
 class controllerMessager {
+    // ✅ Tạo tin nhắn mới
     async createMessage(req, res) {
         const { id } = req.user;
         const { receiverId, message } = req.body;
+
         if (!receiverId || !message) {
             throw new BadRequestError('Vui lòng nhập đầy đủ thông tin');
         }
@@ -18,12 +20,17 @@ class controllerMessager {
             message,
             isRead: false,
         });
+
+        // DEBUG log
+        console.log(`[Message] ${id} -> ${receiverId}: ${message}`);
+
+        // Gửi socket cho người nhận nếu online
         const socket = global.usersMap.get(receiverId.toString());
         if (socket) {
-            socket.emit('new-message', {
-                message: newMessage,
-            });
+            socket.emit('new-message', { message: newMessage });
         }
+
+        // TODO: nên paginate thay vì lấy hết messages
         const messages = await modelMessager.find({
             $or: [
                 { senderId: id, receiverId },
@@ -33,26 +40,26 @@ class controllerMessager {
 
         if (messages.length <= 1) {
             if (socket) {
-                socket.emit('new-user-message', {
-                    message: newMessage,
-                });
+                socket.emit('new-user-message', { message: newMessage });
             }
             return new Created({
                 message: 'Tạo tin nhắn thành công',
                 metadata: newMessage,
             }).send(res);
         }
-        new Created({
+
+        return new Created({
             message: 'Tạo tin nhắn thành công',
             metadata: newMessage,
         }).send(res);
     }
 
+    // ✅ Lấy toàn bộ tin nhắn với 1 user
     async getMessages(req, res) {
         const { id } = req.user;
         const { receiverId } = req.query;
 
-        // Lấy tất cả tin nhắn giữa hai người dùng
+        // TODO: validate receiverId trước khi query
         const messages = await modelMessager
             .find({
                 $or: [
@@ -62,15 +69,22 @@ class controllerMessager {
             })
             .sort({ createdAt: 1 });
 
-        // Đánh dấu tất cả tin nhắn từ người nhận gửi đến là đã đọc
-        await modelMessager.updateMany({ senderId: receiverId, receiverId: id, isRead: false }, { isRead: true });
+        // DEBUG log
+        console.log(`[Message] getMessages ${id} <-> ${receiverId} : ${messages.length} messages`);
 
-        new OK({
+        await modelMessager.updateMany(
+            { senderId: receiverId, receiverId: id, isRead: false },
+            { isRead: true },
+        );
+
+        return new OK({
             message: 'Lấy tin nhắn thành công',
+            count: messages.length,
             metadata: messages,
         }).send(res);
     }
 
+    // ✅ Đánh dấu 1 tin nhắn đã đọc
     async markMessageAsRead(req, res) {
         const { id } = req.user;
         const { messageId } = req.body;
@@ -79,7 +93,6 @@ class controllerMessager {
             throw new BadRequestError('Vui lòng cung cấp ID tin nhắn');
         }
 
-        // Cập nhật trạng thái đã đọc cho 1 tin nhắn cụ thể
         const updatedMessage = await modelMessager.findOneAndUpdate(
             { _id: messageId, receiverId: id, isRead: false },
             { isRead: true },
@@ -90,12 +103,15 @@ class controllerMessager {
             throw new BadRequestError('Không tìm thấy tin nhắn hoặc tin nhắn đã được đọc');
         }
 
-        new OK({
+        console.log(`[Message] markMessageAsRead ${messageId}`);
+
+        return new OK({
             message: 'Đánh dấu tin nhắn đã đọc thành công',
             metadata: updatedMessage,
         }).send(res);
     }
 
+    // ✅ Đánh dấu toàn bộ tin nhắn từ 1 user đã đọc
     async markAllMessagesAsRead(req, res) {
         const { id } = req.user;
         const { senderId } = req.body;
@@ -104,33 +120,34 @@ class controllerMessager {
             throw new BadRequestError('Vui lòng cung cấp ID người gửi');
         }
 
-        // Đánh dấu tất cả tin nhắn từ một người gửi cụ thể là đã đọc
-        const result = await modelMessager.updateMany({ senderId, receiverId: id, isRead: false }, { isRead: true });
+        const result = await modelMessager.updateMany(
+            { senderId, receiverId: id, isRead: false },
+            { isRead: true },
+        );
 
-        // Thông báo cho người gửi biết tin nhắn đã được đọc
+        // DEBUG log
+        console.log(`[Message] markAllMessagesAsRead ${senderId} -> ${id}, updated: ${result.modifiedCount}`);
+
         const socket = global.usersMap.get(senderId.toString());
         if (socket) {
-            socket.emit('messages-read', {
-                readerId: id,
-                count: result.modifiedCount,
-            });
+            socket.emit('messages-read', { readerId: id, count: result.modifiedCount });
         }
 
-        new OK({
+        return new OK({
             message: 'Đánh dấu tất cả tin nhắn đã đọc thành công',
             metadata: { updatedCount: result.modifiedCount },
         }).send(res);
     }
 
+    // ✅ Lấy danh sách user đã nhắn tin với mình
     async getMessagesByUserId(req, res) {
         const { id } = req.user;
 
-        // Get all messages where the current user is the receiver
+        // TODO: có thể optimize query bằng aggregate
         const messages = await modelMessager.find({
             $or: [{ senderId: id }, { receiverId: id }],
         });
 
-        // Tạo danh sách các ID người dùng duy nhất mà người dùng hiện tại đã tương tác
         const uniqueUserIds = [
             ...new Set([
                 ...messages.filter((msg) => msg.senderId !== id).map((msg) => msg.senderId),
@@ -138,20 +155,15 @@ class controllerMessager {
             ]),
         ];
 
-        // Get user information for each unique user
         const users = await modelUser.find({ _id: { $in: uniqueUserIds } });
 
-        // Create a map of userId to user info for easy lookup
         const userMap = {};
         users.forEach((user) => {
             const userId = user._id.toString();
             let statusUser = 'Đang offline';
-
-            // Kiểm tra xem người dùng có đang online không
             if (global.usersMap.get(userId)) {
                 statusUser = 'Đang hoạt động';
             }
-
             userMap[userId] = {
                 id: user._id,
                 username: user.fullName,
@@ -160,7 +172,6 @@ class controllerMessager {
             };
         });
 
-        // Count unread messages per user
         const unreadCounts = {};
         messages.forEach((msg) => {
             if (msg.receiverId.toString() === id && !msg.isRead) {
@@ -172,12 +183,9 @@ class controllerMessager {
             }
         });
 
-        // Create the final response with sender info, unread counts and last message
         const result = uniqueUserIds
             .map((userId) => {
                 const userIdStr = userId.toString();
-
-                // Find the most recent message between users
                 const userMessages = messages.filter(
                     (msg) =>
                         (msg.senderId.toString() === userIdStr && msg.receiverId.toString() === id) ||
@@ -197,8 +205,11 @@ class controllerMessager {
             })
             .filter((item) => item.lastMessage !== null);
 
-        new OK({
+        console.log(`[Message] getMessagesByUserId ${id} -> ${result.length} conversations`);
+
+        return new OK({
             message: 'Lấy tin nhắn thành công',
+            count: result.length,
             metadata: result,
         }).send(res);
     }

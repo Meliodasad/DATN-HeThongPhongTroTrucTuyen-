@@ -1,7 +1,7 @@
 import classNames from 'classnames/bind';
 import styles from './DetailPost.module.scss';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPhoneAlt, faShareAlt, faFlag, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
+import { faPhoneAlt, faShareAlt, faMapMarkerAlt } from '@fortawesome/free-solid-svg-icons';
 import { faHeart } from '@fortawesome/free-regular-svg-icons';
 
 import { useState, useEffect } from 'react';
@@ -19,7 +19,6 @@ import {
 } from '../../config/request';
 import { useStore } from '../../hooks/useStore';
 import { useSocket } from '../../hooks/useSocket';
-import Messager from '../../utils/Messager/Messager';
 import ChatButton from '../../utils/ChatButton/ChatButton';
 import { message } from 'antd';
 
@@ -27,21 +26,16 @@ const cx = classNames.bind(styles);
 
 function DetailPost() {
     const [selectedImg, setSelectedImg] = useState('');
-
     const [user, setUser] = useState({});
-
     const [post, setPost] = useState({});
-
     const { id } = useParams();
-
     const [userHeart, setUserHeart] = useState([]);
-
     const [postVip, setPostVip] = useState([]);
 
     const fetchPost = async () => {
         const res = await requestGetPostById(id);
         setPost(res.metadata.data);
-        setSelectedImg(res?.metadata?.data?.images[0]);
+        setSelectedImg(res?.metadata?.data?.images?.[0]);
         setUser(res?.metadata?.dataUser);
         setUserHeart(res?.metadata?.userFavourite);
         document.title = `${res.metadata.data.title} - PhongTro123`;
@@ -54,19 +48,18 @@ function DetailPost() {
     useEffect(() => {
         const fetchPostVip = async () => {
             const res = await requestGetPostVip();
+            console.log("DEBUG postVip:", res.metadata); // TODO: xóa sau khi test
             setPostVip(res.metadata);
         };
         fetchPostVip();
     }, []);
 
-    const { dataUser, setDataMessages } = useStore();
-    const { usersMessage, setUsersMessage } = useSocket();
+    const { dataUser } = useStore();
+    useSocket(); // TODO: nếu không dùng thì xóa
 
     const handleCreateFavourite = async () => {
         try {
-            const data = {
-                postId: post._id,
-            };
+            const data = { postId: post._id };
             const res = await requestCreateFavourite(data);
             fetchPost();
             message.success(res.message);
@@ -77,9 +70,7 @@ function DetailPost() {
 
     const handleDeleteFavourite = async () => {
         try {
-            const data = {
-                postId: post._id,
-            };
+            const data = { postId: post._id };
             const res = await requestDeleteFavourite(data);
             fetchPost();
             message.error(res.message);
@@ -95,12 +86,22 @@ function DetailPost() {
                     <div className={cx('left')}>
                         <div className={cx('slider-container')}>
                             <div className={cx('slide-item')}>
-                                <img src={selectedImg} alt="" />
+                                {/* ✅ alt rõ ràng + fallback */}
+                                <img src={selectedImg || userDefault} alt={post?.title || "Ảnh bài đăng"} />
                             </div>
                             <div className={cx('select-img')}>
-                                {post?.images?.map((image, index) => (
-                                    <img key={index} src={image} alt="" onClick={() => setSelectedImg(image)} />
-                                ))}
+                                {post?.images?.length > 0 ? (
+                                    post.images.map((image, index) => (
+                                        <img
+                                            key={index}
+                                            src={image}
+                                            alt={`Ảnh ${index + 1} - ${post?.title}`}
+                                            onClick={() => setSelectedImg(image)}
+                                        />
+                                    ))
+                                ) : (
+                                    <p>Chưa có ảnh minh họa</p> // TODO: có thể thêm ảnh mặc định sau
+                                )}
                             </div>
                         </div>
 
@@ -112,6 +113,7 @@ function DetailPost() {
                                     <span>{post?.location}</span>
                                 </div>
                                 <div className={cx('property-meta')}>
+                                    {/* TODO: dùng Intl.NumberFormat('vi-VN') để format chuẩn */}
                                     <div className={cx('price')}>{post?.price?.toLocaleString()} VNĐ/tháng</div>
                                     <div className={cx('area')}>{post?.area} m²</div>
                                 </div>
@@ -161,7 +163,7 @@ function DetailPost() {
                         <div className={cx('contact-card')}>
                             <div className={cx('user-info')}>
                                 <div className={cx('avatar')}>
-                                    <img src={user?.avatar || userDefault} alt="Avatar" />
+                                    <img src={user?.avatar || userDefault} alt={user?.username || "User avatar"} />
                                 </div>
                                 <div className={cx('user-details')}>
                                     <h3 className={cx('user-name')}>{user?.username || user?.fullName}</h3>
@@ -216,7 +218,10 @@ function DetailPost() {
                             {postVip.map((item, index) => (
                                 <div className={cx('listing-item')} key={index}>
                                     <div className={cx('listing-image')}>
-                                        <img src={item.images[0]} alt="Phòng trọ cao cấp" />
+                                        <img
+                                            src={item.images?.[0] || userDefault}
+                                            alt={item.title || "Tin nổi bật"}
+                                        />
                                     </div>
                                     <div className={cx('listing-content')}>
                                         <h4 className={cx('listing-name')}>{item.title}</h4>

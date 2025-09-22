@@ -21,14 +21,14 @@ function ForgotPassword() {
     const handleSendOTP = async (values) => {
         try {
             setLoading(true);
-            // TODO: Call API to send OTP
             await requestForgotPassword({ email: values.email });
             message.success('Mã xác thực đã được gửi đến email của bạn');
             setEmail(values.email);
             setStep(2);
-            setLoading(false);
+            form.resetFields();
         } catch (error) {
-            message.error(error.response.data.message);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra');
+        } finally {
             setLoading(false);
         }
     };
@@ -44,15 +44,11 @@ function ForgotPassword() {
             };
 
             await requestResetPassword(data);
+            message.success('Đặt lại mật khẩu thành công');
             navigate('/login');
-            // Simulate API call
-            setTimeout(() => {
-                message.success('Đặt lại mật khẩu thành công');
-                // TODO: Redirect to login page
-                setLoading(false);
-            }, 1000);
         } catch (error) {
-            message.error(error.response.data.message);
+            message.error(error.response?.data?.message || 'Có lỗi xảy ra');
+        } finally {
             setLoading(false);
         }
     };
@@ -78,6 +74,7 @@ function ForgotPassword() {
 
     const renderStep2 = () => (
         <Form form={form} onFinish={handleVerifyAndReset}>
+            <Text className={cx('email-hint')}>Đang đặt lại mật khẩu cho: <b>{email}</b></Text>
             <Form.Item
                 name="otp"
                 rules={[
@@ -117,6 +114,9 @@ function ForgotPassword() {
                 <Button type="primary" htmlType="submit" block size="large" loading={loading}>
                     Đặt lại mật khẩu
                 </Button>
+                <Button type="link" block onClick={() => setStep(1)}>
+                    Quay lại nhập email
+                </Button>
             </Form.Item>
         </Form>
     );
@@ -135,8 +135,7 @@ function ForgotPassword() {
                         {step === 1 && 'Nhập email của bạn để nhận mã xác thực'}
                         {step === 2 && 'Nhập mã OTP và mật khẩu mới cho tài khoản của bạn'}
                     </Text>
-                    {step === 1 && renderStep1()}
-                    {step === 2 && renderStep2()}
+                    {step === 1 ? renderStep1() : renderStep2()}
                 </Card>
             </div>
         </div>
