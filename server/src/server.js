@@ -73,8 +73,11 @@ app.use((err, req, res, next) => {
 // ✅ Dummy hot-search API (nếu cần)
 let hotSearch = [];
 
+// thêm console.log để debug
 app.post('/api/add-search', (req, res) => {
     const { title } = req.body;
+    console.log(`[HotSearch] Thêm từ khóa: ${title}`);
+
     const index = hotSearch.findIndex((item) => item.title === title);
     if (index !== -1) {
         hotSearch[index].count++;
@@ -84,7 +87,16 @@ app.post('/api/add-search', (req, res) => {
     return res.status(200).json({ message: 'Thêm từ khóa thành công' });
 });
 
+// ✅ API test đơn giản
+app.get('/api/health-check', (req, res) => {
+    return res.status(200).json({
+        status: 'ok',
+        uptime: process.uptime(),
+        message: 'Server vẫn hoạt động bình thường 🚀',
+    });
+});
+
 // ✅ Khởi động server
 server.listen(port, () => {
-    console.log(`Server đang chạy tại http://localhost:${port}`);
+    console.log(`✅ Server đang chạy tại http://localhost:${port}`);
 });
