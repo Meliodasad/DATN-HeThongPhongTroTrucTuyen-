@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Building, 
-  Calendar, 
-  CreditCard, 
-  TrendingUp, 
+import {
+  Users,
+  Building,
+  Calendar,
+  CreditCard,
+  TrendingUp,
   TrendingDown,
-  UserPlus,
   Home
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
-
+import { buildHeaders } from '../../utils/config';
 interface DashboardStats {
   totalUsers: number;
   totalRooms: number;
@@ -39,16 +38,17 @@ const DashboardPage: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-
+      
       const API_URL = 'http://localhost:3000';
 
       // Fetch data từ nhiều endpoint
       const [usersRes, roomsRes, bookingsRes, paymentsRes] = await Promise.all([
-        fetch(`${API_URL}/users`),
-        fetch(`${API_URL}/rooms`),
-        fetch(`${API_URL}/bookings`),
-        fetch(`${API_URL}/payments`)
+        fetch(`${API_URL}/users`, { headers: buildHeaders() }),
+        fetch(`${API_URL}/rooms`, { headers: buildHeaders() }),
+        fetch(`${API_URL}/bookings`, { headers: buildHeaders() }),
+        fetch(`${API_URL}/payments`, { headers: buildHeaders() })
       ]);
+
 
       const [users, rooms, bookings, payments] = await Promise.all([
         usersRes.json(),
@@ -58,22 +58,23 @@ const DashboardPage: React.FC = () => {
       ]);
 
       // Tính toán thống kê
-      const totalRevenue = payments.reduce((sum: number, payment: any) => 
-        payment.paymentStatus === 'completed' ? sum + payment.amount : sum, 0
+      
+      const totalRevenue = payments.data.reduce((sum: number, payment: any) =>
+        payment.paymentStatus === "paid" ? sum + payment.amount : sum, 0
       );
 
       const currentMonth = new Date().getMonth();
-      const newUsersThisMonth = users.filter((u: any) => 
+      const newUsersThisMonth = users.data.users.filter((u: any) =>
         new Date(u.createdAt).getMonth() === currentMonth
       ).length;
 
-      const rentedRooms = rooms.filter((r: any) => r.status === 'rented').length;
-      const occupancyRate = rooms.length > 0 ? (rentedRooms / rooms.length) * 100 : 0;
+      const rentedRooms = rooms.data.rooms.filter((r: any) => r.status === 'rented').length;
+      const occupancyRate = rooms.data.pagination.totalRooms > 0 ? (rentedRooms / rooms.data.pagination.totalRooms) * 100 : 0;
 
       setStats({
-        totalUsers: users.length,
-        totalRooms: rooms.length,
-        totalBookings: bookings.length,
+        totalUsers: users.data.pagination.totalUsers,
+        totalRooms: rooms.data.pagination.totalRooms,
+        totalBookings: bookings.data.length,
         totalRevenue,
         newUsersThisMonth,
         occupancyRate
@@ -165,8 +166,8 @@ const DashboardPage: React.FC = () => {
                   {card.title}
                 </p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {typeof card.value === 'number' && card.title !== 'Doanh thu' 
-                    ? card.value.toLocaleString() 
+                  {typeof card.value === 'number' && card.title !== 'Doanh thu'
+                    ? card.value.toLocaleString()
                     : card.value
                   }
                 </p>
@@ -177,11 +178,10 @@ const DashboardPage: React.FC = () => {
                   {card.changeType === 'decrease' && (
                     <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
                   )}
-                  <span className={`text-sm ${
-                    card.changeType === 'increase' ? 'text-green-600' :
+                  <span className={`text-sm ${card.changeType === 'increase' ? 'text-green-600' :
                     card.changeType === 'decrease' ? 'text-red-600' :
-                    'text-gray-600'
-                  }`}>
+                      'text-gray-600'
+                    }`}>
                     {card.change}
                   </span>
                 </div>

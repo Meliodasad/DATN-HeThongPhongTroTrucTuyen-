@@ -13,6 +13,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 }) => {
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
+console.log(user);
 
   if (loading) {
     return (

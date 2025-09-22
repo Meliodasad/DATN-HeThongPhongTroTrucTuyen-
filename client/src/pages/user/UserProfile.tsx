@@ -1,24 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import '../../css/UserProfile.css';
+import { userService } from '../../services/userService';
+import { roomService } from '../../services/roomService';
 
-interface User {
-  id: string;
-  name: string;
-  phone: string;
-  zalo?: string;
-  avatar?: string;
-  role?: string;
-}
+import type { User } from '../../types/user';
 
 interface Room {
   id: string;
   title: string;
-  price: number;
+  price: any;
   address: string;
   images: string;
   hostId: string;
+  roomId: string;
+  location: string;
+  host: any;
 }
 
 const UserProfile = () => {
@@ -30,12 +27,14 @@ const UserProfile = () => {
     const fetchData = async () => {
       try {
         const [userRes, roomsRes] = await Promise.all([
-          axios.get(`http://localhost:3000/users/${userId}`),
-          axios.get('http://localhost:3000/rooms'),
+          userService.getUserById(userId || ''),
+          roomService.getRooms(),
         ]);
 
         setHost(userRes.data);
-        const hostRooms = roomsRes.data.filter((room: Room) => room.hostId === userId);
+        console.log(roomsRes);
+
+        const hostRooms = roomsRes.data.filter((room: Room) => room.hostId === userId || room.host?.userId === userId);
         setRooms(hostRooms);
       } catch (error) {
         console.error('Lỗi khi tải dữ liệu:', error);
@@ -53,9 +52,9 @@ const UserProfile = () => {
     <div className="user-profile-container">
       <div className="user-info">
         <div className="user-info-left">
-          <img src={host.avatar || '/default-avatar.png'} alt={host.name} className="avatar" />
+          <img src={host.avatar || '/default-avatar.png'} alt={host.fullName} className="avatar" />
           <div className="user-info-text">
-            <h2>Tên :   {host.name}</h2>
+            <h2>Tên :   {host.fullName}</h2>
             <div className="contact-info">
               <p> 📞<a href={`tel:${host.phone}`}>{host.phone}</a></p>
               {host.zalo && (
@@ -71,7 +70,7 @@ const UserProfile = () => {
         <div className="room-list">
           {rooms.length > 0 ? (
             rooms.map((room) => (
-              <Link to={`/posts/${room.id}`} key={room.id} className="post-card1-link">
+              <Link to={`/posts/${room.roomId}`} key={room.roomId} className="post-card1-link">
                 <div className="post-card1">
                   <img
                     src={(room.images?.[0]) || '/default-thumbnail.jpg'}
@@ -80,8 +79,8 @@ const UserProfile = () => {
                   />
                   <div className="details">
                     <h4>{room.title}</h4>
-                    <p className="price">{room.price.toLocaleString()} VNĐ/tháng</p>
-                    <p className="address">{room.address}</p>
+                    <p className="price">{room.price.value.toLocaleString()} VNĐ/tháng</p>
+                    <p className="address">{room.location}</p>
                   </div>
                 </div>
               </Link>

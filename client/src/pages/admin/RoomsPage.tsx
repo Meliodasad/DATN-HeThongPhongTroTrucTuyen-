@@ -18,6 +18,7 @@ import {
 import { useToastContext } from '../../contexts/ToastContext';
 import { roomService } from '../../services/roomService';
 import type { Room, RoomStats, RoomFilters } from '../../types/room';
+import { truncate } from '../../utils/format';
 
 // Room Modal Component (View only)
 interface RoomModalProps {
@@ -43,7 +44,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
     try {
       setLoading(true);
       const roomData = await roomService.getRoomById(roomId);
-      setRoom(roomData);
+      setRoom(roomData.data);
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,6 +57,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
       case 'single': return 'Phòng đơn';
       case 'double': return 'Phòng đôi';
       case 'apartment': return 'Căn hộ';
+      case 'shared': return 'Phòng chung';
       default: return 'Không xác định';
     }
   };
@@ -126,7 +128,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -170,7 +172,7 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Giá thuê
                   </label>
-                  <p className="text-gray-900 font-medium text-green-600">{formatPrice(room?.price || 0)}</p>
+                  <p className="text-gray-900 font-medium text-green-600">{formatPrice(room?.price?.value || 0)}</p>
                 </div>
 
                 <div>
@@ -423,13 +425,15 @@ const RoomsPage: React.FC = () => {
     try {
       setLoading(true);
       const [roomsData, statsData, approvalsData] = await Promise.all([
-        roomService.getRooms(filters),
+        roomService.getRoomsAdmin(filters),
         roomService.getRoomStats(),
         roomService.getRoomApprovals() // This method needs to be implemented
       ]);
-      setRooms(roomsData);
+      
+      setRooms(roomsData.data.rooms || []);
       setStats(statsData);
-      setRoomApprovals(approvalsData || []);
+      setRoomApprovals(approvalsData.data || []);
+      console.log('Room Approvals:', roomApprovals);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải dữ liệu phòng trọ');
@@ -440,11 +444,20 @@ const RoomsPage: React.FC = () => {
 
   // Enhanced rooms with approval status
   const roomsWithApproval = useMemo(() => {
-    return rooms.map(room => ({
+  return rooms.map(room => {
+    const a = roomApprovals.find(x => x.roomId === (room.roomId));
+    const st = (a?.status ?? a?.approvalStatus ?? 'pending') as Room['approvalStatus'];
+    
+    return {
       ...room,
-      approvalStatus: getRoomApprovalStatus(room.roomId || room.id, roomApprovals)
-    }));
-  }, [rooms, roomApprovals]);
+      approvalId: a?.approvalId,
+      approvalStatus: st,
+      approvalNote: a?.note
+    };
+  });
+ 
+}, [rooms, roomApprovals]);
+
 
   const filteredRooms = useMemo(() => {
     return roomsWithApproval.filter(room => {
@@ -539,6 +552,7 @@ const RoomsPage: React.FC = () => {
       case 'single': return 'Phòng đơn';
       case 'double': return 'Phòng đôi';
       case 'apartment': return 'Căn hộ';
+      case 'shared': return 'Phòng chung';
       default: return 'Không xác định';
     }
   };
@@ -731,7 +745,7 @@ const RoomsPage: React.FC = () => {
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredRooms.map((room) => (
                 <tr key={room.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4" title={`${room.roomTitle}\n${room.location}`}>
                     <div className="flex items-start gap-3">
                       {room.images && room.images.length > 0 && (
                         <img 
@@ -742,11 +756,11 @@ const RoomsPage: React.FC = () => {
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium text-gray-900 truncate">
-                          {room.roomTitle}
+                          {truncate(room.roomTitle)}
                         </div>
                         <div className="flex items-center text-sm text-gray-500 mt-1">
                           <MapPin className="w-3 h-3 mr-1" />
-                          <span className="truncate">{room.location}</span>
+                          <span className="truncate">{truncate(room.location)}</span>
                         </div>
                         <div className="text-sm text-gray-500">
                           {room.area}m²
@@ -769,7 +783,7 @@ const RoomsPage: React.FC = () => {
                       </div>
                       <div className="ml-2">
                         <div className="text-sm font-medium text-gray-900">
-                          {room.hostId || 'Unknown'}
+                          {room.hostId || room?.host?.fullName || room?.host?.userId || 'Unknown'}
                         </div>
                       </div>
                     </div>
@@ -782,13 +796,13 @@ const RoomsPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm font-medium text-green-600">
                       <DollarSign className="w-4 h-4 mr-1" />
-                      {formatPrice(room.price)}
+                      {formatPrice(room.price.value)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <StatusDropdown
                       currentStatus={room.status}
-                      roomId={room.id}
+                      roomId={room.roomId}
                       onStatusChange={handleStatusChange}
                     />
                   </td>
@@ -800,7 +814,7 @@ const RoomsPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm text-gray-500">
                       <Calendar className="w-4 h-4 mr-1" />
-                      {formatDate(room.dateAdded)}
+                      {formatDate(room.createdAt)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -824,14 +838,14 @@ const RoomsPage: React.FC = () => {
                         </>
                       )}
                       <button 
-                        onClick={() => handleViewRoom(room.id)}
+                        onClick={() => handleViewRoom(room.roomId)}
                         className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button 
-                        onClick={() => handleDeleteRoom(room.id)}
+                        onClick={() => handleDeleteRoom(room.roomId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa phòng"
                       >

@@ -80,7 +80,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
         {toasts.map((toast) => (
           <div
             key={toast.id}
-            className={`max-w-sm w-full ${getBackgroundColor(toast.type)} border rounded-lg shadow-lg p-4 transition-all duration-300 transform translate-x-0`}
+            className={`max-w-sm w-full min-w-[400px] ${getBackgroundColor(toast.type)} border rounded-lg shadow-lg p-4 transition-all duration-300 transform translate-x-0`}
           >
             <div className="flex items-start">
               <div className="flex-shrink-0">

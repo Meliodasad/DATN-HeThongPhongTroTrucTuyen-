@@ -232,7 +232,7 @@ const ContactsPage: React.FC = () => {
   // useEffect hooks
   useEffect(() => {
     loadData();
-  }, [loadData]);
+  }, []);
 
   // Debug effect
   useEffect(() => {

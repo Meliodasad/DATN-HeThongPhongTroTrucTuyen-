@@ -52,7 +52,7 @@ const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -60,22 +60,21 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const result = await register({
+      const result: any = await register({
         fullName: formData.fullName,
         email: formData.email,
         password: formData.password,
         phone: formData.phone || undefined,
         role: formData.role
       });
+      console.log(result);
 
-      if (result && result.userId) {
-        console.log('Đăng ký thành công với userId:', result.userId);
-        // Lưu userId vào localStorage nếu cần
-        localStorage.setItem('registeredUserId', result.userId);
-        navigate('/login');
-      } else {
-        setErrors({ general: 'Đăng ký không thành công. Vui lòng thử lại.' });
-      }
+    if (result) {
+          navigate('/login');
+        } else {
+          setErrors({ general: 'Đăng ký không thành công. Vui lòng thử lại.' });
+        }
+
     } catch (error) {
       console.error('Registration error:', error);
       setErrors({ general: 'Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại.' });
@@ -136,9 +135,8 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.fullName}
                   onChange={(e) => handleInputChange('fullName', e.target.value)}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.fullName ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.fullName ? 'border-red-300' : 'border-gray-300'
+                    }`}
                   placeholder="Nhập họ và tên"
                 />
               </div>
@@ -164,9 +162,8 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.email}
                   onChange={(e) => handleInputChange('email', e.target.value)}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.email ? 'border-red-300' : 'border-gray-300'
+                    }`}
                   placeholder="Nhập email"
                 />
               </div>
@@ -190,9 +187,8 @@ const RegisterPage: React.FC = () => {
                   type="tel"
                   value={formData.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
-                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.phone ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`block w-full pl-10 pr-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.phone ? 'border-red-300' : 'border-gray-300'
+                    }`}
                   placeholder="Nhập số điện thoại"
                 />
               </div>
@@ -235,9 +231,8 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.password ? 'border-red-300' : 'border-gray-300'
+                    }`}
                   placeholder="Nhập mật khẩu"
                 />
                 <button
@@ -274,9 +269,8 @@ const RegisterPage: React.FC = () => {
                   required
                   value={formData.confirmPassword}
                   onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
-                  }`}
+                  className={`block w-full pl-10 pr-10 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                    }`}
                   placeholder="Nhập lại mật khẩu"
                 />
                 <button

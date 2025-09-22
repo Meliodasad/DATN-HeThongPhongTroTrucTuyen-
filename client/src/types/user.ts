@@ -1,10 +1,13 @@
 export interface User {
+  data: User[];
   
   id: string;
   fullName: string;
+  userId: string;
   email: string;
   password: string;
   phone?: string;
+  username?: string;
   address?: string;
   idNumber?: string;
   dob?: string;
@@ -13,6 +16,7 @@ export interface User {
   createdAt: string;
   avatar?: string;
   otpCode?: string;
+  zalo?: string;
 }
 
 

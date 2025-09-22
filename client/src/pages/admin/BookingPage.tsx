@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Calendar, 
-  User,  
-  Clock, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Calendar,
+  User,
+  Clock,
+  CheckCircle,
+  XCircle,
   Eye,
   Search,
   MapPin,
@@ -15,6 +15,8 @@ import {
   Save
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
+import { buildHeaders } from '../../utils/config';
+import { truncate } from '../../utils/format';
 
 interface Booking {
   id: string;
@@ -23,7 +25,7 @@ interface Booking {
   tenantId: string;
   bookingDate: string;
   note: string;
-  bookingStatus: 'pending' | 'confirmed' | 'cancelled';
+  bookingStatus: 'pending' | 'approved' | 'rejected' | 'cancelled';
   createdAt?: string;
   room: {
     roomTitle: string;
@@ -75,7 +77,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
 
     try {
       setSaving(true);
-      
+
       const response = await fetch(`http://localhost:3000/bookings/${booking.id}`, {
         method: 'PATCH',
         headers: {
@@ -119,18 +121,18 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'approved': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Đã xác nhận';
+      case 'approved': return 'Đã xác nhận';
       case 'pending': return 'Chờ xác nhận';
-      case 'cancelled': return 'Đã hủy';
+      case 'rejected': return 'Đã hủy';
       default: return 'Không xác định';
     }
   };
@@ -150,7 +152,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
   const isViewMode = mode === 'view';
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -204,8 +206,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
               <h4 className="font-medium text-gray-900 mb-4">Thông tin phòng trọ</h4>
               <div className="flex items-start gap-4">
                 {booking.room.images && booking.room.images.length > 0 && (
-                  <img 
-                    src={booking.room.images[0]} 
+                  <img
+                    src={booking.room.images[0]}
                     alt={booking.room.roomTitle}
                     className="w-20 h-20 rounded-lg object-cover"
                   />
@@ -241,8 +243,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
               <div className="flex items-start gap-4">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                   {booking.tenant.avatar ? (
-                    <img 
-                      src={booking.tenant.avatar} 
+                    <img
+                      src={booking.tenant.avatar}
                       alt={booking.tenant.fullName}
                       className="w-16 h-16 rounded-full object-cover"
                     />
@@ -289,8 +291,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="pending">Chờ xác nhận</option>
-                  <option value="confirmed">Đã xác nhận</option>
-                  <option value="cancelled">Đã hủy</option>
+                  <option value="approved">Đã xác nhận</option>
+                  <option value="rejected">Đã hủy</option>
                 </select>
               )}
             </div>
@@ -346,26 +348,30 @@ const BookingsPage: React.FC = () => {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'confirmed' | 'cancelled'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState<'view' >('view');
+  const [modalMode, setModalMode] = useState<'view'>('view');
 
   const { success, error } = useToastContext();
 
   useEffect(() => {
-    loadBookings();
+    try {
+      loadBookings();
+    } catch (error) {
+      loadBookings();
+    }
   }, []);
 
   const loadBookings = async () => {
     try {
       setLoading(true);
-      
+
       // Fetch bookings, rooms, and users
       const [bookingsRes, roomsRes, usersRes] = await Promise.all([
-        fetch('http://localhost:3000/bookings'),
-        fetch('http://localhost:3000/rooms'),
-        fetch('http://localhost:3000/users')
+        fetch('http://localhost:3000/bookings?limit=9999', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/rooms?limit=9999', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/users?limit=9999', { headers: buildHeaders() })
       ]);
 
       const [bookingsData, roomsData, usersData] = await Promise.all([
@@ -375,14 +381,14 @@ const BookingsPage: React.FC = () => {
       ]);
 
       // Combine data with proper mapping based on your database structure
-      const enrichedBookings = bookingsData.map((booking: any) => {
+      const enrichedBookings = bookingsData.data.map((booking: any) => {
         // Find room by roomId (matching your database structure)
-        const room = roomsData.find((r: any) => 
+        const room = roomsData.data.rooms.find((r: any) =>
           r.roomId === booking.roomId || r.id === booking.roomId
         );
-        
+
         // Find tenant by tenantId (matching your database structure)
-        const tenant = usersData.find((u: any) => 
+        const tenant = usersData.data.users.find((u: any) =>
           u.userId === booking.tenantId || u.id === booking.tenantId
         );
 
@@ -397,11 +403,11 @@ const BookingsPage: React.FC = () => {
             images: room.images || [],
             area: room.area,
             roomType: room.roomType
-          } : { 
-            roomTitle: 'Phòng không tìm thấy', 
-            location: 'Không xác định', 
-            price: 0, 
-            images: [] 
+          } : {
+            roomTitle: 'Phòng không tìm thấy',
+            location: 'Không xác định',
+            price: 0,
+            images: []
           },
           tenant: tenant ? {
             fullName: tenant.fullName || 'Khách hàng không xác định',
@@ -409,9 +415,9 @@ const BookingsPage: React.FC = () => {
             phone: tenant.phone,
             avatar: tenant.avatar,
             userId: tenant.userId
-          } : { 
-            fullName: 'Khách hàng không tìm thấy', 
-            email: 'unknown@example.com' 
+          } : {
+            fullName: 'Khách hàng không tìm thấy',
+            email: 'unknown@example.com'
           }
         };
       });
@@ -427,21 +433,19 @@ const BookingsPage: React.FC = () => {
 
   const filteredBookings = bookings.filter(booking => {
     const matchesSearch = booking.room.roomTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        booking.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        booking.room.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        (booking.bookingId && booking.bookingId.toLowerCase().includes(searchTerm.toLowerCase()));
+      booking.tenant.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      booking.room.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (booking.bookingId && booking.bookingId.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesStatus = statusFilter === 'all' || booking.bookingStatus === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
-  const handleUpdateStatus = async (bookingId: string, status: 'confirmed' | 'cancelled') => {
+  const handleUpdateStatus = async (bookingId: string, status: 'approved' | 'rejected') => {
     try {
       const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        method: 'PUT',
+        headers: buildHeaders(),
         body: JSON.stringify({ bookingStatus: status }),
       });
 
@@ -449,7 +453,7 @@ const BookingsPage: React.FC = () => {
         throw new Error('Failed to update booking status');
       }
 
-      success('Thành công', `${status === 'confirmed' ? 'Xác nhận' : 'Hủy'} đặt phòng thành công`);
+      success('Thành công', `${status === 'approved' ? 'Xác nhận' : 'Hủy'} đặt phòng thành công`);
       await loadBookings();
     } catch (err) {
       console.error(err);
@@ -463,6 +467,7 @@ const BookingsPage: React.FC = () => {
     try {
       const response = await fetch(`http://localhost:3000/bookings/${bookingId}`, {
         method: 'DELETE',
+        headers: buildHeaders(),
       });
 
       if (!response.ok) {
@@ -494,18 +499,18 @@ const BookingsPage: React.FC = () => {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'approved': return 'bg-green-100 text-green-800';
       case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'Đã xác nhận';
+      case 'approved': return 'Đã xác nhận';
       case 'pending': return 'Chờ xác nhận';
-      case 'cancelled': return 'Đã hủy';
+      case 'rejected': return 'Đã hủy';
       default: return 'Không xác định';
     }
   };
@@ -531,8 +536,8 @@ const BookingsPage: React.FC = () => {
   const stats = {
     total: bookings.length,
     pending: bookings.filter(b => b.bookingStatus === 'pending').length,
-    confirmed: bookings.filter(b => b.bookingStatus === 'confirmed').length,
-    cancelled: bookings.filter(b => b.bookingStatus === 'cancelled').length
+    confirmed: bookings.filter(b => b.bookingStatus === 'approved').length,
+    cancelled: bookings.filter(b => b.bookingStatus === 'rejected').length
   };
 
   if (loading) {
@@ -610,7 +615,7 @@ const BookingsPage: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
@@ -618,8 +623,8 @@ const BookingsPage: React.FC = () => {
           >
             <option value="all">Tất cả trạng thái</option>
             <option value="pending">Chờ xác nhận</option>
-            <option value="confirmed">Đã xác nhận</option>
-            <option value="cancelled">Đã hủy</option>
+            <option value="approved">Đã xác nhận</option>
+            <option value="rejected">Đã hủy</option>
           </select>
         </div>
       </div>
@@ -631,7 +636,7 @@ const BookingsPage: React.FC = () => {
             Danh sách đặt phòng ({filteredBookings.length})
           </h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -670,23 +675,23 @@ const BookingsPage: React.FC = () => {
                   <td className="px-6 py-4">
                     <div className="flex items-start gap-3">
                       {booking.room.images && booking.room.images.length > 0 && (
-                        <img 
-                          src={booking.room.images[0]} 
+                        <img
+                          src={booking.room.images[0]}
                           alt={booking.room.roomTitle}
                           className="w-12 h-12 rounded-lg object-cover"
                         />
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium text-gray-900 truncate">
-                          {booking.room.roomTitle}
+                          {booking.roomId}
                         </div>
-                        <div className="flex items-center text-sm text-gray-500 mt-1">
+                        {/* <div className="flex items-center text-sm text-gray-500 mt-1">
                           <MapPin className="w-3 h-3 mr-1" />
                           <span className="truncate">{booking.room.location}</span>
                         </div>
                         <div className="text-sm text-green-600 font-medium">
                           {formatPrice(booking.room.price)}
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </td>
@@ -694,8 +699,8 @@ const BookingsPage: React.FC = () => {
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                         {booking.tenant.avatar ? (
-                          <img 
-                            src={booking.tenant.avatar} 
+                          <img
+                            src={booking.tenant.avatar}
                             alt={booking.tenant.fullName}
                             className="w-10 h-10 rounded-full object-cover"
                           />
@@ -719,14 +724,14 @@ const BookingsPage: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatDate(booking.bookingDate)}</div>
+                    {/* <div className="text-sm text-gray-900">{formatDate(booking.bookingDate)}</div> */}
                     {booking.createdAt && booking.createdAt !== booking.bookingDate && (
                       <div className="text-sm text-gray-500">Tạo: {formatDate(booking.createdAt)}</div>
                     )}
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900 max-w-xs">
-                      <p className="line-clamp-2">{booking.note || 'Không có ghi chú'}</p>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                     {truncate(booking.note) || 'Không có ghi chú'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -736,33 +741,33 @@ const BookingsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
-                      {booking.bookingStatus === 'pending' && (
+                      {/* {booking.bookingStatus === 'pending' && (
                         <>
                           <button 
-                            onClick={() => handleUpdateStatus(booking.id, 'confirmed')}
+                            onClick={() => handleUpdateStatus(booking.bookingId, 'approved')}
                             className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
                             title="Xác nhận đặt phòng"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
                           <button 
-                            onClick={() => handleUpdateStatus(booking.id, 'cancelled')}
+                            onClick={() => handleUpdateStatus(booking.bookingId, 'rejected')}
                             className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                             title="Hủy đặt phòng"
                           >
                             <XCircle className="w-4 h-4" />
                           </button>
                         </>
-                      )}
-                      <button 
+                      )} */}
+                      <button
                         onClick={() => handleViewBooking(booking)}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => handleDeleteBooking(booking.id)}
+                      <button
+                        onClick={() => handleDeleteBooking(booking.bookingId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa đặt phòng"
                       >

@@ -34,13 +34,14 @@ body {
   min-height: 100vh;
   background-color: #f1f1f0;
 
-  background-color: #f6f9ff;
   color: #213547;
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
 }
 
-
+main {
+  background-color: #f6f9ff;
+}
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
@@ -78,3 +79,9 @@ button:focus-visible {
   }
 }
 
+.price-area p.active,
+.area-area p.active {
+  font-weight: bold;
+  color: #d32f2f; /* màu nổi bật */
+  cursor: pointer;
+}

@@ -10,6 +10,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
+import { buildHeaders } from '../../utils/config';
 
 interface ReportData {
   userStats: {
@@ -60,10 +61,10 @@ const ReportsPage: React.FC = () => {
       
       // Fetch data from multiple endpoints
       const [usersRes, roomsRes, paymentsRes, contractsRes] = await Promise.all([
-        fetch('http://localhost:3000/users'),
-        fetch('http://localhost:3000/rooms'),
-        fetch('http://localhost:3000/payments'),
-        fetch('http://localhost:3000/contracts')
+        fetch('http://localhost:3000/users', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/rooms', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/payments', { headers: buildHeaders() }),
+        fetch('http://localhost:3000/contracts', { headers: buildHeaders() })
       ]);
 
       const [users, rooms, payments, contracts] = await Promise.all([
@@ -75,24 +76,24 @@ const ReportsPage: React.FC = () => {
 
       // Calculate user stats
       const currentMonth = new Date().getMonth();
-      const newUsersThisMonth = users.filter((user: any) => 
+      const newUsersThisMonth = users.data.users.filter((user: any) => 
         new Date(user.createdAt).getMonth() === currentMonth
       ).length;
-      const activeUsers = users.filter((user: any) => user.status === 'active').length;
+      const activeUsers = users.data.users.filter((user: any) => user.status === 'active').length;
 
       // Calculate room stats
-      const availableRooms = rooms.filter((room: any) => room.status === 'available').length;
-      const rentedRooms = rooms.filter((room: any) => room.status === 'rented').length;
-      const occupancyRate = rooms.length > 0 ? (rentedRooms / rooms.length) * 100 : 0;
+      const availableRooms = rooms.data.rooms.filter((room: any) => room.status === 'available').length;
+      const rentedRooms = rooms.data.rooms.filter((room: any) => room.status === 'rented').length;
+      const occupancyRate = rooms.data.rooms.length > 0 ? (rentedRooms / rooms.data.rooms.length) * 100 : 0;
 
       // Calculate revenue stats
-      const completedPayments = payments.filter((payment: any) => payment.paymentStatus === 'completed');
+      const completedPayments = payments.data.filter((payment: any) => payment.paymentStatus === 'completed');
       const totalRevenue = completedPayments.reduce((sum: number, payment: any) => sum + payment.amount, 0);
       const currentMonthPayments = completedPayments.filter((payment: any) => 
         new Date(payment.paymentDate).getMonth() === currentMonth
       );
       const monthlyRevenue = currentMonthPayments.reduce((sum: number, payment: any) => sum + payment.amount, 0);
-      const averageRent = rooms.length > 0 ? rooms.reduce((sum: number, room: any) => sum + room.price, 0) / rooms.length : 0;
+      const averageRent = rooms.data.pagination.totalRooms > 0 ? (rooms.data.rooms.reduce((sum: number, room: any) => Number(sum + room.price.value || room.price), 0)) / rooms.data.pagination.totalRooms : 0;
 
       // Generate monthly data for charts
       const monthlyData = [];
@@ -101,17 +102,17 @@ const ReportsPage: React.FC = () => {
         date.setMonth(date.getMonth() - i);
         const monthStr = date.toLocaleDateString('vi-VN', { month: 'short', year: 'numeric' });
         
-        const monthUsers = users.filter((user: any) => {
+        const monthUsers = users.data.users.filter((user: any) => {
           const userDate = new Date(user.createdAt);
           return userDate.getMonth() === date.getMonth() && userDate.getFullYear() === date.getFullYear();
         }).length;
 
-        const monthRooms = rooms.filter((room: any) => {
+        const monthRooms = rooms.data.rooms.filter((room: any) => {
           const roomDate = new Date(room.createdAt);
           return roomDate.getMonth() === date.getMonth() && roomDate.getFullYear() === date.getFullYear();
         }).length;
 
-        const monthRevenue = payments.filter((payment: any) => {
+        const monthRevenue = payments.data.filter((payment: any) => {
           const paymentDate = new Date(payment.paymentDate);
           return paymentDate.getMonth() === date.getMonth() && 
                  paymentDate.getFullYear() === date.getFullYear() &&
@@ -125,16 +126,15 @@ const ReportsPage: React.FC = () => {
           revenue: monthRevenue
         });
       }
-
       setReportData({
         userStats: {
-          total: users.length,
+          total: users.data.pagination.totalUsers,
           newThisMonth: newUsersThisMonth,
           activeUsers,
-          growthRate: users.length > 0 ? (newUsersThisMonth / users.length) * 100 : 0
+          growthRate: users.data.users.length > 0 ? (newUsersThisMonth / users.data.users.length) * 100 : 0
         },
         roomStats: {
-          total: rooms.length,
+          total: rooms.data.pagination.totalRooms,
           available: availableRooms,
           rented: rentedRooms,
           occupancyRate

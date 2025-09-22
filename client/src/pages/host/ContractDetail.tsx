@@ -1,30 +1,89 @@
 // 📁 src/pages/host/ContractDetail.tsx
 // Trang xem chi tiết hợp đồng thuê phòng
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { hostService } from "../../services/hostService";
 import { FileText, Download, ArrowLeft } from "lucide-react";
 
+type ApiRoomInfo = {
+  roomId: string;
+  roomTitle: string;
+  location: string;
+  hostId: string;
+  images?: string[];
+  price?: { value: number; unit?: string };
+};
+type ApiTenantInfo = {
+  fullName: string;
+  email: string;
+  phone: string;
+  userId: string;
+};
+type ApiContract = {
+  _id: string;
+  contractId: string;
+  roomId: string;
+  tenantId: string;
+  duration?: number;
+  rentPrice?: number;
+  terms?: string;
+  startDate: string;
+  status: string;
+  createdAt?: string;
+  updatedAt?: string;
+  roomInfo?: ApiRoomInfo;
+  tenantInfo?: ApiTenantInfo;
+};
+
+const fmtDate = (iso?: string) =>
+  iso ? new Date(iso).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" }) : "—";
+
+const addMonthsIso = (startIso: string, months = 0) => {
+  const d = new Date(startIso);
+  d.setMonth(d.getMonth() + months);
+  return d.toISOString();
+};
+
 const ContractDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [contract, setContract] = useState<any>(null);
+  const [contract, setContract] = useState<ApiContract | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (id) {
-      setLoading(true);
-      hostService
-        .getContractById(id)
-        .then((res) => setContract(res.data))
-        .catch(() => alert("❌ Không tìm thấy hợp đồng!"))
-        .finally(() => setLoading(false));
-    }
+    if (!id) return;
+    setLoading(true);
+    hostService
+      .getContractById(id)
+      .then((res: any) => {
+        // ✅ BE trả { success, data: {...} }
+        const data: ApiContract = res?.data?.data ?? res?.data;
+        setContract(data || null);
+      })
+      .catch(() => alert("❌ Không tìm thấy hợp đồng!"))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const view = useMemo(() => {
+    if (!contract) return null;
+    const months = Number(contract.duration || 0);
+    const endIso = months > 0 ? addMonthsIso(contract.startDate, months) : "";
+    return {
+      code: contract.contractId,
+      status: contract.status,
+      start: contract.startDate,
+      end: endIso,
+      durationText: months ? `${months} tháng` : "—",
+      terms: contract.terms || "",
+      rent: contract.roomInfo?.price?.value || 0,
+      rentUnit: contract.roomInfo?.price?.unit || "VNĐ/tháng",
+      room: contract.roomInfo,
+      tenant: contract.tenantInfo,
+      createdAt: contract.createdAt,
+    };
+  }, [contract]);
+
+  const handlePrint = () => window.print();
 
   if (loading) {
     return (
@@ -37,17 +96,13 @@ const ContractDetail = () => {
     );
   }
 
-  if (!contract) {
+  if (!contract || !view) {
     return (
       <div className="max-w-4xl mx-auto p-6">
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
           <FileText className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Không tìm thấy hợp đồng
-          </h3>
-          <p className="text-gray-500 mb-6">
-            Hợp đồng có thể đã bị xóa hoặc không tồn tại
-          </p>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Không tìm thấy hợp đồng</h3>
+          <p className="text-gray-500 mb-6">Hợp đồng có thể đã bị xóa hoặc không tồn tại</p>
           <button
             onClick={() => navigate("/host/contracts")}
             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
@@ -70,7 +125,7 @@ const ContractDetail = () => {
           <ArrowLeft size={20} />
           <span>Quay lại</span>
         </button>
-        
+
         <div className="flex space-x-2">
           <button
             onClick={handlePrint}
@@ -82,44 +137,61 @@ const ContractDetail = () => {
         </div>
       </div>
 
-      {/* Contract Content */}
+      {/* Content */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-8 print:shadow-none print:border-none">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            HỢP ĐỒNG THUÊ PHÒNG TRỌ
-          </h1>
-          <p className="text-gray-600">Số: #{contract.id}</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">HỢP ĐỒNG THUÊ PHÒNG TRỌ</h1>
+          <p className="text-gray-600">Số: #{view.code}</p>
         </div>
 
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900 border-b pb-2">
-                Thông tin người thuê
-              </h3>
+              <h3 className="font-semibold text-gray-900 border-b pb-2">Thông tin người thuê</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Họ tên:</span> {contract.tenantName}</p>
-                <p><span className="font-medium">Số điện thoại:</span> {contract.phone}</p>
+                <p>
+                  <span className="font-medium">Họ tên:</span> {view.tenant?.fullName ?? "—"}
+                </p>
+                <p>
+                  <span className="font-medium">Số điện thoại:</span> {view.tenant?.phone ?? "—"}
+                </p>
+                <p>
+                  <span className="font-medium">Email:</span> {view.tenant?.email ?? "—"}
+                </p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-semibold text-gray-900 border-b pb-2">
-                Thông tin phòng
-              </h3>
+              <h3 className="font-semibold text-gray-900 border-b pb-2">Thông tin phòng</h3>
               <div className="space-y-2">
-                <p><span className="font-medium">Mã phòng:</span> {contract.roomId}</p>
-                <p><span className="font-medium">Tiền cọc:</span> {contract.deposit?.toLocaleString()}₫</p>
+                <p>
+                  <span className="font-medium">Mã phòng:</span>{" "}
+                  {view.room?.roomId ?? contract.roomId}
+                </p>
+                <p>
+                  <span className="font-medium">Tên phòng:</span> {view.room?.roomTitle ?? "—"}
+                </p>
+                <p>
+                  <span className="font-medium">Địa chỉ:</span> {view.room?.location ?? "—"}
+                </p>
+                <p>
+                  <span className="font-medium">Giá/tiền cọc:</span>{" "}
+                  {(view.rent || 0).toLocaleString("vi-VN")} {view.rentUnit}
+                </p>
               </div>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <p><span className="font-medium">Ngày bắt đầu:</span> {contract.startDate}</p>
+              <p>
+                <span className="font-medium">Ngày bắt đầu:</span> {fmtDate(view.start)}
+              </p>
             </div>
             <div>
-              <p><span className="font-medium">Ngày kết thúc:</span> {contract.endDate}</p>
+              <p>
+                <span className="font-medium">Ngày kết thúc:</span> {fmtDate(view.end)}
+              </p>
             </div>
           </div>
 
@@ -129,7 +201,7 @@ const ContractDetail = () => {
             </h3>
             <div className="bg-gray-50 rounded-lg p-4">
               <p className="whitespace-pre-line text-gray-700 leading-relaxed">
-                {contract.terms}
+                {view.terms || "—"}
               </p>
             </div>
           </div>
@@ -150,7 +222,10 @@ const ContractDetail = () => {
           </div>
 
           <div className="text-center text-sm text-gray-500 mt-8">
-            <p>Hợp đồng được tạo ngày: {new Date().toLocaleDateString('vi-VN')}</p>
+            <p>
+              Hợp đồng được tạo ngày: {fmtDate(view.createdAt)} <span className="mx-1">•</span>{" "}
+              Trạng thái: <b>{view.status}</b>
+            </p>
           </div>
         </div>
       </div>

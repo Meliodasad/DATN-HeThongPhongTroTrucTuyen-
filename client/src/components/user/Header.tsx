@@ -1,21 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import '../../css/Header.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-
+import { useSearch } from '../../contexts/SearchContext';
+import logo from "../../assets/logo.png"
 const Header = () => {
-  const { user, logout } = useAuth();
+  const [keyword, setKeyword] = useState("");
+  const { logout } = useAuth();
+  let user = JSON.parse(localStorage.getItem("user") || "{}")
+  const { setSearchRoom } = useSearch();
   const navigate = useNavigate();
   const [showDropdown, setShowDropdown] = useState(false);
-  const dropdownRef = useRef(null);
-
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
   const handleLogout = () => {
     logout();
     navigate('/login');
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: any) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setShowDropdown(false);
       }
@@ -31,21 +34,35 @@ const Header = () => {
       <div className="header-top">
         <div className="header-left">
           <img
-            src="https://phongtro123.com/images/logo-phongtro.svg"
+            src={logo || "src/assets/logo.png"}
             alt="Logo"
             className="logo"
+            onClick={() => {
+              navigate('/');
+              setSearchRoom({});
+            }}
           />
           <input
             type="text"
             placeholder="Tìm phòng theo khu vực..."
             className="search-input"
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                setSearchRoom({})
+                navigate(`?keyword=${keyword}`);
+              } else if (!keyword) {
+                navigate("/")
+              }
+            }}
           />
         </div>
 
         <div className="header-actions">
-          <button className="btn">Tin đã lưu</button>
+          {/* <button className="btn">Tin đã lưu</button> */}
 
-          {user ? (
+          {user?.userId ? (
             <div
               className="user-dropdown"
               ref={dropdownRef}
@@ -58,7 +75,7 @@ const Header = () => {
                   alt="avatar"
                   className="w-8 h-8 rounded-full"
                 />
-                <span className="text-white">{user.username}</span>
+                <span className="text-white">{user?.username}</span>
               </div>
 
               {showDropdown && (
@@ -83,19 +100,15 @@ const Header = () => {
             </>
           )}
 
-          <button className="btn highlight">Đăng tin</button>
+          {/* <button className="btn highlight">Đăng tin</button> */}
         </div>
       </div>
 
       <nav className="header-nav">
         <div className="nav-links">
-          <a href="#">Phòng trọ</a>
-          <a href="#">Nhà nguyên căn</a>
-          <a href="#">Căn hộ</a>
-          <a href="#">Ở ghép</a>
-          <a href="#">Mặt bằng</a>
-          <a href="#">Blog</a>
-          <a href="#">Bảng giá dịch vụ</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'single' }))}>Phòng đơn</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'shared' }))}>Phòng ghép</a>
+          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'apartment' }))}>Nhà nguyên căn</a>
         </div>
       </nav>
     </header>

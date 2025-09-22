@@ -1,4 +1,3 @@
-import React from 'react'; 
 import SidebarLeft from '../../components/user/SidebarLeft';
 import PostList from '../../components/user/PostList';
 import SidebarRight from '../../components/user/SidebarRight';

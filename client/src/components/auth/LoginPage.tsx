@@ -5,8 +5,8 @@ import { useAuth } from '../../contexts/AuthContext';
 
 const LoginPage: React.FC = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: ''
+    email: 'bac1112005@gmail.com',
+    password: '123456'
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,6 +23,8 @@ const LoginPage: React.FC = () => {
     if (loggedInUser) {
       if (loggedInUser.role === 'admin') {
         navigate('/admin', { replace: true });
+      } else if (loggedInUser.role === 'host') {
+        navigate('/host/room-list', { replace: true });
       } else {
         navigate('/', { replace: true });
       }
@@ -145,24 +147,6 @@ const LoginPage: React.FC = () => {
             </p>
           </div>
         </form>
-
-        <div className="mt-6">
-          <h4 className="text-sm font-semibold text-gray-700 mb-2">Tài khoản demo:</h4>
-          <div className="space-y-1 text-sm">
-            {demoAccounts.map((acc) => (
-              <div key={acc.email} className="flex justify-between items-center bg-white px-3 py-2 rounded border">
-                <span>{acc.role}</span>
-                <button
-                  type="button"
-                  className="text-blue-600 hover:underline"
-                  onClick={() => fillDemoAccount(acc.email, acc.password)}
-                >
-                  Dùng thử
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   );

@@ -1,83 +1,150 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import ImageGallery from 'react-image-gallery';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import '../../css/PostDetail.css';
 import ReviewSection from '../../components/user/ReviewSection';
 import ReportForm from '../../components/user/ReportForm';
 import { useAuth } from '../../contexts/AuthContext';
-
-interface Tenant {
-  userId: string;
-  fullName: string;
-  phone: string;
-  avatar: string;
-}
+import { buildHeaders } from '../../utils/config';
+import { convertStatus } from '../../utils/format';
+import { useToastContext } from '../../contexts/ToastContext';
 
 interface Room {
   id: string;
+  hostId: string;           // giá trị này nhiều khả năng là userId
   roomId: string;
-  area: number;
+  roomTitle: string;
   price: number;
-  utilities: string[];
-  maxPeople: number;
-  images: string[];
-  description: string;
+  area: number;
   location: string;
-  deposit: string;
-  electricity: string;
-  tenant: Tenant | null;
+  description: string;
+  images: string[];
+  roomType: string;
+  status: string;
+  utilities: string[];
+  terms: string;
+  approvalStatus: string;
+  approvalDate?: string;
+  updatedAt?: string;
+  createdAt: string;
+}
+
+// cấu trúc trả về từ API /users/:id
+interface UserApi {
+  _id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  role: string;
+  status: string;
+  avatar: string;
+  address?: string;
+  dob?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// model dùng trong UI
+interface User {
+  id: string;               // dùng để link: /user/:id
+  fullName: string;
+  avatar: string;
+  phone: string;
+  zalo?: string;            // API chưa có, để optional
+  status: string;
+  createdAt: string;
 }
 
 const PostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [room, setRoom] = useState<Room | null>(null);
+  const [host, setHost] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user: currentUser } = useAuth();
+  const { warning } = useToastContext( );
+const navigate = useNavigate()
+
+  // hàm ánh xạ UserApi -> User (UI)
+  const mapUser = (u: UserApi): User => ({
+    // ưu tiên userId cho đường link/profile; fallback _id nếu thiếu
+    id: u.userId || u._id,
+    fullName: u.fullName,
+    avatar: u.avatar,
+    phone: u.phone,
+    status: u.status,
+    createdAt: u.createdAt,
+    // zalo: có thể ánh xạ nếu về sau backend trả về
+  });
 
   useEffect(() => {
-    const fetchRoom = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`http://localhost:3000/rooms/${id}`);
-        if (!res.ok) throw new Error('Không tìm thấy phòng');
-        const data: Room = await res.json();
-        setRoom(data);
+        // 1) lấy phòng
+        const roomRes = await fetch(`http://localhost:3000/rooms/${id}`, { headers: buildHeaders() });
+        if (!roomRes.ok) throw new Error('Không tìm thấy phòng');
+        const roomJson: any = await roomRes.json();
+        const roomData: Room = roomJson?.data;
+        if (!roomData) throw new Error('Dữ liệu phòng không hợp lệ');
+        setRoom(roomData);
+
+        // 2) lấy user host theo hostId (thường là userId)
+        const hostRes = await fetch(`http://localhost:3000/users/${roomData.hostId}`, { headers: buildHeaders() });
+        if (!hostRes.ok) throw new Error('Không tìm thấy người đăng');
+        const hostJson: { success: boolean; data?: UserApi } = await hostRes.json();
+
+        if (!hostJson?.success || !hostJson?.data) {
+          throw new Error('Payload user không hợp lệ');
+        }
+
+        setHost(mapUser(hostJson.data));
         setError(null);
       } catch (err: any) {
         setError(err.message || 'Lỗi khi tải dữ liệu');
         setRoom(null);
+        setHost(null);
       } finally {
         setLoading(false);
       }
     };
 
-    if (id) fetchRoom();
+    if (id) fetchData();
   }, [id]);
 
   if (loading) return <div className="post-detail-container">Đang tải dữ liệu...</div>;
   if (error) return <div className="post-detail-container">Lỗi: {error}</div>;
-  if (!room) return <div className="post-detail-container">Không có dữ liệu.</div>;
+  if (!room || !host) return <div className="post-detail-container">Không có dữ liệu.</div>;
 
-  const images = room.images.map(img => ({
+  const images = (room.images ?? []).map(img => ({
     original: img,
     thumbnail: img,
   }));
 
+  const [_, district, province] = room.location ? room.location.split(',').map(s => s.trim()) : ['', '', ''];
+const handRequest = () => {
+
+}
+const handleRq = () => {
+  if(!localStorage.getItem("user")) {
+warning("Thông báo", 'Vui lòng đăng nhập để thuê phòng')
+  } else {
+    navigate(`/booking/${room.roomId}`)
+  }
+}
   return (
     <div className="post-detail-container">
-      {/* Gallery ảnh */}
       <ImageGallery items={images} showPlayButton={false} showFullscreenButton={false} />
 
-      {/* Link đặt phòng */}
-      <Link to={`/booking/${room.id}`} className="booking">Yêu cầu thuê phòng</Link>
+      {/* <Link to={`/booking/${room.roomId}`} className="booking">Yêu cầu thuê phòng</Link> */}
+      <div onClick={handleRq} className="booking">Yêu cầu thuê phòng</div>
 
-      {/* Thông tin phòng */}
       <div className="post-info">
-        <h1 className="title">{room.roomId}</h1>
+        <h1 className="title">{room.roomTitle}</h1>
         <div className="meta">
-          <span className="price">{room.price.toLocaleString('vi-VN')} đ</span>
+          <span className="price">{room.price?.value.toLocaleString('vi-VN')} đ</span>
           <span className="dot">•</span>
           <span>{room.area} m²</span>
           <span className="dot">•</span>
@@ -85,12 +152,16 @@ const PostDetail = () => {
         </div>
 
         <div className="info-table">
-          <div className="info-row"><span><strong>Mã phòng:</strong></span><span>{room.roomId}</span></div>
+          <div className="info-row"><span><strong>Quận huyện:</strong></span><span>{district}</span></div>
+          <div className="info-row"><span><strong>Tỉnh thành:</strong></span><span>{"Hà nội"}</span></div>
           <div className="info-row"><span><strong>Địa chỉ:</strong></span><span>{room.location}</span></div>
-          <div className="info-row"><span><strong>Tiền cọc:</strong></span><span>{room.deposit}</span></div>
-          <div className="info-row"><span><strong>Điện:</strong></span><span>{room.electricity} VND/kWh</span></div>
-          <div className="info-row"><span><strong>Số người tối đa:</strong></span><span>{room.maxPeople}</span></div>
-          <div className="info-row"><span><strong>Tiện ích:</strong></span><span>{room.utilities.length ? room.utilities.join(', ') : 'Không có'}</span></div>
+          <div className="info-row"><span><strong>Mã phòng:</strong></span><span>#{room.roomId.padStart(6, '0')}</span></div>
+          <div className="info-row"><span><strong>Ngày đăng:</strong></span><span>{new Date(room.createdAt).toLocaleDateString()}</span></div>
+          <div className="info-row"><span><strong>Ngày duyệt:</strong></span><span>{room.updatedAt ? new Date(room.updatedAt).toLocaleDateString() : 'Chưa duyệt'}</span></div>
+          <div className="info-row"><span><strong>Trạng thái:</strong></span><span>{convertStatus(room.status)}</span></div>
+          <div className="info-row"><span><strong>Loại phòng:</strong></span><span>{convertStatus(room.roomType)}</span></div>
+          <div className="info-row"><span><strong>Tiện ích:</strong></span><span>{room.utilities?.length ? room.utilities.join(', ') : 'Không có'}</span></div>
+          <div className="info-row"><span><strong>Điều khoản:</strong></span><span>{room.terms || 'Không có'}</span></div>
         </div>
 
         <div className="description">
@@ -99,24 +170,36 @@ const PostDetail = () => {
         </div>
       </div>
 
-      {/* Người thuê hiện tại (nếu có) */}
-      {room.tenant ? (
-        <div className="contact-header">
-          <img src={room.tenant.avatar} alt="avatar" className="avatar" />
-          <div>
-            <h3>{room.tenant.fullName}</h3>
-            <p className="sub-info">📞 {room.tenant.phone}</p>
-          </div>
+      <Link to={`/user/${host.id}`} className="contact-header">
+        <img src={host.avatar} alt="avatar" className="avatar" />
+        <div>
+          <h3>{host.fullName}</h3>
+          <p className="sub-info">
+            {convertStatus(host.status)} • Tham gia từ: {new Date(host.createdAt).toLocaleDateString()}
+          </p>
         </div>
-      ) : (
-        <p style={{ marginTop: '1rem', color: 'gray' }}>Phòng đang trống</p>
-      )}
+      </Link>
 
-      {/* Đánh giá + Báo cáo */}
+      <div className="contact-info">
+        <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${host.phone}`}>{host.phone}</a></p>
+        {host.zalo && (
+          <p>
+            <strong>💬 Zalo:</strong>{' '}
+            <a
+              href={host.zalo.startsWith('http') ? host.zalo : `https://zalo.me/${host.zalo}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Nhắn Zalo
+            </a>
+          </p>
+        )}
+      </div>
+
       {currentUser ? (
         <>
-          <ReviewSection roomId={room.id} />
-          <ReportForm roomId={room.id} />
+          <ReviewSection roomId={room.roomId} />
+          <ReportForm roomId={room.roomId} />
         </>
       ) : (
         <p style={{ marginTop: '1rem', color: 'gray' }}>

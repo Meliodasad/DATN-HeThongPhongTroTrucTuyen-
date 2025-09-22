@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import {  
-  User, 
-  Shield, 
+import React, { useEffect, useState } from 'react';
+import {
+  User,
+  Shield,
   Database,
 
   Palette,
@@ -10,40 +10,71 @@ import {
   EyeOff
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
-import { useAuth } from '../../contexts/AuthContext';
+import { buildHeaders } from '../../utils/config';
+import { API_BASE_URL } from '../../services/api';
 
 const SettingsPage: React.FC = () => {
-  const { user } = useAuth();
   const { success, error } = useToastContext();
-  
+
+  const userStr = localStorage.getItem("user");
+  if (!userStr) {
+    error("Lỗi", "User not found");
+    return;
+  }
+  const user = JSON.parse(userStr);
+
+  useEffect(() => {
+    loadData()
+  }, [userStr])
+
+  const loadData = async () => {
+    try {
+      const response: any = await fetch(
+        `${API_BASE_URL}/users/${user.userId}`,
+        {
+          method: "GET",
+          headers: buildHeaders(),
+        }
+      );
+
+      const data = await response.json();
+
+      setFormData((pre: any) => ({ ...pre, ...data.data }))
+    } catch (err) {
+      console.error(err);
+    } finally {
+    }
+  };
+
+
   const [activeTab, setActiveTab] = useState<'profile' | 'notifications' | 'security' | 'system' | 'appearance'>('profile');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     // Profile settings
     fullName: user?.fullName || '',
     email: user?.email || '',
-    phone: '',
-    address: '',
+    phone: user?.phone || '',
+    address: user?.address || '',
     avatar: user?.avatar || '',
-    
+
     // Notification settings
     emailNotifications: true,
     pushNotifications: true,
     smsNotifications: false,
     marketingEmails: false,
-    
+
     // Security settings
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
     twoFactorAuth: false,
-    
+
     // System settings
     siteName: 'RentalHub',
     siteDescription: 'Hệ thống quản lý cho thuê trọ',
     maintenanceMode: false,
     allowRegistration: true,
-    
+
     // Appearance settings
     theme: 'light',
     language: 'vi',
@@ -55,65 +86,84 @@ const SettingsPage: React.FC = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const validateForm = () => {
+    if (!formData.fullName?.trim()) {
+      error("Lỗi", "Tên không được để trống");
+      return false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email || !emailRegex.test(formData.email)) {
+      error("Lỗi", "Email không hợp lệ");
+      return false;
+    }
+
+    const phoneRegex = /^[0-9]{9,11}$/;
+    if (!formData.phone || !phoneRegex.test(formData.phone)) {
+      error("Lỗi", "Số điện thoại không hợp lệ");
+      return false;
+    }
+
+    // address và avatar có thể optional → bỏ qua
+    return true;
+  };
+
   const handleSaveProfile = async () => {
-  try {
-    const response = await fetch(`http://localhost:3000/users/${user?.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        fullName: formData.fullName,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        avatar: formData.avatar,
-      }),
-    });
+    try {
+      // validate trước khi call API
+      if (!validateForm()) return;
 
-    if (!response.ok) throw new Error('Cập nhật thất bại');
+      const response = await fetch(`http://localhost:3000/users/${user?.id}`, {
+        method: "PUT",
+        headers: buildHeaders(),
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          address: formData.address,
+          avatar: formData.avatar,
+        }),
+      });
 
-    success('Thành công', 'Cập nhật thông tin cá nhân thành công');
-  } catch (err) {
-    console.error(err);
-    error('Lỗi', 'Không thể cập nhật thông tin');
-  }
-};
+      if (!response.ok) throw new Error("Cập nhật thất bại");
 
- 
+      success("Thành công", "Cập nhật thông tin cá nhân thành công");
+    } catch (err) {
+      console.error(err);
+      error("Lỗi", "Không thể cập nhật thông tin");
+    }
+  };
 
   const handleChangePassword = async () => {
-  if (formData.newPassword !== formData.confirmPassword) {
-    error('Lỗi', 'Mật khẩu xác nhận không khớp');
-    return;
-  }
+    if (formData.newPassword !== formData.confirmPassword) {
+      error('Lỗi', 'Mật khẩu xác nhận không khớp');
+      return;
+    }
 
-  try {
-    const response = await fetch(`http://localhost:3000/users/${user?.id}/change-password`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        currentPassword: formData.currentPassword,
-        newPassword: formData.newPassword,
-      }),
-    });
+    try {
+      const response = await fetch(`http://localhost:3000/auth/password`, {
+        method: 'PUT',
+        headers: buildHeaders(),
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword,
+        }),
+      });
 
-    if (!response.ok) throw new Error('Đổi mật khẩu thất bại');
+      if (!response.ok) throw new Error('Đổi mật khẩu thất bại');
 
-    success('Thành công', 'Đổi mật khẩu thành công');
-    setFormData(prev => ({
-      ...prev,
-      currentPassword: '',
-      newPassword: '',
-      confirmPassword: ''
-    }));
-  } catch (err) {
-    console.error(err);
-    error('Lỗi', 'Không thể đổi mật khẩu');
-  }
-};
+      success('Thành công', 'Đổi mật khẩu thành công');
+      setFormData(prev => ({
+        ...prev,
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      }));
+    } catch (err) {
+      console.error(err);
+      error('Lỗi', 'Không thể đổi mật khẩu');
+    }
+  };
 
   const handleSaveSystem = async () => {
     try {
@@ -138,8 +188,8 @@ const SettingsPage: React.FC = () => {
   const tabs = [
     { id: 'profile', label: 'Thông tin cá nhân', icon: User },
     { id: 'security', label: 'Bảo mật', icon: Shield },
-    { id: 'system', label: 'Hệ thống', icon: Database },
-    { id: 'appearance', label: 'Giao diện', icon: Palette }
+    // { id: 'system', label: 'Hệ thống', icon: Database },
+    // { id: 'appearance', label: 'Giao diện', icon: Palette }
   ];
 
   return (
@@ -160,11 +210,10 @@ const SettingsPage: React.FC = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
-                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${
-                  activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
-                }`}
+                className={`py-4 px-1 border-b-2 font-medium text-sm flex items-center gap-2 ${activeTab === tab.id
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
               >
                 <tab.icon className="w-4 h-4" />
                 {tab.label}
@@ -180,8 +229,8 @@ const SettingsPage: React.FC = () => {
               <div className="flex items-center gap-6">
                 <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                   {formData.avatar ? (
-                    <img 
-                      src={formData.avatar} 
+                    <img
+                      src={formData.avatar}
                       alt="Avatar"
                       className="w-24 h-24 rounded-full object-cover"
                     />
@@ -266,7 +315,7 @@ const SettingsPage: React.FC = () => {
             </div>
           )}
 
-   
+
 
           {/* Security Tab */}
           {activeTab === 'security' && (
@@ -331,19 +380,19 @@ const SettingsPage: React.FC = () => {
 
               <div className="border-t pt-6">
                 <div className="flex items-center justify-between">
-              
-                 <label className="relative inline-flex items-center cursor-pointer">
-  <input
-    type="checkbox"
-    checked={formData.twoFactorAuth}
-    onChange={(e) => handleInputChange('twoFactorAuth', e.target.checked)}
-    className="sr-only peer"
-  />
-  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white 
+
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={formData.twoFactorAuth}
+                      onChange={(e) => handleInputChange('twoFactorAuth', e.target.checked)}
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white 
     after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full 
     after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"
-  />
-</label>
+                    />
+                  </label>
 
                 </div>
               </div>
@@ -377,40 +426,40 @@ const SettingsPage: React.FC = () => {
                     </div>
 
                     <div className="flex items-center justify-between">
-                 
-                   <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Định dạng ngày
-                      </label>
-                      <select
-                        value={formData.dateFormat}
-                        onChange={(e) => handleInputChange('dateFormat', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="dd/mm/yyyy">DD/MM/YYYY</option>
-                        <option value="mm/dd/yyyy">MM/DD/YYYY</option>
-                        <option value="yyyy-mm-dd">YYYY-MM-DD</option>
-                      </select>
-                    </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Đơn vị tiền tệ
-                      </label>
-                      <select
-                        value={formData.currency}
-                        onChange={(e) => handleInputChange('currency', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="VND">VND (₫)</option>
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                      </select>
-                    </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Định dạng ngày
+                        </label>
+                        <select
+                          value={formData.dateFormat}
+                          onChange={(e) => handleInputChange('dateFormat', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="dd/mm/yyyy">DD/MM/YYYY</option>
+                          <option value="mm/dd/yyyy">MM/DD/YYYY</option>
+                          <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Đơn vị tiền tệ
+                        </label>
+                        <select
+                          value={formData.currency}
+                          onChange={(e) => handleInputChange('currency', e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                          <option value="VND">VND (₫)</option>
+                          <option value="USD">USD ($)</option>
+                          <option value="EUR">EUR (€)</option>
+                        </select>
+                      </div>
 
 
 
-                
+
                     </div>
                   </div>
                 </div>
@@ -464,7 +513,7 @@ const SettingsPage: React.FC = () => {
                       </select>
                     </div>
 
-                 
+
                   </div>
                 </div>
               </div>

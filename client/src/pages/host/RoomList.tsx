@@ -7,25 +7,55 @@ import RoomCard from "../../components/RoomCard";
 import RoomDetail from "./RoomDetail";
 import { Plus, Search, Filter } from "lucide-react";
 
-interface Room {
-  id: number;
-  code: string;
+// Kiểu dữ liệu từ BE
+type RoomBE = {
+  _id: string;
+  roomId: string;
+  roomTitle: string;
+  price: number | { value: number; unit: string };
   area: number;
-  price: number;
-  utilities: string;
-  maxPeople: number;
-  image: string;
+  location: string;
+  description?: string;
+  images: string[];
+  roomType: 'single' | 'shared' | 'apartment';
+  status: 'available' | 'rented' | 'maintenance';
+  utilities: string[];
+  terms?: string;
+  hostId: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Kiểu FE dùng cho UI hiện tại
+interface Room {
+  id: string;
+  roomId: string;                   // map từ _id
+  title: string;              // map từ roomTitle
+  area: number;
+  price: number;              // ép về number
+  utilities: string;          // join từ mảng utilities
+  image: any;              // ảnh đầu tiên
   description?: string;
   location?: string;
-  deposit?: string;
-  electricity?: string;
-  status: string;
-  tenant?: {
-    name: string;
-    phone: string;
-    avatar: string;
-  };
+  status: 'Còn trống' | 'Đã cho thuê' | 'Đang sửa chữa';
 }
+
+const adaptRoom = (r: RoomBE): Room => ({
+  id: r._id,
+  title: r.roomTitle,
+  roomId: r.roomId,
+  area: r.area,
+  price: typeof r.price === 'object' ? r.price.value : (r.price ?? 0),
+  utilities: (r.utilities || []).join(', '),
+  image: r.images || '',
+  description: r.description || '',
+  location: r.location || '',
+  status:
+    r.status === 'available' ? 'Còn trống' :
+    r.status === 'rented' ? 'Đã cho thuê' :
+    'Đang sửa chữa',
+});
+
 
 export default function RoomList() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -36,58 +66,58 @@ export default function RoomList() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
   const navigate = useNavigate();
 
-  const fetchRooms = async () => {
-    try {
-      setLoading(true);
-      const res = await hostService.getRooms();
-      const roomsWithStatus = res.data.map((room: any) => ({
-        ...room,
-        status: room.tenant ? "Đã cho thuê" : "Còn trống"
-      }));
-      setRooms(roomsWithStatus);
-      setFilteredRooms(roomsWithStatus);
-    } catch (error) {
-      console.error("Error fetching rooms:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+ const fetchRooms = async () => {
+  try {
+    setLoading(true);
+    const res = await hostService.getRooms(); // axios instance
+    // res.data: { success: true, data: { rooms: RoomBE[], pagination: ... } }
+    const roomsBE: RoomBE[] = res?.data?.data?.rooms ?? [];
+    const uiRooms = roomsBE.map(adaptRoom);
+    setRooms(uiRooms);
+    setFilteredRooms(uiRooms);
+  } catch (error) {
+    console.error("Error fetching rooms:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchRooms();
   }, []);
 
   useEffect(() => {
-    let filtered = rooms;
+  let filtered = rooms;
 
-    // Filter by search term
-    if (searchTerm) {
-      filtered = filtered.filter(room =>
-        room.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        room.utilities.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-    }
+  if (searchTerm) {
+    const q = searchTerm.toLowerCase();
+    filtered = filtered.filter(r =>
+      r.title.toLowerCase().includes(q) ||
+      r.utilities.toLowerCase().includes(q) ||
+      (r.location || '').toLowerCase().includes(q)
+    );
+  }
 
-    // Filter by status
-    if (statusFilter !== "all") {
-      filtered = filtered.filter(room => room.status === statusFilter);
-    }
+  if (statusFilter !== "all") {
+    filtered = filtered.filter(r => r.status === statusFilter);
+  }
 
-    setFilteredRooms(filtered);
-  }, [searchTerm, statusFilter, rooms]);
+  setFilteredRooms(filtered);
+}, [searchTerm, statusFilter, rooms]);
 
-  const handleDelete = async (id: number) => {
-    const confirm = window.confirm("❗Bạn có chắc chắn muốn xóa phòng này?");
-    if (!confirm) return;
-    
-    try {
-      await hostService.deleteRoom(id);
-      fetchRooms();
-    } catch (err) {
-      alert("❌ Lỗi khi xóa phòng!");
-      console.error(err);
-    }
-  };
+
+  const handleDelete = async (id: string) => {
+  if (!window.confirm("❗Bạn có chắc chắn muốn xóa phòng này?")) return;
+  try {
+    await hostService.deleteRoom(id as any); // hoặc đổi service về string
+    fetchRooms();
+  } catch (err) {
+    alert("❌ Lỗi khi xóa phòng!");
+    console.error(err);
+  }
+};
+
 
   if (loading) {
     return (
@@ -179,15 +209,16 @@ export default function RoomList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRooms.map((room) => (
-            <RoomCard
-              key={room.id}
-              room={room}
-              onViewDetail={() => setSelectedRoom(room)}
-              onEdit={() => navigate(`/host/update-room/${room.id}`)}
-              onDelete={() => handleDelete(room.id)}
-            />
-          ))}
+           {filteredRooms.map((room) => (
+              <RoomCard
+                key={room.id}
+                room={room}
+                onViewDetail={() => setSelectedRoom(room)}
+                onEdit={() => navigate(`/host/update-room/${room.roomId}`)}
+                onDelete={() => handleDelete(room.roomId)} 
+              />
+
+            ))}
         </div>
       )}
 

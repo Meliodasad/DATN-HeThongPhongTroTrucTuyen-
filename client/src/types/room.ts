@@ -8,13 +8,14 @@ export interface Room {
   location: string;
   description: string;
   images: string[];
-  roomType: 'single' | 'double' | 'apartment';
+  roomType: 'single' | 'double' | 'apartment' | 'shared';
   status: 'available' | 'rented' | 'maintenance';
   utilities: string[];
   terms: string;
   approvalStatus: 'pending' | 'approved' | 'rejected';
   approvalDate?: string;
   createdAt: string;
+  dateAdded?: any;
   host?: {
     fullName: string;
     email: string;
@@ -67,7 +68,7 @@ interface Booking {
   tenantId: string;
   bookingDate: string;
   note: string;
-  bookingStatus: "pending" | "confirmed" | "cancelled";
+  bookingStatus: "pending" | "approved" | "rejected";
   approvalStatus: "approved" | "rejected" | "waiting"; // 👈 Thêm dòng này
   createdAt: string;
   room: {

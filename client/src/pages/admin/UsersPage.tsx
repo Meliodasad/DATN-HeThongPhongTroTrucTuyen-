@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Users,  
-  Search, 
-  Eye, 
-  Trash2, 
-  User, 
+import {
+  Users,
+  Search,
+  Eye,
+  Trash2,
+  User,
   Calendar,
   Mail,
   Phone,
@@ -14,7 +14,8 @@ import {
   XCircle,
   Clock,
   X,
-  ChevronDown
+  ChevronDown,
+  LockOpen
 } from 'lucide-react';
 import { useToastContext } from '../../contexts/ToastContext';
 import { userService } from '../../services/userService';
@@ -41,11 +42,11 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId }) => {
 
   const loadUser = async () => {
     if (!userId) return;
-    
+
     try {
       setLoading(true);
       const userData = await userService.getUserById(userId);
-      setUser(userData);
+      setUser(userData.data);
     } catch (err) {
       console.error(err);
       error('Lỗi', 'Không thể tải thông tin người dùng');
@@ -95,7 +96,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 mt-0">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
@@ -122,8 +123,8 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, userId }) => {
                 <div className="flex-shrink-0">
                   <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                     {user.avatar ? (
-                      <img 
-                        src={user.avatar} 
+                      <img
+                        src={user.avatar}
                         alt={user.fullName}
                         className="w-24 h-24 rounded-full object-cover"
                       />
@@ -310,9 +311,8 @@ const RoleSelector: React.FC<RoleSelectorProps> = ({ currentRole, userId, onRole
             <button
               key={role.value}
               onClick={() => handleRoleSelect(role.value as UserType['role'])}
-              className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors block ${
-                role.value === currentRole ? 'bg-blue-50 font-medium' : ''
-              }`}
+              className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 transition-colors block ${role.value === currentRole ? 'bg-blue-50 font-medium' : ''
+                }`}
             >
               {role.label}
             </button>
@@ -370,14 +370,14 @@ const UsersPage: React.FC = () => {
 
   const filteredUsers = useMemo(() => {
     return users.filter(user => {
-      const matchesSearch = !filters.searchTerm || 
+      const matchesSearch = !filters.searchTerm ||
         user.fullName.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         user.email.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         (user.phone && user.phone.includes(filters.searchTerm));
-      
+
       const matchesRole = filters.role === 'all' || user.role === filters.role;
       const matchesStatus = filters.status === 'all' || user.status === filters.status;
-      
+
       return matchesSearch && matchesRole && matchesStatus;
     });
   }, [users, filters]);
@@ -528,7 +528,7 @@ const UsersPage: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <div className="flex gap-2">
             <select
               value={filters.role}
@@ -552,6 +552,8 @@ const UsersPage: React.FC = () => {
               <option value="inactive">Không hoạt động</option>
               <option value="pending">Chờ duyệt</option>
             </select>
+            {/* <button className='btn btn-primary'>Thêm mới</button> */}
+
           </div>
         </div>
       </div>
@@ -563,7 +565,7 @@ const UsersPage: React.FC = () => {
             Danh sách người dùng ({filteredUsers.length})
           </h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -595,8 +597,8 @@ const UsersPage: React.FC = () => {
                     <div className="flex items-center">
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                         {user.avatar ? (
-                          <img 
-                            src={user.avatar} 
+                          <img
+                            src={user.avatar}
                             alt={user.fullName}
                             className="w-10 h-10 rounded-full object-cover"
                           />
@@ -629,7 +631,7 @@ const UsersPage: React.FC = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <RoleSelector
                       currentRole={user.role}
-                      userId={user.id}
+                      userId={user.userId}
                       onRoleChange={handleRoleChange}
                     />
                   </td>
@@ -646,16 +648,16 @@ const UsersPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => handleViewUser(user.id)}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
+                      <button
+                        onClick={() => handleViewUser(user.userId)}
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       {user.status === 'pending' && (
-                        <button 
-                          onClick={() => handleUpdateStatus(user.id, 'active')}
+                        <button
+                          onClick={() => handleUpdateStatus(user.userId, 'active')}
                           className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
                           title="Duyệt tài khoản"
                         >
@@ -663,16 +665,25 @@ const UsersPage: React.FC = () => {
                         </button>
                       )}
                       {user.status === 'active' && (
-                        <button 
-                          onClick={() => handleUpdateStatus(user.id, 'inactive')}
+                        <button
+                          onClick={() => handleUpdateStatus(user.userId, 'inactive')}
                           className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                           title="Vô hiệu hóa"
                         >
                           <XCircle className="w-4 h-4" />
                         </button>
                       )}
-                      <button 
-                        onClick={() => handleDeleteUser(user.id)}
+                      {user.status === 'inactive' && (
+                        <button
+                          onClick={() => handleUpdateStatus(user.userId, 'active')}
+                          className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-red-50"
+                          title="Hủy khóa tài khoản"
+                        >
+                          <LockOpen className="w-4 h-4" />
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleDeleteUser(user.userId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa người dùng"
                       >

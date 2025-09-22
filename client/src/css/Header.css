@@ -5,7 +5,7 @@
   position: sticky;
   top: 0;
   left: 0;
-  z-index: 1000;
+  z-index: 10;
 }
 
 .header-top {
@@ -25,6 +25,8 @@
 
 .logo {
   height: 30px;
+  scale: 3;
+  margin: 0 40px 0 20px;
 }
 
 .search-input {

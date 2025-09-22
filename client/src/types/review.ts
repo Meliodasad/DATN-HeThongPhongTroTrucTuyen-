@@ -5,6 +5,7 @@ export interface Review {
   tenantId: string;
   review: string;
   rating: number;
+  isApproved: boolean;
   reviewDate: string;
   status?: 'approved' | 'pending' | 'rejected';
   replies?: ReviewReply[];
