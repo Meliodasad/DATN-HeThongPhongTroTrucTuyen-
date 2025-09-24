@@ -19,7 +19,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4>THUÊ NHÀ NGUYÊN CĂN</h4>
+            {/* <h4>THUÊ NHÀ NGUYÊN CĂN</h4> */}
             <ul>
               <li className="hover:underline hover:decoration-blue-500" ><Link to="/?keyword=thue-nha-ha-dong">Thuê nhà Hà Đông</Link></li>
               <li className="hover:underline hover:decoration-blue-500" ><Link to="/?keyword=thue-nha-cau-giay">Thuê nhà Cầu Giấy</Link></li>
@@ -29,7 +29,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4>CHO THUÊ CĂN HỘ</h4>
+            {/* <h4>CHO THUÊ CĂN HỘ</h4> */}
             <ul>
               <li className="hover:underline hover:decoration-blue-500" ><Link to="/?keyword=can-ho-cau-giay">Căn hộ Cầu Giấy</Link></li>
               <li className="hover:underline hover:decoration-blue-500" ><Link to="/?keyword=can-ho-ha-dong">Căn hộ Hà Đông</Link></li>
@@ -39,7 +39,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4>CHO THUÊ MẶT BẰNG</h4>
+            {/* <h4>CHO THUÊ MẶT BẰNG</h4> */}
             <ul>
               <li className="hover:underline hover:decoration-blue-500" ><Link to="/?keyword=mat-bang-hoan-kiem">Mặt bằng Hoàn Kiếm</Link></li>
               <li className="hover:underline hover:decoration-blue-500" ><Link to="/?keyword=mat-bang-dong-da">Mặt bằng Đống Đa</Link></li>
@@ -48,7 +48,7 @@ const Footer = () => {
           </div>
 
           <div>
-            <h4>TÌM NGƯỜI Ở GHÉP</h4>
+            {/* <h4>TÌM NGƯỜI Ở GHÉP</h4> */}
             <ul>
               <li className="hover:underline hover:decoration-blue-500" ><Link to="/?keyword=o-ghep-ha-dong">Ở ghép Hà Đông</Link></li>
               <li className="hover:underline hover:decoration-blue-500" ><Link to="/?keyword=o-ghep-thanh-xuan">Ở ghép Thanh Xuân</Link></li>
@@ -64,39 +64,33 @@ const Footer = () => {
 
         <div className="footer-bottom">
           <div>
-            <h4>VỀ PHONGTRO123.COM</h4>
+            <h4>VỀ PHONGTROTHONGMINH</h4>
             <ul>
-              <li>Giới thiệu</li>
-              <li>Quy chế hoạt động</li>
-              <li>Quy định sử dụng</li>
-              <li>Chính sách bảo mật</li>
-              <li>Liên hệ</li>
+              <li>Trọ Thông Minh là nền tảng hỗ trợ tìm, <br /> thuê và quản lý trọ nhanh chóng, <br /> tiện lợi và minh bạch cho cả người thuê lẫn chủ trọ.</li>
             </ul>
           </div>
 
           <div>
-            <h4>DÀNH CHO KHÁCH HÀNG</h4>
+            <h4>THÔNG TIN LIÊN HỆ HỖ TRỢ</h4>
             <ul>
-              <li>Câu hỏi thường gặp</li>
-              <li>Hướng dẫn đăng tin</li>
-              <li>Bảng giá dịch vụ</li>
-              <li>Quy định đăng tin</li>
-              <li>Giải quyết khiếu nại</li>
+              <li>Hotline:0345981925</li>
+              <li>Fanpage:Trọ Thông Minh</li>
+              <li>Email:trothongminh@gmail.com</li>
+            
+       
             </ul>
           </div>
 
           <div>
             <h4>PHƯƠNG THỨC THANH TOÁN</h4>
+            Online
           </div>
 
-          <div>
-            <h4>THEO DÕI PHONGTRO123</h4>
-          </div>
         </div>
 
         <div className="footer-contact">
-          <p>Công Ty Phòng Trọ 123</p>
-          <p>Email: cskh.phongtro123@gmail.com</p>
+          <p>Công Ty Phòng Trọ Thông Minh</p>
+          <p>Email: cskh.phongtrothongminh@gmail.com</p>
         </div>
       </div>
     </footer>

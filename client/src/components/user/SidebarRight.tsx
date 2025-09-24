@@ -67,8 +67,6 @@ const SidebarRight = () => {
           </div>
         </div>
       </div>
-
-      <p className="latest-posts-title">Tin mới đăng</p>
       {rooms.map((room) => (
         <Link
           key={room.id}

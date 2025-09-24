@@ -364,7 +364,7 @@ const MyAccount: React.FC = () => {
                         }`}
                     >
                       <Calendar className="w-5 h-5" />
-                      <span className="font-medium">My Booking</span>
+                      <span className="font-medium">Yêu cầu thuê của tôi</span>
                     </button>
                   </li>
                 </ul>
