@@ -58,9 +58,6 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="footer-note">
-          <p>Cùng hệ thống LBKCorp:</p>
-        </div>
 
         <div className="footer-bottom">
           <div>
