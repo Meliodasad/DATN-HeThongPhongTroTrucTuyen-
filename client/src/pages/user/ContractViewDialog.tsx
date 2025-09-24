@@ -154,12 +154,12 @@ const ContractDialog = ({ onClose, contractId }: Props) => {
                                                 {formatCurrency(contractData.roomInfo?.price.value)}
                                             </span>
                                         </div>
-                                        <div className="flex justify-between border-t pt-3">
+                                        {/* <div className="flex justify-between border-t pt-3">
                                             <span className="text-gray-800 font-semibold">Tổng tiền ({contractData.duration} tháng):</span>
                                             <span className="font-bold text-lg text-green-700">
                                                 {formatCurrency(contractData.rentPrice)}
                                             </span>
-                                        </div>
+                                        </div> */}
                                     </div>
                                 </div>
                             </div>
