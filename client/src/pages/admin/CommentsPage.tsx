@@ -592,13 +592,13 @@ const CommentsPage: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => handleDeleteReview(review.reviewId)}
                         className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors"
                         title="Ẩn đánh giá"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </button> */}
                     </div>
                   </td>
                 </tr>

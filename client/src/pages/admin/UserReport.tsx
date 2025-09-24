@@ -381,13 +381,13 @@ const UserReport: React.FC = () => {
                                                         <XCircle className="w-4 h-4" />
                                                     </button>
                                                 )}
-                                                <button
+                                                {/* <button
                                                     onClick={() => handleDeleteReport(report.reportId)}
                                                     className="text-red-600 hover:text-red-900 p-2 rounded-lg hover:bg-red-50 transition-colors"
                                                     title="Xóa báo cáo"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
-                                                </button>
+                                                </button> */}
                                             </div>
                                         </td>
                                     </tr>

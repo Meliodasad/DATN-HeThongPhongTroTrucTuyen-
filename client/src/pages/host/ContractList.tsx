@@ -386,14 +386,14 @@ const ContractList = () => {
                           <Edit className="w-4 h-4" />
                           <span>Hóa đơn</span>
                         </button>
-                        <button
+                        {/* <button
                           onClick={() => handleDelete(c.id)}
                           className="flex items-center gap-1 text-red-600 hover:text-red-900"
                           title="Xóa hợp đồng"
                         >
                           <Trash2 className="w-4 h-4" />
                           <span>Xóa</span>
-                        </button>
+                        </button> */}
                         {c.status === "cancel" &&
                           <button
                             onClick={() => openDialog(c.id)}
