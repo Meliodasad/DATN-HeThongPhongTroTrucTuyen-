@@ -72,7 +72,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      if (!response.ok) throw new Error('Failed to fetch users');
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        error('Lỗi đăng nhập', errorData?.message || "Email hoặc mật khẩu không đúng");
+        
+        throw new Error('Failed to fetch users')
+      };
       const users = await response.json();
 
       const foundUser = users.data.user;
@@ -96,9 +102,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('token', users.data.token);
       success('Thành công', `Chào mừng ${foundUser.fullName}!`);
       return userData;
-    } catch (err) {
-      console.error('Login error:', err);
-      error('Lỗi', 'Email hoặc mật khẩu không đúng.');
+    } catch (err: any) {
+      // error('Lỗi', 'Email hoặc mật khẩu không đúng.');
       return null;
     } finally {
       setLoading(false);
@@ -108,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (userData: RegisterData): Promise<boolean> => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/users', {headers: buildHeaders()});
+      const response = await fetch('http://localhost:3000/users', { headers: buildHeaders() });
       if (!response.ok) throw new Error('Failed to fetch users');
       const users = await response.json();
 

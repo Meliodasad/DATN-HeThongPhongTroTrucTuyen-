@@ -62,7 +62,7 @@ const RentalRequests = () => {
       new Date(x.createdAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
 
     // Nếu BE chưa trả tenantInfo, dùng placeholder
-    const tenantName = x.tenantInfo?.fullName ?? "Khách thuê";
+    const tenantName = x?.tenantId ?? "Khách thuê";
     const phone = x.tenantInfo?.phone ?? "—";
     const email = x.tenantInfo?.email ?? "—";
     const avatar =
@@ -70,6 +70,7 @@ const RentalRequests = () => {
       `https://i.pravatar.cc/100?u=${encodeURIComponent(x.tenantId)}`;
 
     return {
+      ...x,
       id,
       tenantName,
       phone,

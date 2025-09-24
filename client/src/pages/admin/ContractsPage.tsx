@@ -111,6 +111,8 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
       currency: 'VND'
     }).format(price);
   };
+  console.log(contract);
+
 
   const calculateEndDate = (startDate: string, duration: number) => {
     return safeCalculateEndDate(startDate, duration);
@@ -199,7 +201,7 @@ const ContractDetailModal: React.FC<ContractDetailModalProps> = ({ isOpen, onClo
                       Diện tích: <span className="font-medium">{contract.room.area}m²</span>
                     </span>
                     <span className="text-sm text-gray-600">
-                      Giá thuê: <span className="font-medium text-green-600">{formatPrice(contract.rentPrice)}</span>
+                      Giá thuê: <span className="font-medium text-green-600">{formatPrice(Number(contract.rentPrice / contract.duration))}</span>
                     </span>
                   </div>
                 </div>
@@ -353,13 +355,14 @@ const ContractsPage: React.FC = () => {
       const enrichedContracts = contractsData.data.contracts.map((contract: any) => {
         const room = contract.roomInfo;
         const tenant = contract.tenantInfo;
-
+        const detailRoom = roomsData?.data?.rooms?.find((x: any) => x.roomId === room?.roomId)
         // Find host through room's hostId
         const host = room ? usersData.data.users.find((u: any) => u.id === room.hostId) : null;
 
         return {
           ...contract,
-          room: room || { roomTitle: 'Phòng không tồn tại', location: 'Không xác định', area: 0 },
+          room: detailRoom || { roomTitle: 'Phòng không tồn tại', location: 'Không xác định', area: 0 },
+          roomInfo: detailRoom || { roomTitle: 'Phòng không tồn tại', location: 'Không xác định', area: 0 },
           tenant: tenant || { fullName: 'Người dùng không tồn tại', email: 'unknown@example.com' },
           host: host || { fullName: 'Chủ trọ không tồn tại', email: 'unknown@example.com' }
         };
@@ -653,7 +656,7 @@ const ContractsPage: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm font-medium text-green-600">
                         <DollarSign className="w-4 h-4 mr-1" />
-                        {formatPrice(contract.rentPrice)}
+                        {formatPrice(Number(contract.rentPrice / contract.duration))}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

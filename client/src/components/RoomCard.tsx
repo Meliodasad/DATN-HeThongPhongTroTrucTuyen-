@@ -132,7 +132,7 @@ const RoomCard = ({ room, onViewDetail, onEdit, onDelete, onStatusUpdated }: Roo
 
         {/* Bộ điều khiển trạng thái */}
         <div className="mb-4 flex items-center gap-2">
-          Cập nhật trạng thái: 
+          Cập nhật trạng thái:
           <select
             value={draft}
             onChange={(e) => setDraft(e.target.value as StatusCode)}
@@ -151,7 +151,7 @@ const RoomCard = ({ room, onViewDetail, onEdit, onDelete, onStatusUpdated }: Roo
             {saving ? "Đang lưu..." : "Lưu"}
           </button>
         </div>
-{/* 
+        {/* 
         {room.tenant && (
           <div className="flex items-center space-x-2 mb-4 p-2 bg-gray-50 rounded-lg">
             <img
@@ -181,12 +181,12 @@ const RoomCard = ({ room, onViewDetail, onEdit, onDelete, onStatusUpdated }: Roo
           >
             Sửa
           </button>
-          <button
+          {room?.status !== 'Đã cho thuê' && <button
             onClick={onDelete}
             className="flex-1 bg-red-50 text-red-600 py-2 px-3 rounded-lg text-sm font-medium hover:bg-red-100 transition"
           >
             Xóa
-          </button>
+          </button>}
         </div>
       </div>
     </div>

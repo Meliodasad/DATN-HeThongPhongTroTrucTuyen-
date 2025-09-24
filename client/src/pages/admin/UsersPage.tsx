@@ -536,7 +536,7 @@ const UsersPage: React.FC = () => {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">Tất cả vai trò</option>
-              <option value="admin">Quản trị viên</option>
+              {/* <option value="admin">Quản trị viên</option> */}
               <option value="host">Chủ trọ</option>
               <option value="tenant">Người thuê</option>
               <option value="guest">Khách</option>
@@ -682,13 +682,13 @@ const UsersPage: React.FC = () => {
                           <LockOpen className="w-4 h-4" />
                         </button>
                       )}
-                      <button
+                      {/* <button
                         onClick={() => handleDeleteUser(user.userId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa người dùng"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </button> */}
                     </div>
                   </td>
                 </tr>

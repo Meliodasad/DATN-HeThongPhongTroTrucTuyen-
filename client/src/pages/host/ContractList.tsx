@@ -97,7 +97,7 @@ const mapContracts = (list: ApiContract[]): ContractRow[] => {
       roomId: c.roomId,
       startDate: fmtDate(start),
       endDate: fmtDate(end),
-      deposit: c.rentPrice ?? 0,
+      deposit: Number(c.rentPrice / c.duration) ?? 0,
       terms: c.terms ?? "",
       status: c.status ?? "",
       location: c.roomInfo?.location ?? "",

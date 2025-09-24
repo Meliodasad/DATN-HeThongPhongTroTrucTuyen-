@@ -69,6 +69,7 @@ const ContractDetail = () => {
     const months = Number(contract.duration || 0);
     const endIso = months > 0 ? addMonthsIso(contract.startDate, months) : "";
     return {
+      ...contract,
       code: contract.contractId,
       status: contract.status,
       start: contract.startDate,
@@ -177,6 +178,10 @@ const ContractDetail = () => {
                 <p>
                   <span className="font-medium">Giá/tiền cọc:</span>{" "}
                   {(view.rent || 0).toLocaleString("vi-VN")} {view.rentUnit}
+                </p>
+                <p>
+                  <span className="font-medium">Tiện ích:</span>{" "}
+                  {view.roomInfo?.utilities?.join(", ")}
                 </p>
               </div>
             </div>

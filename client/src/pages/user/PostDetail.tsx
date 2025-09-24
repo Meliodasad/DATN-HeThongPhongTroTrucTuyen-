@@ -63,10 +63,11 @@ const PostDetail = () => {
   const [host, setHost] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user: currentUser } = useAuth();
-  const { warning } = useToastContext( );
-const navigate = useNavigate()
-
+  const [showComment, setShowComment] = useState<boolean | false>(false);
+  // const { user: currentUser } = useAuth();
+  const { warning } = useToastContext();
+  const navigate = useNavigate()
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}")
   // hàm ánh xạ UserApi -> User (UI)
   const mapUser = (u: UserApi): User => ({
     // ưu tiên userId cho đường link/profile; fallback _id nếu thiếu
@@ -101,6 +102,15 @@ const navigate = useNavigate()
         }
 
         setHost(mapUser(hostJson.data));
+
+        // 3) lấy user 
+        if (currentUser?.userId) {
+          const userRes = await fetch(`http://localhost:3000/contracts/rooms/${id}/active/self`, { headers: buildHeaders() });
+          if (!userRes.ok) throw new Error('Không tìm thấy');
+          const userJson: any = await userRes.json();
+          setShowComment(userJson.active)
+        }
+        
         setError(null);
       } catch (err: any) {
         setError(err.message || 'Lỗi khi tải dữ liệu');
@@ -124,16 +134,16 @@ const navigate = useNavigate()
   }));
 
   const [_, district, province] = room.location ? room.location.split(',').map(s => s.trim()) : ['', '', ''];
-const handRequest = () => {
+  const handRequest = () => {
 
-}
-const handleRq = () => {
-  if(!localStorage.getItem("user")) {
-warning("Thông báo", 'Vui lòng đăng nhập để thuê phòng')
-  } else {
-    navigate(`/booking/${room.roomId}`)
   }
-}
+  const handleRq = () => {
+    if (!localStorage.getItem("user")) {
+      warning("Thông báo", 'Vui lòng đăng nhập để thuê phòng')
+    } else {
+      navigate(`/booking/${room.roomId}`)
+    }
+  }
   return (
     <div className="post-detail-container">
       <ImageGallery items={images} showPlayButton={false} showFullscreenButton={false} />
@@ -169,36 +179,38 @@ warning("Thông báo", 'Vui lòng đăng nhập để thuê phòng')
           <p>{room.description}</p>
         </div>
       </div>
+      {currentUser?.userId && <>
 
-      <Link to={`/user/${host.id}`} className="contact-header">
-        <img src={host.avatar} alt="avatar" className="avatar" />
-        <div>
-          <h3>{host.fullName}</h3>
-          <p className="sub-info">
-            {convertStatus(host.status)} • Tham gia từ: {new Date(host.createdAt).toLocaleDateString()}
-          </p>
+        <Link to={`/user/${host.id}`} className="contact-header">
+          <img src={host.avatar} alt="avatar" className="avatar" />
+          <div>
+            <h3>{host.fullName}</h3>
+            <p className="sub-info">
+              {convertStatus(host.status)} • Tham gia từ: {new Date(host.createdAt).toLocaleDateString()}
+            </p>
+          </div>
+        </Link>
+
+        <div className="contact-info">
+          <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${host.phone}`}>{host.phone}</a></p>
+          {host.zalo && (
+            <p>
+              <strong>💬 Zalo:</strong>{' '}
+              <a
+                href={host.zalo.startsWith('http') ? host.zalo : `https://zalo.me/${host.zalo}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Nhắn Zalo
+              </a>
+            </p>
+          )}
         </div>
-      </Link>
-
-      <div className="contact-info">
-        <p><strong>📞 Số điện thoại:</strong> <a href={`tel:${host.phone}`}>{host.phone}</a></p>
-        {host.zalo && (
-          <p>
-            <strong>💬 Zalo:</strong>{' '}
-            <a
-              href={host.zalo.startsWith('http') ? host.zalo : `https://zalo.me/${host.zalo}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Nhắn Zalo
-            </a>
-          </p>
-        )}
-      </div>
-
-      {currentUser ? (
+      </>
+      }
+      {currentUser?.userId ? (
         <>
-          <ReviewSection roomId={room.roomId} />
+          {showComment && <ReviewSection roomId={room.roomId} />}
           <ReportForm roomId={room.roomId} />
         </>
       ) : (

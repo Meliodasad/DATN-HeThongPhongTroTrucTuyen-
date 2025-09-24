@@ -106,9 +106,9 @@ const Header = () => {
 
       <nav className="header-nav">
         <div className="nav-links">
-          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'single' }))}>Phòng đơn</a>
-          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'shared' }))}>Phòng ghép</a>
-          <a onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'apartment' }))}>Nhà nguyên căn</a>
+          <a className='cursors-pointer' onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'single' }))}>Phòng đơn</a>
+          <a className='cursors-pointer' onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'shared' }))}>Phòng ghép</a>
+          <a className='cursors-pointer' onClick={() => setSearchRoom((pre: any) => ({ ...pre, roomType: 'apartment' }))}>Nhà nguyên căn</a>
         </div>
       </nav>
     </header>

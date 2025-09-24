@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Plus, Edit, Trash2, Eye, Search} from 'lucide-react';
+import { X, Plus, Edit, Trash2, Eye, Search } from 'lucide-react';
 import { API_BASE_URL } from '../../services/api';
 
 interface InvoiceItem {
@@ -33,13 +33,13 @@ interface InvoiceManagementDialogProps {
   onInvoiceCreated?: (invoice: Invoice) => void;
 }
 
-const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({ 
-  isOpen, 
-  onClose, 
-  contractId, 
-  roomId, 
+const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
+  isOpen,
+  onClose,
+  contractId,
+  roomId,
   userId,
-  onInvoiceCreated 
+  onInvoiceCreated
 }) => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(false);
@@ -118,7 +118,7 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
   const updateItem = (index: number, field: keyof InvoiceItem, value: any) => {
     setFormData(prev => ({
       ...prev,
-      items: prev.items.map((item, i) => 
+      items: prev.items.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
       )
     }));
@@ -142,7 +142,7 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
     }
 
     // Validate items
-    const invalidItems = formData.items.some(item => 
+    const invalidItems = formData.items.some(item =>
       !item.type || item.unitPrice <= 0 || item.quantity <= 0
     );
 
@@ -152,12 +152,12 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
     }
 
     setLoading(true);
-    
+
     try {
-      const url = editingInvoice 
-        ? `${API_BASE_URL}/invoices/${editingInvoice.id}` 
+      const url = editingInvoice
+        ? `${API_BASE_URL}/invoices/${editingInvoice.id}`
         : `${API_BASE_URL}/invoices`;
-      
+
       const method = editingInvoice ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -176,14 +176,14 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
       const data = await response.json();
       if (data.success) {
         if (editingInvoice) {
-          setInvoices(prev => prev.map(inv => 
+          setInvoices(prev => prev.map(inv =>
             inv.id === editingInvoice.id ? data.data : inv
           ));
         } else {
           setInvoices(prev => [data.data, ...prev]);
           onInvoiceCreated && onInvoiceCreated(data.data);
         }
-        
+
         setShowCreateForm(false);
         setEditingInvoice(null);
         resetForm();
@@ -261,14 +261,14 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
   // Filter invoices
   const filteredInvoices = invoices.filter(invoice => {
     const matchesSearch = invoice.note?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         invoice.billingMonth.includes(searchTerm) ||
-                         invoice.items.some(item => 
-                           getPaymentTypeLabel(item.type).toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           item.note.toLowerCase().includes(searchTerm.toLowerCase())
-                         );
+      invoice.billingMonth.includes(searchTerm) ||
+      invoice.items.some(item =>
+        getPaymentTypeLabel(item.type).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.note.toLowerCase().includes(searchTerm.toLowerCase())
+      );
     const matchesStatus = filterStatus === 'all' || invoice.status === filterStatus;
     const matchesMonth = filterMonth === 'all' || invoice.billingMonth === filterMonth;
-    
+
     return matchesSearch && matchesStatus && matchesMonth;
   });
 
@@ -369,7 +369,7 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
                     {filteredInvoices.map((invoice) => {
                       const statusInfo = getStatusInfo(invoice.status);
                       const total = calculateTotal(invoice.items);
-                      
+
                       return (
                         <div
                           key={invoice.id}
@@ -385,13 +385,13 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
                                   {statusInfo.label}
                                 </span>
                               </div>
-                              
+
                               <div className="text-2xl font-bold text-blue-600 mb-3">
                                 {formatCurrency(total)}
                               </div>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            {invoice?.status !== "paid" && <div className="flex items-center gap-2">
                               <button
                                 onClick={() => handleDeleteInvoice(invoice.invoiceId)}
                                 className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg"
@@ -399,7 +399,7 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
                               >
                                 <Trash2 className="w-4 h-4" />
                               </button>
-                            </div>
+                            </div>}
                           </div>
 
                           {/* Items List */}
@@ -416,11 +416,11 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
                               </div>
                             ))}
                           </div>
-                          
+
                           {invoice.note && (
                             <p className="text-sm text-gray-600 mb-2">{invoice.note}</p>
                           )}
-                          
+
                           <div className="text-xs text-gray-500">
                             ID: {invoice.id} • Tạo: {new Date(invoice.createdAt).toLocaleString('vi-VN')}
                           </div>
@@ -462,23 +462,6 @@ const InvoiceManagementDialog: React.FC<InvoiceManagementDialogProps> = ({
                           value={formData.billingMonth}
                           onChange={(e) => setFormData(prev => ({ ...prev, billingMonth: e.target.value }))}
                         />
-                      </div>
-
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Trạng thái
-                        </label>
-                        <select
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          value={formData.status}
-                          onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as any }))}
-                        >
-                          {statusOptions.map(status => (
-                            <option key={status.value} value={status.value}>
-                              {status.label}
-                            </option>
-                          ))}
-                        </select>
                       </div>
 
                       <div>

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  Building, 
-  Search, 
-  Eye, 
-  Trash2, 
-  User, 
+import {
+  Building,
+  Search,
+  Eye,
+  Trash2,
+  User,
   Calendar,
   MapPin,
   Home,
@@ -25,9 +25,10 @@ interface RoomModalProps {
   isOpen: boolean;
   onClose: () => void;
   roomId: string | null;
+  status?: string | null;
 }
 
-const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
+const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId, status }) => {
   const [room, setRoom] = useState<Room | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -260,13 +261,13 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
                     {getStatusText(room?.status || 'available')}
                   </span>
                 </div>
-                
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Trạng thái duyệt
                   </label>
-                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getApprovalColor(room?.approvalStatus)}`}>
-                    {getApprovalText(room?.approvalStatus)}
+                  <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getApprovalColor(status)}`}>
+                    {getApprovalText(status)}
                   </span>
                 </div>
               </div>
@@ -281,8 +282,8 @@ const RoomModal: React.FC<RoomModalProps> = ({ isOpen, onClose, roomId }) => {
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
                         {room.host.avatar ? (
-                          <img 
-                            src={room.host.avatar} 
+                          <img
+                            src={room.host.avatar}
                             alt={room.host.fullName}
                             className="w-10 h-10 rounded-full object-cover"
                           />
@@ -371,9 +372,8 @@ const StatusDropdown: React.FC<StatusDropdownProps> = ({ currentStatus, roomId, 
             <button
               key={option.value}
               onClick={() => handleStatusSelect(option.value as Room['status'])}
-              className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 block ${
-                option.value === currentStatus ? 'bg-gray-100' : ''
-              }`}
+              className={`w-full text-left px-3 py-2 text-xs hover:bg-gray-50 block ${option.value === currentStatus ? 'bg-gray-100' : ''
+                }`}
             >
               <span className={`inline-block px-2 py-1 rounded-full ${option.color}`}>
                 {option.label}
@@ -392,6 +392,14 @@ const getRoomApprovalStatus = (roomId: string, roomApprovals: any[]): Room['appr
   return approval?.approvalStatus || 'pending';
 };
 
+const getApprovalText = (status?: Room['approvalStatus']) => {
+  switch (status) {
+    case 'approved': return 'Đã duyệt';
+    case 'pending': return 'Chờ duyệt';
+    case 'rejected': return 'Từ chối';
+    default: return 'Chờ duyệt'; // Default to pending if not set
+  }
+};
 // Main Rooms Page Component
 const RoomsPage: React.FC = () => {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -413,6 +421,7 @@ const RoomsPage: React.FC = () => {
     searchTerm: ''
   });
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
+  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { success, error } = useToastContext();
@@ -429,9 +438,18 @@ const RoomsPage: React.FC = () => {
         roomService.getRoomStats(),
         roomService.getRoomApprovals() // This method needs to be implemented
       ]);
-      
-      setRooms(roomsData.data.rooms || []);
-      setStats(statsData);
+      const data = roomsData.data
+      const rooms = (roomsData.data?.rooms || []).filter((x: any) => x.status !== "deleted")
+      setRooms(rooms);
+      const rented = [...rooms].filter((x: any) => x.status === "rented").length
+      const pending = [...rooms].filter((x: any) => x.status === "available").length
+      const status = {
+        total: rooms.length,
+        available: Number(rooms.length - rented),
+        rented: rented,
+        pending: pending,
+      }
+      setStats((pre) => ({ ...pre, ...status }));
       setRoomApprovals(approvalsData.data || []);
       console.log('Room Approvals:', roomApprovals);
     } catch (err) {
@@ -444,37 +462,38 @@ const RoomsPage: React.FC = () => {
 
   // Enhanced rooms with approval status
   const roomsWithApproval = useMemo(() => {
-  return rooms.map(room => {
-    const a = roomApprovals.find(x => x.roomId === (room.roomId));
-    const st = (a?.status ?? a?.approvalStatus ?? 'pending') as Room['approvalStatus'];
-    
-    return {
-      ...room,
-      approvalId: a?.approvalId,
-      approvalStatus: st,
-      approvalNote: a?.note
-    };
-  });
- 
-}, [rooms, roomApprovals]);
+    return rooms.map(room => {
+      const a = roomApprovals.find(x => x.roomId === (room.roomId));
+      const st = (a?.status ?? a?.approvalStatus ?? 'pending') as Room['approvalStatus'];
+
+      return {
+        ...room,
+        approvalId: a?.approvalId,
+        approvalStatus: st,
+        approvalNote: a?.note
+      };
+    });
+
+  }, [rooms, roomApprovals]);
 
 
   const filteredRooms = useMemo(() => {
     return roomsWithApproval.filter(room => {
-      const matchesSearch = !filters.searchTerm || 
+      const matchesSearch = !filters.searchTerm ||
         room.roomTitle.toLowerCase().includes(filters.searchTerm.toLowerCase()) ||
         room.location.toLowerCase().includes(filters.searchTerm.toLowerCase());
-      
+
       const matchesType = filters.roomType === 'all' || room.roomType === filters.roomType;
       const matchesStatus = filters.status === 'all' || room.status === filters.status;
       const matchesApproval = filters.approvalStatus === 'all' || room.approvalStatus === filters.approvalStatus;
-      
+
       return matchesSearch && matchesType && matchesStatus && matchesApproval;
     });
   }, [roomsWithApproval, filters]);
 
-  const handleViewRoom = (roomId: string) => {
+  const handleViewRoom = (roomId: string, status: string) => {
     setSelectedRoomId(roomId);
+    setApprovalStatus(status)
     setIsModalOpen(true);
   };
 
@@ -494,7 +513,7 @@ const RoomsPage: React.FC = () => {
   const handleUpdateApproval = async (roomId: string, status: Room['approvalStatus']) => {
     try {
       await roomService.updateApprovalStatus(roomId, status);
-      
+
       // Update local state immediately
       setRoomApprovals(prevApprovals => {
         const existingIndex = prevApprovals.findIndex(approval => approval.roomId === roomId);
@@ -508,9 +527,9 @@ const RoomsPage: React.FC = () => {
           return [...prevApprovals, { roomId, approvalStatus: status, approvalDate: new Date().toISOString() }];
         }
       });
-      
+
       success('Thành công', `${status === 'approved' ? 'Duyệt' : 'Từ chối'} phòng trọ thành công`);
-      
+
       // Reload data to ensure sync
       await loadData();
     } catch (err) {
@@ -522,18 +541,18 @@ const RoomsPage: React.FC = () => {
   const handleStatusChange = async (roomId: string, status: Room['status']) => {
     try {
       await roomService.updateRoom(roomId, { status });
-      
+
       // Update local state immediately
-      setRooms(prevRooms => 
-        prevRooms.map(room => 
+      setRooms(prevRooms =>
+        prevRooms.map(room =>
           room.id === roomId || room.roomId === roomId
             ? { ...room, status: status }
             : room
         )
       );
-      
+
       success('Thành công', 'Cập nhật trạng thái phòng thành công');
-      
+
       // Reload data to ensure sync
       await loadData();
     } catch (err) {
@@ -545,6 +564,7 @@ const RoomsPage: React.FC = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedRoomId(null);
+    setApprovalStatus(null);
   };
 
   const getRoomTypeText = (type: Room['roomType']) => {
@@ -566,14 +586,6 @@ const RoomsPage: React.FC = () => {
     }
   };
 
-  const getApprovalText = (status?: Room['approvalStatus']) => {
-    switch (status) {
-      case 'approved': return 'Đã duyệt';
-      case 'pending': return 'Chờ duyệt';
-      case 'rejected': return 'Từ chối';
-      default: return 'Chờ duyệt'; // Default to pending if not set
-    }
-  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -666,7 +678,7 @@ const RoomsPage: React.FC = () => {
               className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          
+
           <div className="flex gap-2">
             <select
               value={filters.roomType}
@@ -711,7 +723,7 @@ const RoomsPage: React.FC = () => {
             Danh sách phòng trọ ({filteredRooms.length})
           </h3>
         </div>
-        
+
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -748,8 +760,8 @@ const RoomsPage: React.FC = () => {
                   <td className="px-6 py-4" title={`${room.roomTitle}\n${room.location}`}>
                     <div className="flex items-start gap-3">
                       {room.images && room.images.length > 0 && (
-                        <img 
-                          src={room.images[0]} 
+                        <img
+                          src={room.images[0]}
                           alt={room.roomTitle}
                           className="w-16 h-16 rounded-lg object-cover"
                         />
@@ -772,8 +784,8 @@ const RoomsPage: React.FC = () => {
                     <div className="flex items-center">
                       <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                         {room.host?.avatar ? (
-                          <img 
-                            src={room.host.avatar} 
+                          <img
+                            src={room.host.avatar}
                             alt={room.host.fullName}
                             className="w-8 h-8 rounded-full object-cover"
                           />
@@ -821,14 +833,14 @@ const RoomsPage: React.FC = () => {
                     <div className="flex items-center justify-end gap-2">
                       {room.approvalStatus === 'pending' && (
                         <>
-                          <button 
+                          <button
                             onClick={() => handleUpdateApproval(room.roomId || room.id, 'approved')}
                             className="text-green-600 hover:text-green-900 p-1 rounded hover:bg-green-50"
                             title="Duyệt phòng"
                           >
                             <CheckCircle className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => handleUpdateApproval(room.roomId || room.id, 'rejected')}
                             className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                             title="Từ chối"
@@ -837,20 +849,20 @@ const RoomsPage: React.FC = () => {
                           </button>
                         </>
                       )}
-                      <button 
-                        onClick={() => handleViewRoom(room.roomId)}
-                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50" 
+                      <button
+                        onClick={() => handleViewRoom(room.roomId, room.approvalStatus)}
+                        className="text-blue-600 hover:text-blue-900 p-1 rounded hover:bg-blue-50"
                         title="Xem chi tiết"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button 
+                      {/* <button
                         onClick={() => handleDeleteRoom(room.roomId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa phòng"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </button> */}
                     </div>
                   </td>
                 </tr>
@@ -873,6 +885,7 @@ const RoomsPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         roomId={selectedRoomId}
+        status={approvalStatus}
       />
     </div>
   );

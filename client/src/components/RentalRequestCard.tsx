@@ -78,21 +78,26 @@ const RentalRequestCard = ({ request, onApprove, onReject }: RentalRequestCardPr
             </div>
           </div>
 
-          {request.status === "pending" && (
-            <div className="flex space-x-2 mt-4">
-              <button
-                onClick={onApprove}
-                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
-              >
-                Chấp nhận
-              </button>
-              <button
-                onClick={onReject}
-                className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
-              >
-                Từ chối
-              </button>
+          {request?.roomInfo?.status === "maintenance" && (
+            <div className="flex space-x-2 mt-4 justify-center rounded-lg bg-gray-600 text-white font-bold py-2">
+              PHÒNG ĐANG SỬA CHỮA
             </div>
+          )}
+          {request.status === "pending" && request?.roomInfo?.status === "available" && request?.roomInfo?.status !== "maintenance" &&  (
+          <div className="flex space-x-2 mt-4">
+            <button
+              onClick={onApprove}
+              className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+            >
+              Chấp nhận
+            </button>
+            <button
+              onClick={onReject}
+              className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg text-sm font-medium hover:bg-gray-200 transition"
+            >
+              Từ chối
+            </button>
+          </div>
           )}
         </div>
       </div>

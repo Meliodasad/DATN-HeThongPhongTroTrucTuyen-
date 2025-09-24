@@ -109,10 +109,10 @@ export const InvoiceListDialog: React.FC<InvoiceListDialogProps> = ({
                 </div> */}
 
                 {/* Content */}
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1">
                     <div className="flex h-full">
                         {/* Invoice List */}
-                        <div className={`w-full overflow-y-auto`}>
+                        <div className={`w-full max-h-[500px] overflow-y-auto`}>
                             <div className="p-6">
                                 {invoices.length === 0 ? (
                                     <div className="text-center py-8">

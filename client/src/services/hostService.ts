@@ -18,7 +18,7 @@ api.interceptors.request.use((config) => {
 
 export const hostService = {
 
-    updateRoomStatus: async (
+  updateRoomStatus: async (
     roomId: string,
     status: 'available' | 'rented' | 'maintenance'
   ) => {
@@ -37,11 +37,11 @@ export const hostService = {
     if (!res.ok) {
       throw new Error(json?.message || 'Cập nhật trạng thái thất bại');
     }
-    return json?.data; 
+    return json?.data;
   },
 
-   approveBooking: async (bookingId: string) => {
-    const token =localStorage.getItem('token');
+  approveBooking: async (bookingId: string) => {
+    const token = localStorage.getItem('token');
     if (!token) throw new Error('Chưa đăng nhập');
 
     const res = await fetch(`http://localhost:3000/bookings/${bookingId}/approve`, {
@@ -112,6 +112,8 @@ export const hostService = {
   getRoomById: (id: number) => api.get(`/rooms/${id}`),
   updateRoom: (id: number, data: any) => api.put(`/rooms/${id}`, data),
 
+  hostStatic: (params: any) => api.get(`statistics/host?${params}`),
+  adminStatic: (params: any) => api.get(`statistics/admin?${params}`),
   // Statistics
   getStatistics: () => {
     return Promise.all([

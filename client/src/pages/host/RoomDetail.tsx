@@ -33,7 +33,7 @@ export default function RoomDetail({ room, onClose }: Props) {
       setListItems(data?.data.length ? data?.data : []);
       console.log("Reviewưs:", data);
 
-      setUser(dataUser?.data.length ? data?.data : []);
+      setUser(dataUser?.data);
       console.log("Contracts:", dataUser);
     } catch (error) {
       console.error("Error fetching contracts:", error);

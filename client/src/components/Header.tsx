@@ -15,9 +15,10 @@ const Header = () => {
   };
 
   const navItems = [
+    { path: "/host/dashboard", label: "Thống kê" },
     { path: "/host/profile", label: "Thông tin cá nhân" },
     { path: "/host/room-list", label: "Danh sách phòng của tôi" },
-    { path: "/host/room-status", label: "Trạng thái phòng" },
+    // { path: "/host/room-status", label: "Trạng thái phòng" },
     { path: "/host/rental-request", label: "Yêu cầu thuê" },
     { path: "/host/create-contract", label: "Tạo hợp đồng" },
     { path: "/host/contracts", label: "Hợp đồng" },

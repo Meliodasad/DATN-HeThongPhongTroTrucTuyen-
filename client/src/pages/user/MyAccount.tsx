@@ -20,7 +20,8 @@ import {
   Settings,
   History,
   FileText,
-  Camera
+  Camera,
+  Eye
 } from 'lucide-react';
 import { buildHeaders } from '../../utils/config';
 import { InvoiceListDialog } from './InvoiceListDialog';
@@ -30,6 +31,7 @@ import UpdateProfile from '../host/UpdateProfile';
 import { convertStatus } from '../../utils/format';
 import CancelContractDialog from './CancelContractDialog';
 import PaymentHistoryDialog from './PaymentHistoryDialog';
+import ContractDialog from './ContractViewDialog';
 
 type ContractStatus = 'pending' | 'active' | 'expired' | 'terminated';
 
@@ -93,6 +95,7 @@ const MyAccount: React.FC = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenViewContract, setIsOpenViewContract] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
 
   const [isOpenContract, setIsOpenContract] = useState(false);
@@ -106,6 +109,7 @@ const MyAccount: React.FC = () => {
   const closeDialog = () => {
     setContract('')
     setIsOpenContract(false)
+    setIsOpenViewContract(false)
   }
   const fetchData = async () => {
     try {
@@ -132,6 +136,7 @@ const MyAccount: React.FC = () => {
           : monthly * (c.duration || 1);
 
         return {
+          price: c.roomInfo?.price?.value,
           id: c.contractId || c._id,
           contractId: c.contractId || c._id,
           roomId: c.roomId,
@@ -222,6 +227,11 @@ const MyAccount: React.FC = () => {
       setLoading(false);
     }
   };
+
+  const handleView = (id: string) => {
+    setIsOpenViewContract(true)
+    setContract(id)
+  }
 
   const getStatusStyle = (status: string) => {
     switch (status) {
@@ -450,10 +460,10 @@ const MyAccount: React.FC = () => {
                             <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                               Thời hạn
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[200px]">
                               Trạng thái
                             </th>
-                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider min-w-[350px]">
                               Hành động
                             </th>
                           </tr>
@@ -506,7 +516,7 @@ const MyAccount: React.FC = () => {
                                 <div className="flex items-center gap-2">
                                   {r.status === 'pending' && (
                                     <button
-                                      onClick={() => handlePay(r.contractId, r.totalPrice)}
+                                      onClick={() => handlePay(r.contractId, r.price)}
                                       className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md"
                                     >
                                       <CreditCard className="w-3 h-3" />
@@ -516,7 +526,7 @@ const MyAccount: React.FC = () => {
                                   {r.status === 'active' && (
                                     <button
                                       onClick={() => openDialog(r.contractId)}
-                                      className={"bg-red-500 hover:bg-red-600 text-white rounded-xl font-small shadow-lg transform transition-all duration-200 hover:scale-105 hover:shadow-xl flex items-center"}
+                                      className={"inline-flex items-center text-[10px] gap-1 px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md"}
                                     >
                                       Gửi yêu cầu hủy Hợp Đồng
                                     </button>
@@ -524,6 +534,13 @@ const MyAccount: React.FC = () => {
                                   {!["active", "pending"].includes(r.status) && (
                                     <span className="text-xs text-gray-400 italic">Không có hành động</span>
                                   )}
+                                  <button
+                                    onClick={() => handleView(r.contractId)}
+                                    className="inline-flex items-center gap-1 px-3 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-medium rounded-lg transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md"
+                                  >
+                                    <Eye className="w-3 h-3" />
+                                    Xem hợp đồng
+                                  </button>
                                 </div>
                               </td>
                             </tr>
@@ -663,6 +680,9 @@ const MyAccount: React.FC = () => {
           />
         )
       }
+      {isOpenViewContract && (
+        <ContractDialog onClose={closeDialog} contractId={contract} />
+      )}
     </div >
   );
 };

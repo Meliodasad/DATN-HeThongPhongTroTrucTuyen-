@@ -53,9 +53,10 @@ const adaptRoom = (r: RoomBE): Room => ({
   status:
     r.status === 'available' ? 'Còn trống' :
     r.status === 'rented' ? 'Đã cho thuê' :
-    'Đang sửa chữa',
+    r.status === 'maintenance' ? 'Đang sửa chữa' :
+    r.status === 'Waiting' ? 'Chờ thanh toán' :
+    '',
 });
-
 
 export default function RoomList() {
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -71,7 +72,7 @@ export default function RoomList() {
     setLoading(true);
     const res = await hostService.getRooms(); // axios instance
     // res.data: { success: true, data: { rooms: RoomBE[], pagination: ... } }
-    const roomsBE: RoomBE[] = res?.data?.data?.rooms ?? [];
+    const roomsBE: RoomBE[] = (res?.data?.data?.rooms ?? []).filter((x: any) => x?.status !== "deleted");
     const uiRooms = roomsBE.map(adaptRoom);
     setRooms(uiRooms);
     setFilteredRooms(uiRooms);

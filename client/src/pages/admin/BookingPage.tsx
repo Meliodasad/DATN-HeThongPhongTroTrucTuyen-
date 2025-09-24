@@ -111,6 +111,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
       minute: '2-digit'
     });
   };
+  const formatShortDate = (dateString: string) => {
+    if (!dateString) return 'Không có dữ liệu';
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    }).format(new Date(dateString));
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -186,7 +194,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
                   </label>
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
-                    <p className="text-gray-900">{formatDate(booking.bookingDate)}</p>
+                    <p className="text-gray-900">{formatShortDate(booking.startDate)}</p>
                   </div>
                 </div>
                 <div>
@@ -220,7 +228,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, booking, m
                       <span className="text-sm text-gray-600">{booking.room.location}</span>
                     </div>
                     <div className="text-lg font-medium text-green-600">
-                      {formatPrice(booking.room.price)}
+                      {formatPrice(booking.room.price.value)}
                     </div>
                     {booking.room.area && (
                       <div className="text-sm text-gray-600">
@@ -508,9 +516,20 @@ const BookingsPage: React.FC = () => {
 
   const getStatusText = (status: string) => {
     switch (status) {
+      case 'approved': return 'Đã thanh toán';
+      case 'pending': return 'Chưa thanh toán';
+      case 'cancelled': return 'Đã hủy';
+      case 'rejected': return 'Từ chối';
+      default: return 'Không xác định';
+    }
+  };
+
+  const getStatusBookingText = (status: string) => {
+    switch (status) {
       case 'approved': return 'Đã xác nhận';
-      case 'pending': return 'Chờ xác nhận';
-      case 'rejected': return 'Đã hủy';
+      case 'pending': return 'Chưa xác nhận';
+      case 'rejected': return 'Từ chối xác nhận';
+      case 'cancelled': return 'Đóng xác nhận';
       default: return 'Không xác định';
     }
   };
@@ -657,7 +676,10 @@ const BookingsPage: React.FC = () => {
                   Ghi chú
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Trạng thái
+                  Trạng thái thanh toán
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Trạng thái xác nhận
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Thao tác
@@ -683,7 +705,7 @@ const BookingsPage: React.FC = () => {
                       )}
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium text-gray-900 truncate">
-                          {booking.roomId}
+                          {booking.room?.roomTitle}
                         </div>
                         {/* <div className="flex items-center text-sm text-gray-500 mt-1">
                           <MapPin className="w-3 h-3 mr-1" />
@@ -731,12 +753,17 @@ const BookingsPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                     {truncate(booking.note) || 'Không có ghi chú'}
+                      {truncate(booking.note) || 'Không có ghi chú'}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.bookingStatus)}`}>
                       {getStatusText(booking.bookingStatus)}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                      {getStatusBookingText(booking.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -766,13 +793,13 @@ const BookingsPage: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
+                      {/* <button
                         onClick={() => handleDeleteBooking(booking.bookingId)}
                         className="text-red-600 hover:text-red-900 p-1 rounded hover:bg-red-50"
                         title="Xóa đặt phòng"
                       >
                         <Trash2 className="w-4 h-4" />
-                      </button>
+                      </button> */}
                     </div>
                   </td>
                 </tr>
